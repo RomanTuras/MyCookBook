@@ -35,6 +35,12 @@ public interface StaticFields {
     byte ID_LIST_RECIPE = 2;
     byte ID_TEXT_RECIPE = 3;
 
+    /*id icons for Folder or Recipe and for Like-icon*/
+    byte ID_IMG_FOLDER = 0;
+    byte ID_IMG_RECIPE = 1;
+    byte ID_IMG_LIKE = 2;
+    byte ID_IMG_LIKE_OFF = 3;
+
     /*Data Base Helper*/
 
     String DB_FILE = "db_cook.db";

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.io.File;
 
@@ -29,6 +30,7 @@ public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields{
     /** Checking availability of database file and return true if it is */
     private boolean checkDataBase() {
         File dbFile = mContext.getDatabasePath(DB_FILE);
+        Log.d("TG", "checkDataBase ="+dbFile.exists());
         return dbFile.exists();
     }
 
