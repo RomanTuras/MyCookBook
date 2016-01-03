@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,12 +34,19 @@ public class FragSubCategory extends Fragment implements StaticFields,
     private ContentValues contentValues;
     private ListView listView;
     private ArrayList<ListData> adapter;
+    int idItem = 0;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         this.contentValues = new ContentValues();
         this.dataBaseHelper = new DataBaseHelper(context);
+
+        Bundle bundle = this.getArguments();
+        if(bundle != null) {
+            this.idItem = bundle.getInt(ITEM_ID);
+        }
+        Log.d("TG", "ITEM_ID = "+idItem);
 
         try {
             onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
@@ -54,44 +62,66 @@ public class FragSubCategory extends Fragment implements StaticFields,
         listView = (ListView) view.findViewById(R.id.listSubCategory);
         database = dataBaseHelper.getWritableDatabase();
 
-        showSubCategory();
+        showCategoryAndRecipe();
         return view;
     }
 
-    public void showSubCategory() {
+    public void showCategoryAndRecipe() {
+        adapter = new ArrayList<>();
         subCategoryInList();
+        recipeInList();
         ListAdapter listAdapter = new ListAdapter(getContext(), adapter);
         // if (adapter.size() == 0)
         // tv.setText(getString(R.string.title_category) + " "+
         // getString(R.string.empty));
         // else
         // tv.setText(R.string.title_category);
+        dataBaseHelper.close();
         listView.setAdapter(listAdapter);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
     }
 
-    public void subCategoryInList() {
-        adapter = new ArrayList<>();
-        Cursor c = database.query("tableMain", null, null, null, null, null,
-                "category", null);
-
-        if (c != null) {
-            if (c.moveToFirst()) {
+    private void recipeInList() {
+        String selectQuery ="SELECT * FROM " + TABLE_LIST_RECIPE +
+                " WHERE category_id=" + idItem + " ORDER BY recipe_title";
+        Cursor cursor = database.rawQuery(selectQuery, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
                 do {
-                    int numberRecipe = 45; //cntRecipe(c.getInt(0));
-//                    String tmp = getResources().getString(R.string.cnt_recipe);
-//                    tmp += " " + n;
+                    int numberRecipe = 45; //cntRecipe(cursor.getInt(0));
+                    int item_id = cursor.getInt(0);
+                    int imgLike = cursor.getInt(4);
 
-                    adapter.add(new ListData(c.getString(1),
-                            "Соленья, Варенья, Лосятина, Говядина, Игуанодонятина", ID_IMG_FOLDER,
-                            ID_IMG_LIKE_OFF, numberRecipe));
-                } while (c.moveToNext());
+                    adapter.add(new ListData(cursor.getString(1),
+                            "", ID_IMG_RECIPE,
+                            imgLike, numberRecipe, item_id));
+                } while (cursor.moveToNext());
             }
-            c.close();
-            dataBaseHelper.close();
+            cursor.close();
         } else {
-            dataBaseHelper.close();
+            Log.d("TG", "Table with recipeCategory - is Empty");
+        }
+    }
+
+    public void subCategoryInList() {
+        String selectQuery ="SELECT * FROM " + TABLE_SUB_CATEGORY +
+                " WHERE parent_id=" + idItem + " ORDER BY name";
+        Cursor cursor = database.rawQuery(selectQuery, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    int numberRecipe = 45; //cntRecipe(cursor.getInt(0));
+                    int item_id = cursor.getInt(0);
+
+                    adapter.add(new ListData(cursor.getString(1),
+                            "Соленья, Варенья, Лосятина, Говядина, Игуанодонятина", ID_IMG_FOLDER,
+                            ID_IMG_LIKE_OFF, numberRecipe, item_id));
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } else {
+            Log.d("TG", "Table with SubCategories - is Empty");
         }
     }
 

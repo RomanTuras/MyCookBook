@@ -17,13 +17,12 @@
 package ua.com.spacetv.mycookbook.tools;
 
 /**
- * Created by salden on 14/12/2015.
+ * Created by salden on 02/01/2016.
  *
  * Creates feedback between Fragment and Activity
  *
- * @param byte idExercise
  */
 
 public interface OnFragmentEventsListener {
-    void onExerciseFinish(byte idFragment, byte correctAnswers);
+    void onListItemClick(int idTable, int idItem);
 }

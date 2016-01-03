@@ -146,7 +146,38 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onExerciseFinish(byte idFragment, byte correctAnswers) {
-        
+    public void onListItemClick(int idTable, int idItem) {
+        switch (idTable){
+            case ID_TABLE_TOP_CATEGORY:
+                removeFragment();
+                startSubCategoryFragment(idItem);
+                break;
+            case ID_TABLE_SUB_CATEGORY:
+                break;
+            case ID_TABLE_LIST_RECIPE:
+                break;
+        }
+    }
+
+    private void startSubCategoryFragment(int idItem) {
+        Bundle bundle = new Bundle();
+                fragment = new FragSubCategory();
+                bundle.putInt(ITEM_ID, idItem);
+        fragment.setArguments(bundle);
+        fragmentTransaction = fragmentManager
+                .beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment).commit();
+    }
+
+    /** If fragment is attached ,remove him, override action bar, make visible main layout
+     * If back pressed on main screen -> finish
+     * When back pressed from Fragment Statistic -> refresh information for all cards */
+    private void removeFragment(){
+//        String title = getString(R.string.app_name);
+//        if(fragment!=null && !getSupportActionBar().getTitle().equals(title)){
+            fragmentTransaction = fragmentManager
+                    .beginTransaction();
+            fragmentTransaction.remove(fragment).commit();
+//        }else if(getSupportActionBar().getTitle().equals(title)) finish();
     }
 }

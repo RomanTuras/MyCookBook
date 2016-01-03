@@ -26,14 +26,16 @@ public class ListData {
     private int imgIcon;
     private int imgLike;
     private int number;
+    private int item_id;
 
     public ListData(String listTitle, String listSubTitle,
-                    int imgIcon, int imgLike, int number){
+                    int imgIcon, int imgLike, int number, int item_id){
         this.listTitle = listTitle;
         this.listSubTitle = listSubTitle;
         this.imgIcon = imgIcon;
         this.imgLike = imgLike;
         this.number = number;
+        this.item_id = item_id;
     }
 
     public String getListTitle() {
@@ -55,4 +57,6 @@ public class ListData {
     public int getNumber() {
         return number;
     }
+
+    public int getItemId() { return item_id; }
 }

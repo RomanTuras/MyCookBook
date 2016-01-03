@@ -30,16 +30,29 @@ public interface StaticFields {
     String TAG_SEARCH = "SEARCH";
 
     /* id of Fragments */
-    byte ID_CATEGORY = 0;
-    byte ID_SUBCATEGORY = 1;
-    byte ID_LIST_RECIPE = 2;
-    byte ID_TEXT_RECIPE = 3;
+    byte ID_FRAG_CATEGORY = 0;
+    byte ID_FRAG_SUBCATEGORY = 1;
+    byte ID_FRAG_LIST_RECIPE = 2;
+    byte ID_FRAG_TEXT_RECIPE = 3;
+
+    /* id of Tables */
+    int ID_TABLE_TOP_CATEGORY = 0;
+    int ID_TABLE_SUB_CATEGORY = 1;
+    int ID_TABLE_LIST_RECIPE = 5;
+
+    /* Names of a Tables*/
+    String TABLE_TOP_CATEGORY = "tableMain";
+    String TABLE_SUB_CATEGORY = "tableSubCat";
+    String TABLE_LIST_RECIPE = "tableRecipe";
+
+    /* id of item */
+    String ITEM_ID = "ITEM_ID";
 
     /*id icons for Folder or Recipe and for Like-icon*/
     byte ID_IMG_FOLDER = 0;
     byte ID_IMG_RECIPE = 1;
-    byte ID_IMG_LIKE = 2;
-    byte ID_IMG_LIKE_OFF = 3;
+    byte ID_IMG_LIKE = 1;
+    byte ID_IMG_LIKE_OFF = 0;
 
     /*Data Base Helper*/
 
