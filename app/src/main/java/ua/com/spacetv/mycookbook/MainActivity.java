@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         fragmentManager = getSupportFragmentManager();
-        fragment = new FragCategory();
+        fragment = new FragTopCategory();
         if(!fragment.isAdded()) addFragment(TAG_CATEGORY);
     }
 

@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -25,7 +24,8 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
 /**
  * Created by salden on 02/01/2016.
  */
-public class FragCategory extends Fragment implements StaticFields, View.OnTouchListener, AdapterView.OnItemLongClickListener {
+public class FragSubCategory extends Fragment implements StaticFields,
+        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
     private OnFragmentEventsListener onFragmentEventsListener;
     private DataBaseHelper dataBaseHelper;
@@ -33,7 +33,6 @@ public class FragCategory extends Fragment implements StaticFields, View.OnTouch
     private ContentValues contentValues;
     private ListView listView;
     private ArrayList<ListData> adapter;
-    private boolean isLongAction = false;
 
     @Override
     public void onAttach(Context context) {
@@ -51,16 +50,16 @@ public class FragCategory extends Fragment implements StaticFields, View.OnTouch
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle saveInstanceState) {
-        View view = inflater.inflate(R.layout.frag_category, null);
-        listView = (ListView) view.findViewById(R.id.listCategory);
+        View view = inflater.inflate(R.layout.frag_sub_category, null);
+        listView = (ListView) view.findViewById(R.id.listSubCategory);
         database = dataBaseHelper.getWritableDatabase();
 
-        showAllCategory();
+        showSubCategory();
         return view;
     }
 
-    public void showAllCategory() {
-        categoryInList();
+    public void showSubCategory() {
+        subCategoryInList();
         ListAdapter listAdapter = new ListAdapter(getContext(), adapter);
         // if (adapter.size() == 0)
         // tv.setText(getString(R.string.title_category) + " "+
@@ -68,11 +67,11 @@ public class FragCategory extends Fragment implements StaticFields, View.OnTouch
         // else
         // tv.setText(R.string.title_category);
         listView.setAdapter(listAdapter);
-        listView.setOnTouchListener(this);
         listView.setOnItemLongClickListener(this);
+        listView.setOnItemClickListener(this);
     }
 
-    public void categoryInList() {
+    public void subCategoryInList() {
         adapter = new ArrayList<>();
         Cursor c = database.query("tableMain", null, null, null, null, null,
                 "category", null);
@@ -111,21 +110,20 @@ public class FragCategory extends Fragment implements StaticFields, View.OnTouch
         super.onDetach();
     }
 
-    @Override
-    public boolean onTouch(View view, MotionEvent event) {
-        if((event.getAction() == event.ACTION_UP) & isLongAction == false) {
-            Snackbar.make(view, "Action: onClick - " + view.getId(),
-                    Snackbar.LENGTH_LONG).setAction("Action", null).show();
-        }else isLongAction = false;
-
-        return false;
-    }
-
+    /** onLongClick() - This returns a boolean to indicate whether you have consumed the event and
+     * it should not be carried further. That is, return true to indicate that you have handled
+     * the event and it should stop here; return false if you have not handled it and/or the event
+     * should continue to any other on-click listeners.*/
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         Snackbar.make(view, "Action: onLongClick - " + position,
                 Snackbar.LENGTH_LONG).setAction("Action", null).show();
-        isLongAction = true;
-        return false;
+        return true;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Snackbar.make(view, "Action: onClick - "+position,
+                    Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 }

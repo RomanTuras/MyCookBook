@@ -19,10 +19,10 @@ public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields{
     private ContentValues mContentValues =new ContentValues();
 //    private static String mSdState = Environment.getExternalStorageDirectory().getAbsolutePath();
 //    private static String mPath = (mSdState + "/" + DB_FOLDER + "/" + DB_FILE);
-    private static int mVers=1;
+    private static int versDb =2;
 
     public DataBaseHelper(Context context) {
-        super(context, DB_FILE, null, mVers);
+        super(context, DB_FILE, null, versDb);
         mContext = context;
     }
 
@@ -36,18 +36,33 @@ public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields{
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String mTableMain = "create table tableMain (_id integer primary key autoincrement, "
+        String tableMain = "create table tableMain (_id integer primary key autoincrement, "
                 + "category text);";
 
-        String tableRecipe = "create table tableRecipe (_id integer primary key autoincrement, "
-                + "recipe_title text, recipe text, category_id integer, make integer);";
+        String tableSubCategory = "create table tableSubCat (_id integer primary key autoincrement, "
+                + "name text, hierarchy integer, parent_id integer);";
 
-        sqLiteDatabase.execSQL(mTableMain);
+        String tableRecipe = "create table tableRecipe (_id integer primary key autoincrement, "
+                + "recipe_title text, recipe text, category_id integer, make integer, " +
+                "sub_category_id integer, image text);";
+
+        sqLiteDatabase.execSQL(tableMain);
+        sqLiteDatabase.execSQL(tableSubCategory);
         sqLiteDatabase.execSQL(tableRecipe);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersDb, int versDb) {
+        Log.d("TG", "on Upgrade start");
+        String upgradeQuery = "ALTER TABLE tableRecipe ADD COLUMN sub_category_id integer;";
+        String upgradeQuery2 = "ALTER TABLE tableRecipe ADD COLUMN image text;";
+        String tableSubCategory = "create table tableSubCat (_id integer primary key autoincrement, "
+                + "name text, hierarchy integer, parent_id integer);";
+        if (oldVersDb == 1 && versDb == 2) {
+            sqLiteDatabase.execSQL(upgradeQuery);
+            sqLiteDatabase.execSQL(upgradeQuery2);
+            sqLiteDatabase.execSQL(tableSubCategory);
+            Log.d("TG", "on Upgrade make a new db");
+        }
     }
 }
