@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
+
 /**
  * Created by Roman Turas on 10/12/2015.
  * Fill arrayList with data required to Cards from Main Screen

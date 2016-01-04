@@ -5,8 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.PopupMenu;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,38 +17,44 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.shehabic.droppy.DroppyClickCallbackInterface;
-import com.shehabic.droppy.DroppyMenuItem;
-import com.shehabic.droppy.DroppyMenuPopup;
-
 import java.util.ArrayList;
 
-import ua.com.spacetv.mycookbook.tools.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.FragDialog;
+import ua.com.spacetv.mycookbook.helpers.MenuPopup;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
+import ua.com.spacetv.mycookbook.tools.OnPopupMenuItemClickListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
  * Created by salden on 02/01/2016.
  */
 public class FragTopCategory extends Fragment implements StaticFields,
-        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener,
+        OnPopupMenuItemClickListener{
 
-    private OnFragmentEventsListener onFragmentEventsListener;
-    private DataBaseHelper dataBaseHelper;
-    private SQLiteDatabase database;
-    private ContentValues contentValues;
-    private ListView listView;
-    private ArrayList<ListData> adapter;
+    private static DataBaseHelper dataBaseHelper;
+    private static Context context;
+    private static SQLiteDatabase database;
+    private static FragmentManager fragmentManager;
+    private static ListView listView;
+    private static ArrayList<ListData> adapter;
+    private static View view;
+    private static String nameForAction;
+    private static int idParentCategory;
+    private static OnFragmentEventsListener onFragmentEventsListener;
     private ArrayList<Integer> arrayIdSubCategories;
-    private PopupMenu popup;
+    private ContentValues contentValues;
+
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         this.contentValues = new ContentValues();
-        this.dataBaseHelper = new DataBaseHelper(context);
+        FragTopCategory.context = context;
+        FragTopCategory.dataBaseHelper = new DataBaseHelper(context);
 
         try {
             onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
@@ -59,15 +68,17 @@ public class FragTopCategory extends Fragment implements StaticFields,
                              Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.frag_top_category, null);
         listView = (ListView) view.findViewById(R.id.listTopCategory);
+        fragmentManager = getFragmentManager();
         database = dataBaseHelper.getWritableDatabase();
-
         showAllCategory();
+        FragTopCategory.view = view;
         return view;
     }
 
-    public void showAllCategory() {
+    private void showAllCategory() {
+        adapter = new ArrayList<>();
         categoryInList();
-        ListAdapter listAdapter = new ListAdapter(getContext(), adapter);
+        ListAdapter listAdapter = new ListAdapter(context, adapter);
         // if (adapter.size() == 0)
         // tv.setText(getString(R.string.title_category) + " "+
         // getString(R.string.empty));
@@ -78,8 +89,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         listView.setOnItemClickListener(this);
     }
 
-    public void categoryInList() {
-        adapter = new ArrayList<>();
+    private void categoryInList() {
         Cursor cursor = database.query(TABLE_TOP_CATEGORY, null, null, null, null, null,
                 "category", null);
         if (cursor != null) {
@@ -93,9 +103,6 @@ public class FragTopCategory extends Fragment implements StaticFields,
                 } while (cursor.moveToNext());
             }
             cursor.close();
-            dataBaseHelper.close();
-        } else {
-            dataBaseHelper.close();
         }
     }
 
@@ -144,6 +151,19 @@ public class FragTopCategory extends Fragment implements StaticFields,
     @Override
     public void onStart() {
         super.onStart();
+        Log.d("TG", "Fragment onStart");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("TG", "Fragment onPause");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("TG", "Fragment onResume");
     }
 
     @Override
@@ -154,6 +174,8 @@ public class FragTopCategory extends Fragment implements StaticFields,
     @Override
     public void onDetach() {
         super.onDetach();
+        database.close();
+        dataBaseHelper.close();
     }
 
     /** onLongClick() - This returns a boolean to indicate whether you have consumed the event and
@@ -162,34 +184,112 @@ public class FragTopCategory extends Fragment implements StaticFields,
      * should continue to any other on-click listeners.*/
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        showPopupMenu(view);
+        nameForAction = adapter.get(position).getListTitle();
+        idParentCategory = adapter.get(position).getItemId();
+        new MenuPopup(context, view, ID_TABLE_TOP_CATEGORY);
         return true;
     }
 
-    public void showPopupMenu(View view) {
-        DroppyMenuPopup droppyMenu;
-        DroppyMenuPopup.Builder droppyBuilder = new DroppyMenuPopup.Builder(getContext(), view);
-        String item_rename = getResources().getString(R.string.item_rename);
-        String item_delete = getResources().getString(R.string.item_delete);
+    @Override
+    public void onPopupMenuItemClick(int idPopupItem) {
+        switch (idPopupItem){
+            case ID_POPUP_ITEM_REN:
+                showDialog(DIALOG_REN_CATEGORY, nameForAction);
+                break;
+            case ID_POPUP_ITEM_DEL:
+                showDialog(DIALOG_DEL_CATEGORY, nameForAction);
+                break;
+        }
+    }
 
-        droppyMenu = droppyBuilder.addMenuItem(new DroppyMenuItem(item_rename,
-                R.drawable.ic_mode_edit_black_18dp))
-                .addSeparator()
-                .addMenuItem(new DroppyMenuItem(item_delete, R.drawable.ic_delete_black_18dp))
-                .triggerOnAnchorClick(false)
-                .setOnClick(new DroppyClickCallbackInterface() {
-                    @Override
-                    public void call(View v, int id) {
-                        Log.d("TG", String.valueOf(id));
+    public void showDialog(int idDialog, String nameForAction) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(ID_DIALOG, idDialog);
+        bundle.putString(NAME_FOR_ACTION, nameForAction);
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        Fragment fragment = fragmentManager.findFragmentByTag(TAG_DIALOG);
+        if (fragment != null) {
+            ft.remove(fragment);
+        }
+        ft.addToBackStack(null);
+
+        DialogFragment dialogFragment = new FragDialog();
+        dialogFragment.setArguments(bundle);
+        dialogFragment.show(fragmentManager, TAG_DIALOG);
+    }
+
+    public void onDialogClick(int idDialog, String param){
+        switch (idDialog){
+            case DIALOG_REN_CATEGORY:
+                renameCategory(param);
+                break;
+            case DIALOG_ADD_CATEGORY:
+                addCategory(param);
+                break;
+            case DIALOG_DEL_CATEGORY:
+                if(isCategoryEmpty()) deleteCategory();
+                else makeSnackbar(context.getResources().getString(R.string.folder_not_empty));
+                break;
+        }
+    }
+
+    private void addCategory(String param) {
+        contentValues = new ContentValues();
+        contentValues.put("category" , param);
+        long rowId = database.insert(TABLE_TOP_CATEGORY, null, contentValues);
+        showAllCategory();
+        if(rowId >= 0) makeSnackbar(context.getResources().getString(R.string.success));
+    }
+
+    private void renameCategory(String param) {
+        contentValues = new ContentValues();
+        contentValues.put("category" , param);
+        long rowId = database.update(TABLE_TOP_CATEGORY, contentValues, "_ID="+idParentCategory, null);
+        showAllCategory();
+        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+    }
+
+    private void deleteCategory() {
+        long rowId = database.delete(TABLE_TOP_CATEGORY, "_ID="+idParentCategory,null);
+        showAllCategory();
+        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+    }
+
+    /** Check in two tables (TABLE_SUB_CATEGORY and TABLE_LIST_RECIPE), 
+     * if at least one object is in parent category -> return false, else -> true */
+    private boolean isCategoryEmpty() {
+        Cursor cursor = database.query(TABLE_SUB_CATEGORY, null, null, null, null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    if (cursor.getInt(3) == idParentCategory) { //column 'parent_id'
+                        return false;
                     }
-                })
-                .build();
-        droppyMenu.show();
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        cursor = database.query(TABLE_LIST_RECIPE, null, null, null, null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    if (cursor.getInt(3) == idParentCategory) { //column 'category_id'
+                        return false;
+                    }
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        return true;
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ListData ld = adapter.get(position);
         onFragmentEventsListener.onListItemClick(ID_TABLE_TOP_CATEGORY, ld.getItemId());
+    }
+
+    private void makeSnackbar(String text){
+        Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 }

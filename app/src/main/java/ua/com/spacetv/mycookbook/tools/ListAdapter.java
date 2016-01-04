@@ -35,14 +35,14 @@ import ua.com.spacetv.mycookbook.R;
  * It working with CardView
  */
 public class ListAdapter extends BaseAdapter implements StaticFields {
-    Context cont;
+    Context context;
     ArrayList<ListData> arrayData;
     LayoutInflater lInflater;
 
     public ListAdapter(Context context, ArrayList<ListData> arrayData) {
-        cont = context;
+        this.context = context;
         this.arrayData = arrayData;
-        lInflater = (LayoutInflater) cont
+        lInflater = (LayoutInflater) this.context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 

@@ -1,4 +1,4 @@
-package ua.com.spacetv.mycookbook.tools;
+package ua.com.spacetv.mycookbook.helpers;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,11 +8,13 @@ import android.util.Log;
 
 import java.io.File;
 
+import ua.com.spacetv.mycookbook.tools.StaticFields;
+
 /**
  * Created by salden on 14/12/2015.
  *
  */
-public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields{
+public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields {
 
     public SQLiteDatabase mDataBase;
     private Context mContext;

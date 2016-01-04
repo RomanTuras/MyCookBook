@@ -21,7 +21,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -40,7 +39,7 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, StaticFields,
-        OnFragmentEventsListener {
+        OnFragmentEventsListener, View.OnClickListener {
 
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
@@ -54,13 +53,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fab.setOnClickListener(this);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -70,10 +63,10 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         fragmentManager = getSupportFragmentManager();
         fragment = new FragTopCategory();
         if(!fragment.isAdded()) addFragment(TAG_CATEGORY);
+
     }
 
     private void addFragment(String tag){
@@ -179,5 +172,18 @@ public class MainActivity extends AppCompatActivity
                     .beginTransaction();
             fragmentTransaction.remove(fragment).commit();
 //        }else if(getSupportActionBar().getTitle().equals(title)) finish();
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(view.getId() == R.id.fab){
+            Fragment fragment;
+            fragmentManager = getSupportFragmentManager();
+            fragment = fragmentManager.findFragmentByTag(TAG_CATEGORY);
+            if(fragment != null){
+                new FragTopCategory().showDialog(DIALOG_ADD_CATEGORY, null);
+            }
+        }
+
     }
 }

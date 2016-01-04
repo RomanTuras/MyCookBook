@@ -1,11 +1,33 @@
 <resources>
     <string name="app_name">My Cook Book</string>
 
+    <!-- Navigation Draver -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
 
+    <!-- SnackBar -->
+    <string name="success">Выполнено успешно!</string>
+    <string name="folder_not_empty">Невозможно! Эта папка не пуста!</string>
+
+    <!-- Popup Menu Items -->
     <string name="item_rename">Переименовать</string>
     <string name="item_delete">Удалить</string>
+    <string name="item_move">Переместить</string>
+    <string name="item_favorite">Понравилось :)</string>
+
+    <!-- Dialog -->
+    <string name="dlg_add_category">Добавить папку:</string><!-- * -->
+    <string name="dlg_hint">напишите название</string><!-- * -->
+    <string name="dlg_space"> </string><!-- * -->
+    <string name="dlg_rename_category">Переименовать папку:</string><!-- * -->
+    <string name="dlg_confirm_delete">Удалить папку:</string><!-- * -->
+    <string name="dlg_cannot_delete">Невозможно удалить!</string><!-- * -->
+    <string name="dlg_cannot_delete_text">Папка не пуста</string><!-- * -->
+    <string name="dlg_btn_cancel">Cancel</string>
+    <string name="dlg_add_recipe">Добавить рецепт:</string><!-- * -->
+    <string name="dlg_rename_recipe">Переименовать рецепт:</string><!-- * -->
+    <string name="dlg_move_recipe">Переместить рецепт:</string><!-- * -->
+    <string name="dlg_confirm_del_recipe">Удалить рецепт:</string><!-- * -->
 </resources>

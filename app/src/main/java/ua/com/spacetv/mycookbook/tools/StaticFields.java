@@ -28,6 +28,7 @@ public interface StaticFields {
     String TAG_LIST_RECIPE = "ID_LIST_RECIPE";
     String TAG_TEXT_RECIPE = "ID_TEXT_RECIPE";
     String TAG_SEARCH = "SEARCH";
+    String TAG_DIALOG = "TAG_DIALOG";
 
     /* id of Fragments */
     byte ID_FRAG_CATEGORY = 0;
@@ -35,10 +36,29 @@ public interface StaticFields {
     byte ID_FRAG_LIST_RECIPE = 2;
     byte ID_FRAG_TEXT_RECIPE = 3;
 
+    /* id of Dialogs */
+    String ID_DIALOG = "ID_DIALOG";
+    String NAME_FOR_ACTION = "NAME_FOR_ACTION";
+    byte DIALOG_ADD_CATEGORY = 0;
+    byte DIALOG_REN_CATEGORY = 1;
+    byte DIALOG_DEL_CATEGORY = 2;
+    byte DIALOG_ADD_RECIPE = 3;
+    byte DIALOG_REN_RECIPE = 4;
+    byte DIALOG_DEL_RECIPE = 5;
+    byte DIALOG_MOV_RECIPE = 6;
+
+
     /* id of Tables */
     int ID_TABLE_TOP_CATEGORY = 0;
     int ID_TABLE_SUB_CATEGORY = 1;
     int ID_TABLE_LIST_RECIPE = 5;
+
+    /* id of pressed menu popup item */
+    int ID_POPUP_ITEM_CANCEL = -1;
+    int ID_POPUP_ITEM_REN = 0;
+    int ID_POPUP_ITEM_DEL = 1;
+    int ID_POPUP_ITEM_MOV = 2;
+    int ID_POPUP_ITEM_FAV = 3;
 
     /* Names of a Tables*/
     String TABLE_TOP_CATEGORY = "tableMain";

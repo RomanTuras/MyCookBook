@@ -16,7 +16,7 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-import ua.com.spacetv.mycookbook.tools.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
