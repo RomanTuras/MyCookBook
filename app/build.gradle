@@ -25,4 +25,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.shehabic.droppy:Droppy:0.2.5.2@aar'
+    compile 'com.github.clans:fab:1.6.2'
 }

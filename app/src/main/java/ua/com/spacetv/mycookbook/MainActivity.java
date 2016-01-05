@@ -19,7 +19,6 @@ package ua.com.spacetv.mycookbook;
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -30,9 +29,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
@@ -44,6 +47,8 @@ public class MainActivity extends AppCompatActivity
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
     private Fragment fragment;
+    private static FloatingActionButton fabTopCategory, fabRecipeSubCategory, fabFolderSubCategory;
+    private static FloatingActionMenu fabSubCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +57,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(this);
+        initFloatAction();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -63,10 +67,53 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Log.d("TG", "main activity onCreate");
+
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d("TG", "main activity onResume");
         fragmentManager = getSupportFragmentManager();
         fragment = new FragTopCategory();
         if(!fragment.isAdded()) addFragment(TAG_CATEGORY);
+    }
 
+    private void initFloatAction() {
+        fabTopCategory = (FloatingActionButton) findViewById(R.id.fab);
+        fabSubCategory = (FloatingActionMenu) findViewById(R.id.fabMenuSubCategory);
+        fabTopCategory.setOnClickListener(this);
+        fabRecipeSubCategory = (FloatingActionButton) findViewById(R.id.fabRecipeSubCategory);
+        fabFolderSubCategory = (FloatingActionButton) findViewById(R.id.fabFolderSubCategory);
+
+        showFloatButtonTopCategory();
+
+        fabRecipeSubCategory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("TG", "add recipe in top folder");
+                fabSubCategory.close(true);
+            }
+        });
+        fabFolderSubCategory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("TG", "add folder in top folder");
+                fabSubCategory.close(true);
+            }
+        });
+    }
+
+    public static void showFloatButtonTopCategory(){
+        fabTopCategory.show(true);
+        fabSubCategory.hideMenuButton(false);
+    }
+
+    public static void showFloatMenuSubCategory(){
+        fabTopCategory.hide(false);
+        fabSubCategory.showMenuButton(true);
     }
 
     private void addFragment(String tag){
@@ -142,7 +189,6 @@ public class MainActivity extends AppCompatActivity
     public void onListItemClick(int idTable, int idItem) {
         switch (idTable){
             case ID_TABLE_TOP_CATEGORY:
-                removeFragment();
                 startSubCategoryFragment(idItem);
                 break;
             case ID_TABLE_SUB_CATEGORY:
@@ -159,19 +205,9 @@ public class MainActivity extends AppCompatActivity
         fragment.setArguments(bundle);
         fragmentTransaction = fragmentManager
                 .beginTransaction();
-        fragmentTransaction.replace(R.id.container, fragment).commit();
-    }
-
-    /** If fragment is attached ,remove him, override action bar, make visible main layout
-     * If back pressed on main screen -> finish
-     * When back pressed from Fragment Statistic -> refresh information for all cards */
-    private void removeFragment(){
-//        String title = getString(R.string.app_name);
-//        if(fragment!=null && !getSupportActionBar().getTitle().equals(title)){
-            fragmentTransaction = fragmentManager
-                    .beginTransaction();
-            fragmentTransaction.remove(fragment).commit();
-//        }else if(getSupportActionBar().getTitle().equals(title)) finish();
+        fragmentTransaction.replace(R.id.container, fragment)
+                .addToBackStack(TAG_SUBCATEGORY)
+                .commit();
     }
 
     @Override

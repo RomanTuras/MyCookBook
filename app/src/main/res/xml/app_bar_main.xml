@@ -2,6 +2,7 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:android.support.design="urn:oasis:names:tc:xliff:document:1.2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,12 +27,47 @@
 
     <include layout="@xml/fragment_holder" />
 
-    <android.support.design.widget.FloatingActionButton
+    <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_white_24dp" />
+        android:src="@drawable/ic_add_white_24dp"
+        style="@style/MenuButtonsStyle"/>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fabMenuSubCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        fab:menu_labels_showAnimation="@anim/jump_from_down"
+        fab:menu_labels_hideAnimation="@anim/jump_to_down"
+        fab:menu_animationDelayPerItem="0"
+        app:fab_shadowRadius="4dp"
+        app:fab_shadowXOffset="1dp"
+        app:fab_shadowYOffset="3dp"
+        fab:menu_colorNormal="#FF4081"
+        fab:menu_colorPressed="#AF1050"
+        fab:menu_colorRipple="#FF4081"
+        fab:menu_fab_size="normal"
+        fab:menu_shadowColor="#444"
+        style="@style/MenuButtonsStyle">
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/fabRecipeSubCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_recipe_white_18dp"
+        style="@style/MenuButtonsStyle" />
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/fabFolderSubCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_folder_open_white_18dp"
+        style="@style/MenuButtonsStyle" />
+    </com.github.clans.fab.FloatingActionMenu>
 
 </android.support.design.widget.CoordinatorLayout>
