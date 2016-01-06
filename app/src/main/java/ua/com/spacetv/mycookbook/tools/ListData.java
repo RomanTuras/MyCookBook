@@ -27,15 +27,17 @@ public class ListData {
     private int imgLike;
     private int number;
     private int item_id;
+    private boolean isFolder;
 
     public ListData(String listTitle, String listSubTitle,
-                    int imgIcon, int imgLike, int number, int item_id){
+                    int imgIcon, int imgLike, int number, int item_id, boolean isFolder){
         this.listTitle = listTitle;
         this.listSubTitle = listSubTitle;
         this.imgIcon = imgIcon;
         this.imgLike = imgLike;
         this.number = number;
         this.item_id = item_id;
+        this.isFolder = isFolder;
     }
 
     public String getListTitle() {
@@ -59,4 +61,8 @@ public class ListData {
     }
 
     public int getItemId() { return item_id; }
+
+    public boolean getTypeItem(){
+        return isFolder;
+    }
 }

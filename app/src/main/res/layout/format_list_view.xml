@@ -25,7 +25,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imageIcon"
-                android:src="@drawable/ic_folder_open_black_24dp" />
+                android:src="@drawable/ic_folder_open_black_24dp"
+                android:alpha="0.6" />
 
             <TextView
                 android:id="@+id/textNumber"
@@ -91,7 +92,8 @@
                 android:layout_height="30dp"
                 android:layout_gravity="right|center_vertical"
                 android:layout_marginRight="16dp"
-                android:background="@drawable/ic_favorite_border_black_24dp" />
+                android:background="@drawable/ic_favorite_border_black_24dp"
+                android:alpha="0.6" />
 
         </LinearLayout>
 

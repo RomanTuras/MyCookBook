@@ -24,6 +24,7 @@ import com.shehabic.droppy.DroppyClickCallbackInterface;
 import com.shehabic.droppy.DroppyMenuItem;
 import com.shehabic.droppy.DroppyMenuPopup;
 
+import ua.com.spacetv.mycookbook.FragSubCategory;
 import ua.com.spacetv.mycookbook.FragTopCategory;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.tools.OnPopupMenuItemClickListener;
@@ -34,20 +35,13 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
  */
 public class MenuPopup implements StaticFields, DroppyClickCallbackInterface {
     private OnPopupMenuItemClickListener onPopupMenuItemClickListener;
-    private FragTopCategory fragTopCategory = new FragTopCategory();
     private int idPopupItem = ID_POPUP_ITEM_CANCEL;
-    private int idList;
+    private int idTable;
 
-    public MenuPopup(Context context, View view, int idList) {
-        try {
-            onPopupMenuItemClickListener = fragTopCategory;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(fragTopCategory.toString()
-                    + " must implement onPopupMenuItemClickListener");
-        }
+    public MenuPopup(Context context, View view, int idTable) {
         Resources resources = context.getResources();
         DroppyMenuPopup droppyMenu;
-        this.idList = idList;
+        this.idTable = idTable;
         DroppyMenuPopup.Builder droppyBuilder = new DroppyMenuPopup.Builder(context, view);
         String item_rename = resources.getString(R.string.item_rename);
         String item_delete = resources.getString(R.string.item_delete);
@@ -58,7 +52,7 @@ public class MenuPopup implements StaticFields, DroppyClickCallbackInterface {
         droppyBuilder.addMenuItem(new DroppyMenuItem(item_rename,
                 R.drawable.ic_mode_edit_black_18dp));
         droppyBuilder.addSeparator();
-        if(idList == ID_TABLE_LIST_RECIPE){
+        if(idTable == ID_TABLE_LIST_RECIPE){
             droppyBuilder.addMenuItem(new DroppyMenuItem(item_favorite,
                     R.drawable.ic_favorite_black_18dp));
             droppyBuilder.addSeparator();
@@ -76,23 +70,45 @@ public class MenuPopup implements StaticFields, DroppyClickCallbackInterface {
 
     @Override
     public void call(View v, int id) {
-        switch (idList){
+        switch (idTable){
             case ID_TABLE_TOP_CATEGORY:
                 if(id == 0) idPopupItem = ID_POPUP_ITEM_REN;
                 else idPopupItem = ID_POPUP_ITEM_DEL;
+                try {
+                    onPopupMenuItemClickListener = new FragTopCategory();
+                } catch (ClassCastException e) {
+                    throw new ClassCastException(new FragTopCategory().toString()
+                            + " must implement onPopupMenuItemClickListener");
+                }
                 break;
             case ID_TABLE_SUB_CATEGORY:
                 if(id == 0) idPopupItem = ID_POPUP_ITEM_REN;
                 else idPopupItem = ID_POPUP_ITEM_DEL;
+                try {
+                    onPopupMenuItemClickListener = new FragSubCategory();
+                } catch (ClassCastException e) {
+                    throw new ClassCastException(new FragSubCategory().toString()
+                            + " must implement onPopupMenuItemClickListener");
+                }
                 break;
             case ID_TABLE_LIST_RECIPE:
                 if(id == 0) idPopupItem = ID_POPUP_ITEM_REN;
                 else if(id == 1) idPopupItem = ID_POPUP_ITEM_FAV;
                 else if(id == 2) idPopupItem = ID_POPUP_ITEM_MOV;
                 else idPopupItem = ID_POPUP_ITEM_DEL;
+                try {
+                    onPopupMenuItemClickListener = new FragSubCategory();
+                } catch (ClassCastException e) {
+                    throw new ClassCastException(new FragSubCategory().toString()
+                            + " must implement onPopupMenuItemClickListener");
+                }
                 break;
             default: idPopupItem = ID_POPUP_ITEM_CANCEL;
         }
-        onPopupMenuItemClickListener.onPopupMenuItemClick(idPopupItem);
+
+
+        onPopupMenuItemClickListener.onClickPopupMenuItem(idPopupItem);
+
+
     }
 }

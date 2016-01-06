@@ -59,14 +59,14 @@
         android:id="@+id/fabRecipeSubCategory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_recipe_white_18dp"
+        android:src="@drawable/ic_description_white_24dp"
         style="@style/MenuButtonsStyle" />
 
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fabFolderSubCategory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_folder_open_white_18dp"
+        android:src="@drawable/ic_folder_open_white_24dp"
         style="@style/MenuButtonsStyle" />
     </com.github.clans.fab.FloatingActionMenu>
 

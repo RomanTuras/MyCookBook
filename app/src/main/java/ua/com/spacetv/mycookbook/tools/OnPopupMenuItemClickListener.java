@@ -23,5 +23,7 @@ package ua.com.spacetv.mycookbook.tools;
  */
 
 public interface OnPopupMenuItemClickListener {
-    void onPopupMenuItemClick(int idPopupItem);
+
+    void onClickPopupMenuItem(int idPopupItem);
+
 }

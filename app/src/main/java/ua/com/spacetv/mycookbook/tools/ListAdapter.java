@@ -87,7 +87,7 @@ public class ListAdapter extends BaseAdapter implements StaticFields {
         if(listData.getImgIcon() == ID_IMG_FOLDER){
             imageIcon.setImageResource(R.drawable.ic_folder_open_black_24dp);
         }else if(listData.getImgIcon() == ID_IMG_RECIPE){
-            imageIcon.setImageResource(R.drawable.ic_content_paste_black_24dp);
+            imageIcon.setImageResource(R.drawable.ic_document_24);
         }
 
         /** if 'Like' not set on recipe -> disable show layoutImgLike */

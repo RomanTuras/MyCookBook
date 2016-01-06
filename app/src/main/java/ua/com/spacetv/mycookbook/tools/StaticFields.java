@@ -65,8 +65,12 @@ public interface StaticFields {
     String TABLE_SUB_CATEGORY = "tableSubCat";
     String TABLE_LIST_RECIPE = "tableRecipe";
 
-    /* id of item */
-    String ITEM_ID = "ITEM_ID";
+    /* id of parent item (was clicked in list and will passed to next fragment) */
+    String PARENT_ITEM_ID = "PARENT_ITEM_ID";
+
+    /* Type of item in list */
+    boolean IS_FOLDER = true;
+    boolean IS_RECIPE = false;
 
     /*id icons for Folder or Recipe and for Like-icon*/
     byte ID_IMG_FOLDER = 0;

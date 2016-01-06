@@ -115,7 +115,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
                     String subCategories = getSubcategories(item_id);
                     int numberRecipe = countRecipe(item_id);
                     adapter.add(new ListData(cursor.getString(1), subCategories, ID_IMG_FOLDER,
-                            ID_IMG_LIKE_OFF, numberRecipe, item_id));
+                            ID_IMG_LIKE_OFF, numberRecipe, item_id, IS_FOLDER));
                 } while (cursor.moveToNext());
             }
             cursor.close();
@@ -210,7 +210,9 @@ public class FragTopCategory extends Fragment implements StaticFields,
     }
 
     @Override
-    public void onPopupMenuItemClick(int idPopupItem) {
+    public void onClickPopupMenuItem(int idPopupItem) {
+        Log.d("TG", "onClickPopupMenuItem= " + idPopupItem);
+
         switch (idPopupItem){
             case ID_POPUP_ITEM_REN:
                 showDialog(DIALOG_REN_CATEGORY, nameForAction);
@@ -311,4 +313,5 @@ public class FragTopCategory extends Fragment implements StaticFields,
     private void makeSnackbar(String text){
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
+
 }

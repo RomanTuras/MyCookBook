@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity
     private void startSubCategoryFragment(int idItem) {
         Bundle bundle = new Bundle();
                 fragment = new FragSubCategory();
-                bundle.putInt(ITEM_ID, idItem);
+                bundle.putInt(PARENT_ITEM_ID, idItem);
         fragment.setArguments(bundle);
         fragmentTransaction = fragmentManager
                 .beginTransaction();

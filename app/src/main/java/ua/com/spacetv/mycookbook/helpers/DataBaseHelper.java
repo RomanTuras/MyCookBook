@@ -45,8 +45,8 @@ public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields {
                 + "name text, hierarchy integer, parent_id integer);";
 
         String tableRecipe = "create table tableRecipe (_id integer primary key autoincrement, "
-                + "recipe_title text, recipe text, category_id integer, make integer, " +
-                "sub_category_id integer, image text);";
+                + "recipe_title text, recipe text, category_id integer default -1, make integer, " +
+                "sub_category_id integer default -1, image text);";
 
         sqLiteDatabase.execSQL(tableMain);
         sqLiteDatabase.execSQL(tableSubCategory);
@@ -56,7 +56,8 @@ public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersDb, int versDb) {
         Log.d("TG", "on Upgrade start");
-        String upgradeQuery = "ALTER TABLE tableRecipe ADD COLUMN sub_category_id integer;";
+        String upgradeQuery =
+                "ALTER TABLE tableRecipe ADD COLUMN sub_category_id integer default -1;";
         String upgradeQuery2 = "ALTER TABLE tableRecipe ADD COLUMN image text;";
         String tableSubCategory = "create table tableSubCat (_id integer primary key autoincrement, "
                 + "name text, hierarchy integer, parent_id integer);";
