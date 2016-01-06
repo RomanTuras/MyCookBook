@@ -13,9 +13,7 @@ import ua.com.spacetv.mycookbook.FragTopCategory;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
-
 public class FragDialog extends DialogFragment implements StaticFields, DialogInterface.OnClickListener {
-
     private FragTopCategory fragTopCategory;
     private FragSubCategory fragSubCategory;
     private EditText input;
@@ -43,6 +41,7 @@ public class FragDialog extends DialogFragment implements StaticFields, DialogIn
         int title = 0;
         int message = 0;
         switch (idDialog) {
+            /** Dialog Category */
             case DIALOG_ADD_CATEGORY:
                 title = R.string.dlg_add_category;
                 adb.setMessage(R.string.dlg_space);
@@ -57,11 +56,30 @@ public class FragDialog extends DialogFragment implements StaticFields, DialogIn
                 break;
 
             case DIALOG_DEL_CATEGORY:
-          /* TODO make check "Folder empty or Not" before call Dialog **/
                 title = R.string.dlg_confirm_delete;
                 adb.setMessage(nameForAction + "?");
                 break;
 
+            /** Dialog Sub Category */
+            case DIALOG_ADD_SUBCATEGORY:
+                title = R.string.dlg_add_category;
+                adb.setMessage(R.string.dlg_space);
+                input.setHint(R.string.dlg_hint);
+                adb.setView(input);
+                break;
+
+            case DIALOG_REN_SUBCATEGORY:
+                title = R.string.dlg_rename_category;
+                adb.setView(input);
+                input.setText(nameForAction);
+                break;
+
+            case DIALOG_DEL_SUBCATEGORY:
+                title = R.string.dlg_confirm_delete;
+                adb.setMessage(nameForAction + "?");
+                break;
+
+            /** Dialog Recipe */
             case DIALOG_ADD_RECIPE:
                 title = R.string.dlg_add_recipe;
                 adb.setMessage(R.string.dlg_space);
@@ -100,6 +118,20 @@ public class FragDialog extends DialogFragment implements StaticFields, DialogIn
         }else if (idDialog == DIALOG_DEL_CATEGORY) {
             new FragTopCategory().onDialogClick(idDialog, null);
         }
+
+        /** Dialog Sub Category */
+        if (idDialog == DIALOG_ADD_SUBCATEGORY) {
+            if (input.getText().toString().length() != 0) {
+                new FragSubCategory().onDialogClick(idDialog, input.getText().toString());
+            }
+        }else if (idDialog == DIALOG_REN_SUBCATEGORY) {
+            if (input.getText().toString().length() != 0) {
+                new FragSubCategory().onDialogClick(idDialog, input.getText().toString());
+            }
+        }else if (idDialog == DIALOG_DEL_SUBCATEGORY) {
+            new FragSubCategory().onDialogClick(idDialog, null);
+        }
+
         /** Dialog Recipe */
         else if (idDialog == DIALOG_ADD_RECIPE) {
 

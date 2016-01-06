@@ -42,10 +42,13 @@ public interface StaticFields {
     byte DIALOG_ADD_CATEGORY = 0;
     byte DIALOG_REN_CATEGORY = 1;
     byte DIALOG_DEL_CATEGORY = 2;
-    byte DIALOG_ADD_RECIPE = 3;
-    byte DIALOG_REN_RECIPE = 4;
-    byte DIALOG_DEL_RECIPE = 5;
-    byte DIALOG_MOV_RECIPE = 6;
+    byte DIALOG_ADD_SUBCATEGORY = 3;
+    byte DIALOG_REN_SUBCATEGORY = 4;
+    byte DIALOG_DEL_SUBCATEGORY = 5;
+    byte DIALOG_ADD_RECIPE = 6;
+    byte DIALOG_REN_RECIPE = 7;
+    byte DIALOG_DEL_RECIPE = 8;
+    byte DIALOG_MOV_RECIPE = 9;
 
 
     /* id of Tables */

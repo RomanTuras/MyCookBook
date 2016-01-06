@@ -74,34 +74,19 @@ public class MenuPopup implements StaticFields, DroppyClickCallbackInterface {
             case ID_TABLE_TOP_CATEGORY:
                 if(id == 0) idPopupItem = ID_POPUP_ITEM_REN;
                 else idPopupItem = ID_POPUP_ITEM_DEL;
-                try {
-                    onPopupMenuItemClickListener = new FragTopCategory();
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(new FragTopCategory().toString()
-                            + " must implement onPopupMenuItemClickListener");
-                }
+                onPopupMenuItemClickListener = new FragTopCategory();
                 break;
             case ID_TABLE_SUB_CATEGORY:
                 if(id == 0) idPopupItem = ID_POPUP_ITEM_REN;
                 else idPopupItem = ID_POPUP_ITEM_DEL;
-                try {
-                    onPopupMenuItemClickListener = new FragSubCategory();
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(new FragSubCategory().toString()
-                            + " must implement onPopupMenuItemClickListener");
-                }
+                onPopupMenuItemClickListener = new FragSubCategory();
                 break;
             case ID_TABLE_LIST_RECIPE:
                 if(id == 0) idPopupItem = ID_POPUP_ITEM_REN;
                 else if(id == 1) idPopupItem = ID_POPUP_ITEM_FAV;
                 else if(id == 2) idPopupItem = ID_POPUP_ITEM_MOV;
                 else idPopupItem = ID_POPUP_ITEM_DEL;
-                try {
-                    onPopupMenuItemClickListener = new FragSubCategory();
-                } catch (ClassCastException e) {
-                    throw new ClassCastException(new FragSubCategory().toString()
-                            + " must implement onPopupMenuItemClickListener");
-                }
+                onPopupMenuItemClickListener = new FragSubCategory();
                 break;
             default: idPopupItem = ID_POPUP_ITEM_CANCEL;
         }

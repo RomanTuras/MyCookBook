@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Log.d("TG", "add recipe in top folder");
+                new FragSubCategory().showDialog(DIALOG_ADD_RECIPE, "");
                 fabSubCategory.close(true);
             }
         });
@@ -101,6 +102,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Log.d("TG", "add folder in top folder");
+                new FragSubCategory().showDialog(DIALOG_ADD_SUBCATEGORY, "");
                 fabSubCategory.close(true);
             }
         });

@@ -218,7 +218,8 @@ public class FragTopCategory extends Fragment implements StaticFields,
                 showDialog(DIALOG_REN_CATEGORY, nameForAction);
                 break;
             case ID_POPUP_ITEM_DEL:
-                showDialog(DIALOG_DEL_CATEGORY, nameForAction);
+                if(isCategoryEmpty()) showDialog(DIALOG_DEL_CATEGORY, nameForAction);
+                else makeSnackbar(context.getResources().getString(R.string.folder_not_empty));
                 break;
         }
     }
@@ -248,8 +249,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
                 addCategory(param);
                 break;
             case DIALOG_DEL_CATEGORY:
-                if(isCategoryEmpty()) deleteCategory();
-                else makeSnackbar(context.getResources().getString(R.string.folder_not_empty));
+                deleteCategory();
                 break;
         }
     }
