@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
     private Fragment fragment;
-    private static FloatingActionButton fabTopCategory, fabRecipeSubCategory, fabFolderSubCategory;
+    private static FloatingActionButton fabTopCategory, fabListRecipe;
     private static FloatingActionMenu fabSubCategory;
 
     @Override
@@ -82,9 +82,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initFloatAction() {
-        fabTopCategory = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fabRecipeSubCategory, fabFolderSubCategory;
+
+        fabTopCategory = (FloatingActionButton) findViewById(R.id.fabTopCategory);
         fabSubCategory = (FloatingActionMenu) findViewById(R.id.fabMenuSubCategory);
+        fabListRecipe = (FloatingActionButton) findViewById(R.id.fabListRecipe);
         fabTopCategory.setOnClickListener(this);
+        fabListRecipe.setOnClickListener(this);
         fabRecipeSubCategory = (FloatingActionButton) findViewById(R.id.fabRecipeSubCategory);
         fabFolderSubCategory = (FloatingActionButton) findViewById(R.id.fabFolderSubCategory);
 
@@ -94,7 +98,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Log.d("TG", "add recipe in top folder");
-                new FragSubCategory().showDialog(DIALOG_ADD_RECIPE, "");
+                new FragSubCategory().showDialog(DIALOG_ADD_RECIPE_SUBCATEGORY, "");
                 fabSubCategory.close(true);
             }
         });
@@ -111,11 +115,19 @@ public class MainActivity extends AppCompatActivity
     public static void showFloatButtonTopCategory(){
         fabTopCategory.show(true);
         fabSubCategory.hideMenuButton(false);
+        fabListRecipe.hide(false);
     }
 
     public static void showFloatMenuSubCategory(){
         fabTopCategory.hide(false);
         fabSubCategory.showMenuButton(true);
+        fabListRecipe.hide(false);
+    }
+
+    public static void showFloatButtonListRecipe(){
+        fabTopCategory.hide(false);
+        fabSubCategory.hideMenuButton(false);
+        fabListRecipe.show(true);
     }
 
     private void addFragment(String tag){
@@ -194,10 +206,23 @@ public class MainActivity extends AppCompatActivity
                 startSubCategoryFragment(idItem);
                 break;
             case ID_TABLE_SUB_CATEGORY:
+                startListRecipeFragment(idItem);
                 break;
             case ID_TABLE_LIST_RECIPE:
                 break;
         }
+    }
+
+    private void startListRecipeFragment(int idItem) {
+        Bundle bundle = new Bundle();
+        fragment = new FragListRecipe();
+        bundle.putInt(PARENT_ITEM_ID, idItem);
+        fragment.setArguments(bundle);
+        fragmentTransaction = fragmentManager
+                .beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment)
+                .addToBackStack(TAG_LIST_RECIPE)
+                .commit();
     }
 
     private void startSubCategoryFragment(int idItem) {
@@ -214,7 +239,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClick(View view) {
-        if(view.getId() == R.id.fab){
+        if(view.getId() == R.id.fabTopCategory){
             Fragment fragment;
             fragmentManager = getSupportFragmentManager();
             fragment = fragmentManager.findFragmentByTag(TAG_CATEGORY);

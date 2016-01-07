@@ -45,9 +45,9 @@ import ua.com.spacetv.mycookbook.tools.OnPopupMenuItemClickListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
- * Created by salden on 02/01/2016.
+ * Created by Roman Turas on 07/01/2016.
  */
-public class FragSubCategory extends Fragment implements StaticFields,
+public class FragListRecipe extends Fragment implements StaticFields,
         AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener,
         OnPopupMenuItemClickListener {
 
@@ -64,42 +64,35 @@ public class FragSubCategory extends Fragment implements StaticFields,
     private static int idItem;
     private static int fav;
     private static int idParentItem = 0;
-    private static boolean isFolder;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        FragSubCategory.context = context;
-        FragSubCategory.dataBaseHelper = new DataBaseHelper(context);
+        FragListRecipe.context = context;
+        FragListRecipe.dataBaseHelper = new DataBaseHelper(context);
         this.contentValues = new ContentValues();
 
         Bundle bundle = this.getArguments();
         if(bundle != null) {
-            FragSubCategory.idParentItem = bundle.getInt(PARENT_ITEM_ID);
+            FragListRecipe.idParentItem = bundle.getInt(PARENT_ITEM_ID);
         }
-        Log.d("TG", "PARENT_ITEM_ID = "+ idParentItem);
+        Log.d("TG", "Frag List Recipe : PARENT_ITEM_ID = "+ idParentItem);
 
-        try {
-            onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement OnFragmentEventsListener");
-        }
+        onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle saveInstanceState) {
-        View view = inflater.inflate(R.layout.frag_sub_category, null);
-        listView = (ListView) view.findViewById(R.id.listSubCategory);
+        View view = inflater.inflate(R.layout.frag_list_recipe, null);
+        listView = (ListView) view.findViewById(R.id.listRecipe);
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
-        FragSubCategory.view = view;
+        FragListRecipe.view = view;
         return view;
     }
 
-    public void showCategoryAndRecipe() {
+    public void showListRecipe() {
         adapter = new ArrayList<>();
-        subCategoryInList();
         recipeInList();
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
@@ -109,7 +102,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
 
     private void recipeInList() {
         String selectQuery ="SELECT * FROM " + TABLE_LIST_RECIPE +
-                " WHERE category_id=" + idParentItem + " ORDER BY recipe_title";
+                " WHERE sub_category_id=" + idParentItem + " ORDER BY recipe_title";
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -118,49 +111,13 @@ public class FragSubCategory extends Fragment implements StaticFields,
                     int imgLike = cursor.getInt(4);
 
                     adapter.add(new ListData(cursor.getString(1),
-                            "", ID_IMG_RECIPE,
-                            imgLike, 0, item_id, IS_RECIPE));
+                            "", ID_IMG_RECIPE, imgLike, 0, item_id, IS_RECIPE));
                 } while (cursor.moveToNext());
             }
             cursor.close();
         } else {
             Log.d("TG", "Table with recipeCategory - is Empty");
         }
-    }
-
-    public void subCategoryInList() {
-        String selectQuery ="SELECT * FROM " + TABLE_SUB_CATEGORY +
-                " WHERE parent_id=" + idParentItem + " ORDER BY name";
-        Cursor cursor = database.rawQuery(selectQuery, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    int item_id = cursor.getInt(0);
-                    int numberRecipe = countRecipe(item_id);
-                    adapter.add(new ListData(cursor.getString(1), "",
-                            ID_IMG_FOLDER, ID_IMG_LIKE_OFF, numberRecipe, item_id, IS_FOLDER));
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        } else {
-            Log.d("TG", "Table with SubCategories - is Empty");
-        }
-    }
-
-    private int countRecipe(int item_id) {
-        int numberRecipe = 0;
-        Cursor cursor = database.query(TABLE_LIST_RECIPE, null, null, null, null, null, null, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    if(cursor.getInt(5) == item_id) { //column 'sub_category_id'
-                        numberRecipe++; // count recipes in Sub Category
-                    }
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        }
-        return numberRecipe;
     }
 
     @Override
@@ -176,8 +133,8 @@ public class FragSubCategory extends Fragment implements StaticFields,
     @Override
     public void onResume(){
         super.onResume();
-        showCategoryAndRecipe();
-        MainActivity.showFloatMenuSubCategory();
+        showListRecipe();
+        MainActivity.showFloatButtonListRecipe();
     }
 
     @Override
@@ -187,7 +144,6 @@ public class FragSubCategory extends Fragment implements StaticFields,
         dataBaseHelper.close();
     }
 
-
     /** onLongClick() - This returns a boolean to indicate whether you have consumed the event and
      * it should not be carried further. That is, return true to indicate that you have handled
      * the event and it should stop here; return false if you have not handled it and/or the event
@@ -196,17 +152,13 @@ public class FragSubCategory extends Fragment implements StaticFields,
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         nameForAction = adapter.get(position).getListTitle();
         idItem = adapter.get(position).getItemId();
-        isFolder = adapter.get(position).getTypeItem();
-        if(isFolder) new MenuPopup(context, view, ID_TABLE_SUB_CATEGORY);
-        else new MenuPopup(context, view, ID_TABLE_LIST_RECIPE);
-
+        new MenuPopup(context, view, ID_TABLE_LIST_RECIPE);
         return true;
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ListData ld = adapter.get(position);
-        onFragmentEventsListener.onListItemClick(ID_TABLE_SUB_CATEGORY, ld.getItemId());
+
     }
 
     private void setUnsetFav() {
@@ -224,7 +176,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
             contentValues = new ContentValues();
             contentValues.put("make", fav);
             long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idItem, null);
-            showCategoryAndRecipe();
+            showListRecipe();
         }
     }
 
@@ -246,15 +198,6 @@ public class FragSubCategory extends Fragment implements StaticFields,
 
     public void onDialogClick(int idDialog, String param, int typeFolder, int idCategory){
         switch (idDialog){
-            case DIALOG_REN_SUBCATEGORY:
-                renameSubCategory(param);
-                break;
-            case DIALOG_ADD_SUBCATEGORY:
-                addSubCategory(param);
-                break;
-            case DIALOG_DEL_SUBCATEGORY:
-                deleteSubCategory();
-                break;
             case DIALOG_REN_RECIPE_SUBCATEGORY:
                 renameRecipe(param);
                 break;
@@ -280,7 +223,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
             contentValues.put("sub_category_id" , idCategory);
         }
         long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
-        showCategoryAndRecipe();
+        showListRecipe();
         if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
     }
 
@@ -288,18 +231,13 @@ public class FragSubCategory extends Fragment implements StaticFields,
     public void onClickPopupMenuItem(int idPopupItem) {
         switch (idPopupItem){
             case ID_POPUP_ITEM_REN:
-                if(isFolder) showDialog(DIALOG_REN_SUBCATEGORY, nameForAction);
-                else showDialog(DIALOG_REN_RECIPE_SUBCATEGORY, nameForAction);
+                showDialog(DIALOG_REN_RECIPE_LIST, nameForAction);
                 break;
             case ID_POPUP_ITEM_DEL:
-                if(isFolder){
-                    if(isSubCategoryEmpty()) showDialog(DIALOG_DEL_SUBCATEGORY, nameForAction);
-                    else makeSnackbar(context.getResources().getString(R.string.folder_not_empty));
-                }
-                else showDialog(DIALOG_DEL_RECIPE_SUBCATEGORY, nameForAction);
+                showDialog(DIALOG_DEL_RECIPE_LIST, nameForAction);
                 break;
             case ID_POPUP_ITEM_MOV:
-                showDialog(DIALOG_MOV_RECIPE_SUBCATEGORY, nameForAction);
+                showDialog(DIALOG_MOV_RECIPE_LIST, nameForAction);
                 break;
             case ID_POPUP_ITEM_FAV:
                 setUnsetFav();
@@ -309,7 +247,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
 
     private void deleteRecipe() {
         long rowId = database.delete(TABLE_LIST_RECIPE, "_ID="+idItem,null);
-        showCategoryAndRecipe();
+        showListRecipe();
         if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
     }
 
@@ -317,47 +255,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         contentValues = new ContentValues();
         contentValues.put("recipe_title" , param);
         long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
-        showCategoryAndRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
-    }
-
-    private void renameSubCategory(String param) {
-        contentValues = new ContentValues();
-        contentValues.put("name" , param);
-        long rowId = database.update(TABLE_SUB_CATEGORY, contentValues, "_ID="+idItem, null);
-        showCategoryAndRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
-    }
-
-    /** Add subcategory in to parent category */
-    private void addSubCategory(String param) {
-        contentValues = new ContentValues();
-        contentValues.put("name" , param);
-        contentValues.put("parent_id", idParentItem);
-        long rowId = database.insert(TABLE_SUB_CATEGORY, null, contentValues);
-        showCategoryAndRecipe();
-        if(rowId >= 0) makeSnackbar(context.getResources().getString(R.string.success));
-    }
-
-    /** Search in table 'TABLE_LIST_RECIPE' recipe with 'sub_category_id = pressed id' */
-    private boolean isSubCategoryEmpty() {
-        Cursor cursor = database.query(TABLE_LIST_RECIPE, null, null, null, null, null, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    if (cursor.getInt(5) == idItem) { //column 'sub_category_id'
-                        return false;
-                    }
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        }
-        return true;
-    }
-
-    private void deleteSubCategory() {
-        long rowId = database.delete(TABLE_SUB_CATEGORY, "_ID="+idItem,null);
-        showCategoryAndRecipe();
+        showListRecipe();
         if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
     }
 

@@ -30,21 +30,26 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import ua.com.spacetv.mycookbook.FragListRecipe;
 import ua.com.spacetv.mycookbook.FragSubCategory;
 import ua.com.spacetv.mycookbook.FragTopCategory;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
+/** Created by Roman Turas on 02/01/2016.
+ *  Class created dialog with views depends from input params
+ * Input params: ID_DIALOG (what dialog was do) and string NAME_FOR_ACTION
+ * Output: ID_DIALOG, String param, int typeFolder (parent or child), int idCategory*/
+
 public class FragDialog extends DialogFragment implements StaticFields,
         DialogInterface.OnClickListener, AdapterView.OnItemClickListener {
     private EditText input;
-    private ListView eListView;
+    private ListView listView;
     private String nameForAction = "";
     private ArrayList<Map<String, Object>> data = new ArrayList<>();
     private Map<String, Object> map;
@@ -75,11 +80,8 @@ public class FragDialog extends DialogFragment implements StaticFields,
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
         input = new EditText(getActivity());
-        eListView = new ListView(getActivity());
-        final TextView msg = new TextView(getActivity());
-
+        listView = new ListView(getActivity());
         int title = 0;
-        int message = 0;
         switch (idDialog) {
             /** Dialog Category */
             case DIALOG_ADD_CATEGORY:
@@ -115,30 +117,56 @@ public class FragDialog extends DialogFragment implements StaticFields,
                 adb.setMessage(nameForAction + "?");
                 break;
 
-            /** Dialog Recipe */
-            case DIALOG_ADD_RECIPE:
+            /** Dialog Recipe in Subcategory */
+            case DIALOG_ADD_RECIPE_SUBCATEGORY:
                 title = R.string.dlg_add_recipe;
                 adb.setMessage(R.string.dlg_space);
                 input.setHint(R.string.dlg_hint);
                 adb.setView(input);
                 break;
-            case DIALOG_REN_RECIPE:
+            case DIALOG_REN_RECIPE_SUBCATEGORY:
                 title = R.string.dlg_rename_recipe;
                 input.setText(nameForAction);
                 adb.setView(input);
                 break;
-            case DIALOG_DEL_RECIPE:
+            case DIALOG_DEL_RECIPE_SUBCATEGORY:
                 title = R.string.dlg_confirm_del_recipe;
                 adb.setMessage(nameForAction + "?");
                 break;
-            case DIALOG_MOV_RECIPE:
+            case DIALOG_MOV_RECIPE_SUBCATEGORY:
                 title = R.string.dlg_move;
                 categoryInList();
-                eListView.setSelected(true);
-                eListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-                eListView.setSelector(R.drawable.color_list_selector);
-                eListView.setOnItemClickListener(this);
-                adb.setView(eListView);
+                listView.setSelected(true);
+                listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+                listView.setSelector(R.drawable.color_list_selector);
+                listView.setOnItemClickListener(this);
+                adb.setView(listView);
+                break;
+
+            /** Dialog Recipe in list of recipe */
+            case DIALOG_ADD_RECIPE_LIST:
+                title = R.string.dlg_add_recipe;
+                adb.setMessage(R.string.dlg_space);
+                input.setHint(R.string.dlg_hint);
+                adb.setView(input);
+                break;
+            case DIALOG_REN_RECIPE_LIST:
+                title = R.string.dlg_rename_recipe;
+                input.setText(nameForAction);
+                adb.setView(input);
+                break;
+            case DIALOG_DEL_RECIPE_LIST:
+                title = R.string.dlg_confirm_del_recipe;
+                adb.setMessage(nameForAction + "?");
+                break;
+            case DIALOG_MOV_RECIPE_LIST:
+                title = R.string.dlg_move;
+                categoryInList();
+                listView.setSelected(true);
+                listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+                listView.setSelector(R.drawable.color_list_selector);
+                listView.setOnItemClickListener(this);
+                adb.setView(listView);
                 break;
         }
         adb.setTitle(title);
@@ -169,7 +197,7 @@ public class FragDialog extends DialogFragment implements StaticFields,
 
         SimpleAdapter sAdapter = new SimpleAdapter(getActivity(), data,
                 R.layout.format_list_dialog, from, to);
-        eListView.setAdapter(sAdapter);
+        listView.setAdapter(sAdapter);
     }
 
     private void subCategoryInList(int idParent){
@@ -192,43 +220,57 @@ public class FragDialog extends DialogFragment implements StaticFields,
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        /** Dialog Category */
-        if (idDialog == DIALOG_ADD_CATEGORY) {
-            if (input.getText().toString().length() != 0) {
-                new FragTopCategory().onDialogClick(idDialog, input.getText().toString());
+        if(which == DialogInterface.BUTTON_POSITIVE) {
+            /** Dialog Category */
+            if (idDialog == DIALOG_ADD_CATEGORY) {
+                if (input.getText().toString().length() != 0) {
+                    new FragTopCategory().onDialogClick(idDialog, input.getText().toString());
+                }
+            } else if (idDialog == DIALOG_REN_CATEGORY) {
+                if (input.getText().toString().length() != 0) {
+                    new FragTopCategory().onDialogClick(idDialog, input.getText().toString());
+                }
+            } else if (idDialog == DIALOG_DEL_CATEGORY) {
+                new FragTopCategory().onDialogClick(idDialog, null);
             }
-        }else if (idDialog == DIALOG_REN_CATEGORY) {
-            if (input.getText().toString().length() != 0) {
-                new FragTopCategory().onDialogClick(idDialog, input.getText().toString());
-            }
-        }else if (idDialog == DIALOG_DEL_CATEGORY) {
-            new FragTopCategory().onDialogClick(idDialog, null);
-        }
 
-        /** Dialog Sub Category */
-        if (idDialog == DIALOG_ADD_SUBCATEGORY) {
-            if (input.getText().toString().length() != 0) {
+            /** Dialog Sub Category */
+            if (idDialog == DIALOG_ADD_SUBCATEGORY) {
+                if (input.getText().toString().length() != 0) {
+                    new FragSubCategory().onDialogClick(idDialog, input.getText().toString(), 0, 0);
+                }
+            } else if (idDialog == DIALOG_REN_SUBCATEGORY) {
+                if (input.getText().toString().length() != 0) {
+                    new FragSubCategory().onDialogClick(idDialog, input.getText().toString(), 0, 0);
+                }
+            } else if (idDialog == DIALOG_DEL_SUBCATEGORY) {
+                new FragSubCategory().onDialogClick(idDialog, null, 0, 0);
+            }
+
+            /** Dialog Recipe in SubCategory*/
+            else if (idDialog == DIALOG_ADD_RECIPE_SUBCATEGORY) {
+
+            } else if (idDialog == DIALOG_REN_RECIPE_SUBCATEGORY) {
                 new FragSubCategory().onDialogClick(idDialog, input.getText().toString(), 0, 0);
+
+            } else if (idDialog == DIALOG_DEL_RECIPE_SUBCATEGORY) {
+                new FragSubCategory().onDialogClick(idDialog, null, 0, 0);
+            } else if (idDialog == DIALOG_MOV_RECIPE_SUBCATEGORY) {
+                new FragSubCategory().onDialogClick(idDialog, null, typeFolder, idCategory);
             }
-        }else if (idDialog == DIALOG_REN_SUBCATEGORY) {
-            if (input.getText().toString().length() != 0) {
-                new FragSubCategory().onDialogClick(idDialog, input.getText().toString(), 0, 0);
+
+            /** Dialog Recipe in List of recipe */
+            else if (idDialog == DIALOG_ADD_RECIPE_LIST) {
+
+            } else if (idDialog == DIALOG_REN_RECIPE_LIST) {
+                new FragListRecipe().onDialogClick(idDialog, input.getText().toString(), 0, 0);
+
+            } else if (idDialog == DIALOG_DEL_RECIPE_LIST) {
+                new FragListRecipe().onDialogClick(idDialog, null, 0, 0);
+            } else if (idDialog == DIALOG_MOV_RECIPE_LIST) {
+                new FragListRecipe().onDialogClick(idDialog, null, typeFolder, idCategory);
             }
-        }else if (idDialog == DIALOG_DEL_SUBCATEGORY) {
-            new FragSubCategory().onDialogClick(idDialog, null, 0, 0);
-        }
-
-        /** Dialog Recipe */
-        else if (idDialog == DIALOG_ADD_RECIPE) {
-
-        }else if (idDialog == DIALOG_REN_RECIPE) {
-            new FragSubCategory().onDialogClick(idDialog, input.getText().toString(), 0, 0);
-
-        }else if (idDialog == DIALOG_DEL_RECIPE) {
-            new FragSubCategory().onDialogClick(idDialog, null, 0, 0);
-        }else if(idDialog == DIALOG_MOV_RECIPE){
-            new FragSubCategory().onDialogClick(idDialog, null, typeFolder, idCategory);
-        }
+        }else onCancel(dialog);
     }
 
     @Override
