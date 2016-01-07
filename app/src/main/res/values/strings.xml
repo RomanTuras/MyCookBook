@@ -28,6 +28,6 @@
     <string name="dlg_btn_cancel">Cancel</string>
     <string name="dlg_add_recipe">Добавить рецепт:</string><!-- * -->
     <string name="dlg_rename_recipe">Переименовать рецепт:</string><!-- * -->
-    <string name="dlg_move_recipe">Переместить рецепт:</string><!-- * -->
+    <string name="dlg_move">Переместить в папку:</string><!-- * -->
     <string name="dlg_confirm_del_recipe">Удалить рецепт:</string><!-- * -->
 </resources>

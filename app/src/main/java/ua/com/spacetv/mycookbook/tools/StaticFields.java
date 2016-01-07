@@ -30,11 +30,6 @@ public interface StaticFields {
     String TAG_SEARCH = "SEARCH";
     String TAG_DIALOG = "TAG_DIALOG";
 
-    /* id of Fragments */
-    byte ID_FRAG_CATEGORY = 0;
-    byte ID_FRAG_SUBCATEGORY = 1;
-    byte ID_FRAG_LIST_RECIPE = 2;
-    byte ID_FRAG_TEXT_RECIPE = 3;
 
     /* id of Dialogs */
     String ID_DIALOG = "ID_DIALOG";
@@ -49,7 +44,6 @@ public interface StaticFields {
     byte DIALOG_REN_RECIPE = 7;
     byte DIALOG_DEL_RECIPE = 8;
     byte DIALOG_MOV_RECIPE = 9;
-
 
     /* id of Tables */
     int ID_TABLE_TOP_CATEGORY = 0;
@@ -71,6 +65,10 @@ public interface StaticFields {
     /* id of parent item (was clicked in list and will passed to next fragment) */
     String PARENT_ITEM_ID = "PARENT_ITEM_ID";
 
+    /* key of Type Category */
+    int PARENT = 0;
+    int CHILD = 1;
+
     /* Type of item in list */
     boolean IS_FOLDER = true;
     boolean IS_RECIPE = false;
@@ -85,4 +83,7 @@ public interface StaticFields {
 
     String DB_FILE = "db_cook.db";
     String DB_FOLDER = "myCookBook";
+
+    /* Default value of columns 'category_id' and 'sub_category_id'*/
+    int DEFAULT_VALUE_COLUMN = -1;
 }

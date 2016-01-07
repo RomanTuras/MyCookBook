@@ -54,12 +54,12 @@ public class FragSubCategory extends Fragment implements StaticFields,
     private static Context context;
     private static FragmentManager fragmentManager;
     private static OnFragmentEventsListener onFragmentEventsListener;
-    private static DataBaseHelper dataBaseHelper;
-    private static SQLiteDatabase database;
+    public static DataBaseHelper dataBaseHelper;
+    public static SQLiteDatabase database;
     private ContentValues contentValues;
     private static ListView listView;
     private static View view;
-    private static ArrayList<ListData> adapter;
+    public static ArrayList<ListData> adapter;
     private static String nameForAction;
     private static int idItem;
     private static int fav;
@@ -205,8 +205,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Snackbar.make(view, "Action: onClick - "+position,
-                    Snackbar.LENGTH_LONG).setAction("Action", null).show();
+
     }
 
     private void setUnsetFav() {
@@ -244,7 +243,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         dialogFragment.show(fragmentManager, TAG_DIALOG);
     }
 
-    public void onDialogClick(int idDialog, String param){
+    public void onDialogClick(int idDialog, String param, int typeFolder, int idCategory){
         switch (idDialog){
             case DIALOG_REN_SUBCATEGORY:
                 renameSubCategory(param);
@@ -256,14 +255,32 @@ public class FragSubCategory extends Fragment implements StaticFields,
                 deleteSubCategory();
                 break;
             case DIALOG_REN_RECIPE:
+                renameRecipe(param);
                 break;
             case DIALOG_ADD_RECIPE:
                 break;
             case DIALOG_DEL_RECIPE:
+                deleteRecipe();
                 break;
             case DIALOG_MOV_RECIPE:
+                moveRecipe(typeFolder, idCategory);
                 break;
         }
+    }
+
+    /** Just change value in columns "category_id" & "sub_category_id" in TABLE_LIST_RECIPE */
+    private void moveRecipe(int typeFolder, int idCategory) {
+        contentValues = new ContentValues();
+        if(typeFolder == PARENT){
+            contentValues.put("category_id" , idCategory);
+            contentValues.put("sub_category_id" , DEFAULT_VALUE_COLUMN);
+        }else if(typeFolder == CHILD){
+            contentValues.put("category_id" , DEFAULT_VALUE_COLUMN);
+            contentValues.put("sub_category_id" , idCategory);
+        }
+        long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
+        showCategoryAndRecipe();
+        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
     }
 
     @Override
@@ -291,11 +308,25 @@ public class FragSubCategory extends Fragment implements StaticFields,
         }
     }
 
+    private void deleteRecipe() {
+        long rowId = database.delete(TABLE_LIST_RECIPE, "_ID="+idItem,null);
+        showCategoryAndRecipe();
+        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+    }
+
+    private void renameRecipe(String param) {
+        contentValues = new ContentValues();
+        contentValues.put("recipe_title" , param);
+        long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
+        showCategoryAndRecipe();
+        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+    }
+
     /** Rename. Save new name of SubCategory in to parent category */
     private void renameSubCategory(String param) {
         contentValues = new ContentValues();
         contentValues.put("name" , param);
-        contentValues.put("parent_id", idParentItem);
+//        contentValues.put("parent_id", idParentItem);
         long rowId = database.update(TABLE_SUB_CATEGORY, contentValues, "_ID="+idItem, null);
         showCategoryAndRecipe();
         if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
