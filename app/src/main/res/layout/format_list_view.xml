@@ -71,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="TextView"
-                android:textSize="10sp"
+                android:textSize="12sp"
                 android:textStyle="italic"
                 android:visibility="visible"
                 android:textColor="#000000"/>

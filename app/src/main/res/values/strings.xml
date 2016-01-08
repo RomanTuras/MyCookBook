@@ -9,13 +9,21 @@
 
     <!-- SnackBar -->
     <string name="success">Выполнено успешно!</string>
+    <string name="success_saved">Рецепт успешно сохранен!</string>
     <string name="folder_not_empty">Невозможно! Эта папка не пуста!</string>
+    <string name="folder_folder_not_select">Папка не выбрана!</string>
+    <string name="there_is_no_change">Изменений нет!</string>
+    <string name="nothing_was_entered">Ничего не введено!</string>
 
     <!-- Popup Menu Items -->
     <string name="item_rename">Переименовать</string>
     <string name="item_delete">Удалить</string>
     <string name="item_move">Переместить</string>
     <string name="item_favorite">Понравилось :)</string>
+    <!--Main Menu Items-->
+    <string name="item_edit_recipe">Редактировать</string>
+    <string name="item_share_recipe">Поделиться</string>
+    <string name="item_save_recipe">Сохранить</string>
 
     <!-- Dialog -->
     <string name="dlg_add_category">Добавить папку:</string><!-- * -->
@@ -31,9 +39,12 @@
     <string name="dlg_move">Переместить в папку:</string><!-- * -->
     <string name="dlg_confirm_del_recipe">Удалить рецепт:</string><!-- * -->
 
-    <!--FragSingleRecipe-->
-    <string name="title_recipe">Напишите название рецепта:</string>
-    <string name="text_recipe">Напишите рецепт:</string>
+    <!--FragTextRecipe-->
+    <string name="title_recipe_edit">Напишите название рецепта:</string>
+    <string name="text_recipe_edit">Напишите рецепт:</string>
+    <string name="text_recipe_review">Описание рецепта:</string>
+    <string name="text_recipe_no_title">Рецепт без названия</string>
+    <string name="text_recipe_no_text">Добавьте описание рецепта</string>
 
 
 </resources>

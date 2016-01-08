@@ -44,15 +44,16 @@ public interface StaticFields {
     byte DIALOG_REN_RECIPE_SUBCATEGORY = 7;
     byte DIALOG_DEL_RECIPE_SUBCATEGORY = 8;
     byte DIALOG_MOV_RECIPE_SUBCATEGORY = 9;
-    byte DIALOG_ADD_RECIPE_LIST = 10;
-    byte DIALOG_REN_RECIPE_LIST = 11;
-    byte DIALOG_DEL_RECIPE_LIST = 12;
-    byte DIALOG_MOV_RECIPE_LIST = 13;
+    byte DIALOG_REN_RECIPE_LISTRECIPE = 11;
+    byte DIALOG_DEL_RECIPE_LISTRECIPE = 12;
+    byte DIALOG_MOV_RECIPE_LISTRECIPE = 13;
+    int NOP = -1;
 
-    /* id of Tables */
-    int ID_TABLE_TOP_CATEGORY = 0;
-    int ID_TABLE_SUB_CATEGORY = 1;
-    int ID_TABLE_LIST_RECIPE = 5;
+    /* id of actions (from where do it) */
+    int ID_ACTION_TOP_CATEGORY = 0;
+    int ID_ACTION_SUB_CATEGORY_CATEGORY = 1;
+    int ID_ACTION_SUB_CATEGORY_RECIPE = 2;
+    int ID_ACTION_LIST_RECIPE = 5;
 
     /* id of pressed menu popup item */
     int ID_POPUP_ITEM_CANCEL = -1;
@@ -60,6 +61,11 @@ public interface StaticFields {
     int ID_POPUP_ITEM_DEL = 1;
     int ID_POPUP_ITEM_MOV = 2;
     int ID_POPUP_ITEM_FAV = 3;
+
+    /* Types of Main menu */
+    int MENU_MAIN = 0;
+    int MENU_EDIT_RECIPE = 1;
+    int MENU_REVIEW_RECIPE = 2;
 
     /* Names of a Tables*/
     String TABLE_TOP_CATEGORY = "tableMain";
@@ -69,6 +75,12 @@ public interface StaticFields {
     /* id of parent item (was clicked in list and will passed to next fragment) */
     String TAG_PARENT_ITEM_ID = "TAG_PARENT_ITEM_ID";
     String TAG_TYPE_FOLDER = "TYPE_FOLDER";
+    String TAG_MODE = "TAG_MODE";
+
+    /* Switch start mode in FragTextRecipe */
+    int MODE_EDIT_RECIPE = 0;
+    int MODE_REVIEW_RECIPE = 1;
+    int MODE_NEW_RECIPE = 2;
 
     /* key of Type Folder */
     int PARENT = 0;

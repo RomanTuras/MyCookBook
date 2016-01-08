@@ -47,8 +47,10 @@ public class MainActivity extends AppCompatActivity
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
     private Fragment fragment;
-    private static FloatingActionButton fabTopCategory, fabListRecipe;
+    private static FloatingActionButton fabAddTopCategory, fabAddRecipeListRecipe,
+            fabAddRecipeSubCategory, fabAddFolderSubCategory;
     private static FloatingActionMenu fabSubCategory;
+    private int typeOfMenu = MENU_MAIN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,69 +70,56 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        fragmentManager = getSupportFragmentManager();
+        fragment = new FragTopCategory();
+        if (!fragment.isAdded()) addFragment(TAG_CATEGORY);
         Log.d("TG", "main activity onCreate");
 
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-        Log.d("TG", "main activity onResume");
-        fragmentManager = getSupportFragmentManager();
-        fragment = new FragTopCategory();
-        if(!fragment.isAdded()) addFragment(TAG_CATEGORY);
     }
 
     private void initFloatAction() {
-        FloatingActionButton fabRecipeSubCategory, fabFolderSubCategory;
-
-        fabTopCategory = (FloatingActionButton) findViewById(R.id.fabTopCategory);
+        fabAddTopCategory = (FloatingActionButton) findViewById(R.id.fabAddTopCategory);
+        fabAddTopCategory.setOnClickListener(this);
         fabSubCategory = (FloatingActionMenu) findViewById(R.id.fabMenuSubCategory);
-        fabListRecipe = (FloatingActionButton) findViewById(R.id.fabListRecipe);
-        fabTopCategory.setOnClickListener(this);
-        fabListRecipe.setOnClickListener(this);
-        fabRecipeSubCategory = (FloatingActionButton) findViewById(R.id.fabRecipeSubCategory);
-        fabFolderSubCategory = (FloatingActionButton) findViewById(R.id.fabFolderSubCategory);
-
+        fabAddRecipeListRecipe = (FloatingActionButton) findViewById(R.id.fabAddRecipeListRecipe);
+        fabAddRecipeListRecipe.setOnClickListener(this);
+        fabAddRecipeSubCategory = (FloatingActionButton) findViewById(R.id.fabAddRecipeSubCategory);
+        fabAddFolderSubCategory = (FloatingActionButton) findViewById(R.id.fabAddFolderSubCategory);
+        fabAddRecipeSubCategory.setOnClickListener(this);
+        fabAddFolderSubCategory.setOnClickListener(this);
         showFloatButtonTopCategory();
-
-        fabRecipeSubCategory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("TG", "add recipe in top folder");
-                new FragSubCategory().showDialog(DIALOG_ADD_RECIPE_SUBCATEGORY, "");
-                fabSubCategory.close(true);
-            }
-        });
-        fabFolderSubCategory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("TG", "add folder in top folder");
-                new FragSubCategory().showDialog(DIALOG_ADD_SUBCATEGORY, "");
-                fabSubCategory.close(true);
-            }
-        });
     }
 
-    public static void showFloatButtonTopCategory(){
-        fabTopCategory.show(true);
+    public static void showFloatButtonTopCategory() {
+        fabAddTopCategory.show(true);
         fabSubCategory.hideMenuButton(false);
-        fabListRecipe.hide(false);
+        fabAddRecipeListRecipe.hide(false);
     }
 
-    public static void showFloatMenuSubCategory(){
-        fabTopCategory.hide(false);
+    public static void showFloatMenuSubCategory() {
+        fabAddTopCategory.hide(false);
         fabSubCategory.showMenuButton(true);
-        fabListRecipe.hide(false);
+        fabAddRecipeListRecipe.hide(false);
     }
 
-    public static void showFloatButtonListRecipe(){
-        fabTopCategory.hide(false);
+    public static void showFloatButtonListRecipe() {
+        fabAddTopCategory.hide(false);
         fabSubCategory.hideMenuButton(false);
-        fabListRecipe.show(true);
+        fabAddRecipeListRecipe.show(true);
     }
 
-    private void addFragment(String tag){
+    public static void hideAllFloatButtons() {
+        fabAddTopCategory.hide(false);
+        fabSubCategory.hideMenuButton(false);
+        fabAddRecipeListRecipe.hide(false);
+    }
+
+    private void addFragment(String tag) {
         fragmentTransaction = getSupportFragmentManager().beginTransaction()
                 .add(R.id.container, fragment, tag);
         fragmentTransaction.commit();
@@ -152,15 +141,18 @@ public class MainActivity extends AppCompatActivity
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
 
-        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
+        SearchManager searchManager =
+                (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
 
         SearchView searchView = null;
         if (searchItem != null) {
             searchView = (SearchView) searchItem.getActionView();
         }
         if (searchView != null) {
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(MainActivity.this.getComponentName()));
+            searchView.setSearchableInfo(searchManager.getSearchableInfo
+                    (MainActivity.this.getComponentName()));
         }
+
         return true;
     }
 
@@ -200,24 +192,34 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListItemClick(int idTable, int idItem) {
-        switch (idTable){
-            case ID_TABLE_TOP_CATEGORY:
+    public void onListItemClick(int idActionFrom, int idItem) {
+        switch (idActionFrom) {
+            case ID_ACTION_TOP_CATEGORY:
                 startSubCategoryFragment(idItem);
                 break;
-            case ID_TABLE_SUB_CATEGORY:
+            case ID_ACTION_SUB_CATEGORY_CATEGORY:
                 startListRecipeFragment(idItem);
                 break;
-            case ID_TABLE_LIST_RECIPE:
-                startSingleRecipeFragment(idItem);
+            case ID_ACTION_SUB_CATEGORY_RECIPE:
+                Log.d("TG", "onListItemClick idItem = "+idItem);
+                startTextRecipeFragment(idItem, PARENT, MODE_REVIEW_RECIPE);
+                break;
+            case ID_ACTION_LIST_RECIPE:
+                startTextRecipeFragment(idItem, PARENT, MODE_REVIEW_RECIPE);
                 break;
         }
     }
 
-    private void startSingleRecipeFragment(int idItem) {
+    private void startTextRecipeFragment(int idItem, int typeFolder, int startMode) {
         Bundle bundle = new Bundle();
-        fragment = new FragSingleRecipe();
+        fragment = new FragTextRecipe();
+        if(startMode == MODE_NEW_RECIPE) {
+            if (typeFolder == PARENT) idItem = FragSubCategory.idParentItem;
+        }
         bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+        Log.d("TG", "startTextRecipeFragment idItem = "+idItem);
+        bundle.putInt(TAG_MODE, startMode);
+        bundle.putInt(TAG_TYPE_FOLDER, typeFolder);
         fragment.setArguments(bundle);
         fragmentTransaction = fragmentManager
                 .beginTransaction();
@@ -240,8 +242,8 @@ public class MainActivity extends AppCompatActivity
 
     private void startSubCategoryFragment(int idItem) {
         Bundle bundle = new Bundle();
-                fragment = new FragSubCategory();
-                bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+        fragment = new FragSubCategory();
+        bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
         fragment.setArguments(bundle);
         fragmentTransaction = fragmentManager
                 .beginTransaction();
@@ -252,13 +254,22 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClick(View view) {
-        if(view.getId() == R.id.fabTopCategory){
-            Fragment fragment;
-            fragmentManager = getSupportFragmentManager();
-            fragment = fragmentManager.findFragmentByTag(TAG_CATEGORY);
-            if(fragment != null){
-                new FragTopCategory().showDialog(DIALOG_ADD_CATEGORY, null);
-            }
+        if (view.getId() == R.id.fabAddTopCategory) {
+            FragTopCategory.showDialog(DIALOG_ADD_CATEGORY, null);
+            /** add recipe in TOP folder */
+        } else if (view.getId() == R.id.fabAddRecipeSubCategory) {
+            startTextRecipeFragment(FragSubCategory.idParentItem,
+                    PARENT, MODE_NEW_RECIPE);
+            fabSubCategory.close(true);
+            /** add folder in TOP folder */
+        } else if (view.getId() == R.id.fabAddFolderSubCategory) {
+            FragSubCategory.showDialog(DIALOG_ADD_SUBCATEGORY, "");
+            fabSubCategory.close(true);
+            /** add recipe in SUB folder */
+        } else if (view.getId() == R.id.fabAddRecipeListRecipe) {
+            Log.d("TG", "fabAddRecipeListRecipe idItem = "+FragSubCategory.idItem);
+            startTextRecipeFragment(FragSubCategory.idItem, CHILD, MODE_NEW_RECIPE);
+            fabSubCategory.close(true);
         }
 
     }

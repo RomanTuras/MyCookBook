@@ -29,7 +29,7 @@
     <include layout="@xml/fragment_holder" />
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/fabTopCategory"
+        android:id="@+id/fabAddTopCategory"
         style="@style/MenuButtonsStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
         android:src="@drawable/ic_add_white_24dp" />
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/fabListRecipe"
+        android:id="@+id/fabAddRecipeListRecipe"
         style="@style/MenuButtonsStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -66,14 +66,14 @@
         fab:menu_shadowColor="#444">
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fabRecipeSubCategory"
+            android:id="@+id/fabAddRecipeSubCategory"
             style="@style/MenuButtonsStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_description_white_24dp" />
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fabFolderSubCategory"
+            android:id="@+id/fabAddFolderSubCategory"
             style="@style/MenuButtonsStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

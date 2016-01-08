@@ -59,7 +59,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
     private static ArrayList<ListData> adapter;
     private static View view;
     private static String nameForAction;
-    private static int idParentCategory;
+    public static int idParentCategory;
     private static OnFragmentEventsListener onFragmentEventsListener;
     private ArrayList<Integer> arrayIdSubCategories;
     private ContentValues contentValues;
@@ -97,6 +97,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
+        listView.requestFocus();
     }
 
     private void categoryInList() {
@@ -209,7 +210,6 @@ public class FragTopCategory extends Fragment implements StaticFields,
                                     ContextMenu.ContextMenuInfo menuInfo) {
         menu.add(0, ID_POPUP_ITEM_REN, 0, R.string.item_rename);
         menu.add(0, ID_POPUP_ITEM_DEL, 0, R.string.item_delete);
-
     }
 
     @Override
@@ -228,7 +228,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         return false;
     }
 
-    public void showDialog(int idDialog, String nameForAction) {
+    public static void showDialog(int idDialog, String nameForAction) {
         Bundle bundle = new Bundle();
         bundle.putInt(ID_DIALOG, idDialog);
         bundle.putString(NAME_FOR_ACTION, nameForAction);
@@ -313,7 +313,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ListData ld = adapter.get(position);
-        onFragmentEventsListener.onListItemClick(ID_TABLE_TOP_CATEGORY, ld.getItemId());
+        onFragmentEventsListener.onListItemClick(ID_ACTION_TOP_CATEGORY, ld.getItemId());
     }
 
     private void makeSnackbar(String text) {

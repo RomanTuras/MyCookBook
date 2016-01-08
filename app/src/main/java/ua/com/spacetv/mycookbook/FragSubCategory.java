@@ -60,9 +60,9 @@ public class FragSubCategory extends Fragment implements StaticFields,
     private static View view;
     public static ArrayList<ListData> adapter;
     private static String nameForAction;
-    private static int idItem;
+    public static int idItem; //id sub category
     private static int fav;
-    private static int idParentItem = 0;
+    public static int idParentItem = 0; //id TOP category, income in params
     private static boolean isFolder;
 
     @Override
@@ -105,6 +105,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
+        listView.requestFocus();
     }
 
     private void recipeInList() {
@@ -245,7 +246,13 @@ public class FragSubCategory extends Fragment implements StaticFields,
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ListData ld = adapter.get(position);
-        onFragmentEventsListener.onListItemClick(ID_TABLE_SUB_CATEGORY, ld.getItemId());
+        isFolder = adapter.get(position).getTypeItem();
+        idItem = ld.getItemId();
+        if(isFolder) {
+            Log.d("TG", "SubCategory - isFolder");
+            onFragmentEventsListener.onListItemClick(ID_ACTION_SUB_CATEGORY_CATEGORY, idItem);
+        }
+        else onFragmentEventsListener.onListItemClick(ID_ACTION_SUB_CATEGORY_RECIPE, idItem);
     }
 
     private void setUnsetFav() {
@@ -267,7 +274,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         }
     }
 
-    public void showDialog(int idDialog, String nameForAction) {
+    public static void showDialog(int idDialog, String nameForAction) {
         Bundle bundle = new Bundle();
         bundle.putInt(ID_DIALOG, idDialog);
         bundle.putString(NAME_FOR_ACTION, nameForAction);
@@ -303,7 +310,9 @@ public class FragSubCategory extends Fragment implements StaticFields,
                 deleteRecipe();
                 break;
             case DIALOG_MOV_RECIPE_SUBCATEGORY:
-                moveRecipe(typeFolder, idCategory);
+                if(idCategory != NOP) moveRecipe(typeFolder, idCategory);
+                else makeSnackbar(context.getResources()
+                        .getString(R.string.folder_folder_not_select));
                 break;
         }
     }

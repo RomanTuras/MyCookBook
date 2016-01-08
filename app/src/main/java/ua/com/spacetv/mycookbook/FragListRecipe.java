@@ -173,13 +173,13 @@ public class FragListRecipe extends Fragment implements StaticFields,
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case ID_POPUP_ITEM_REN:
-                showDialog(DIALOG_REN_RECIPE_LIST, nameForAction);
+                showDialog(DIALOG_REN_RECIPE_LISTRECIPE, nameForAction);
                 break;
             case ID_POPUP_ITEM_DEL:
-                showDialog(DIALOG_DEL_RECIPE_LIST, nameForAction);
+                showDialog(DIALOG_DEL_RECIPE_LISTRECIPE, nameForAction);
                 break;
             case ID_POPUP_ITEM_MOV:
-                showDialog(DIALOG_MOV_RECIPE_LIST, nameForAction);
+                showDialog(DIALOG_MOV_RECIPE_LISTRECIPE, nameForAction);
                 break;
             case ID_POPUP_ITEM_FAV:
                 setUnsetFav();
@@ -191,7 +191,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ListData ld = adapter.get(position);
-        onFragmentEventsListener.onListItemClick(ID_TABLE_LIST_RECIPE, ld.getItemId());
+        onFragmentEventsListener.onListItemClick(ID_ACTION_LIST_RECIPE, ld.getItemId());
     }
 
     private void setUnsetFav() {
@@ -231,17 +231,16 @@ public class FragListRecipe extends Fragment implements StaticFields,
 
     public void onDialogClick(int idDialog, String param, int typeFolder, int idCategory){
         switch (idDialog){
-            case DIALOG_REN_RECIPE_LIST:
+            case DIALOG_REN_RECIPE_LISTRECIPE:
                 renameRecipe(param);
                 break;
-            case DIALOG_ADD_RECIPE_LIST:
-                break;
-            case DIALOG_DEL_RECIPE_LIST:
+            case DIALOG_DEL_RECIPE_LISTRECIPE:
                 deleteRecipe();
                 break;
-            case DIALOG_MOV_RECIPE_LIST:
-                Log.d("TG", "Frag List Recipe : onDialogClick ");
-                moveRecipe(typeFolder, idCategory);
+            case DIALOG_MOV_RECIPE_LISTRECIPE:
+                if(idCategory != NOP) moveRecipe(typeFolder, idCategory);
+                else makeSnackbar(context.getResources()
+                        .getString(R.string.folder_folder_not_select));
                 break;
         }
     }
