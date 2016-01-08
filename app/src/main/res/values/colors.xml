@@ -5,4 +5,7 @@
     <color name="colorPrimaryBackground">#BBDEFB</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorWhite">#FFFFFF</color>
+    <color name="colorDarkWhite">#959595</color>
+    <color name="colorDarkGray">#656565</color>
+    <color name="colorBlack">#000000</color>
 </resources>

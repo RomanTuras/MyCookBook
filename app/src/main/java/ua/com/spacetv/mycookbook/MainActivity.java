@@ -209,14 +209,27 @@ public class MainActivity extends AppCompatActivity
                 startListRecipeFragment(idItem);
                 break;
             case ID_TABLE_LIST_RECIPE:
+                startSingleRecipeFragment(idItem);
                 break;
         }
+    }
+
+    private void startSingleRecipeFragment(int idItem) {
+        Bundle bundle = new Bundle();
+        fragment = new FragSingleRecipe();
+        bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+        fragment.setArguments(bundle);
+        fragmentTransaction = fragmentManager
+                .beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment)
+                .addToBackStack(TAG_TEXT_RECIPE)
+                .commit();
     }
 
     private void startListRecipeFragment(int idItem) {
         Bundle bundle = new Bundle();
         fragment = new FragListRecipe();
-        bundle.putInt(PARENT_ITEM_ID, idItem);
+        bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
         fragment.setArguments(bundle);
         fragmentTransaction = fragmentManager
                 .beginTransaction();
@@ -228,7 +241,7 @@ public class MainActivity extends AppCompatActivity
     private void startSubCategoryFragment(int idItem) {
         Bundle bundle = new Bundle();
                 fragment = new FragSubCategory();
-                bundle.putInt(PARENT_ITEM_ID, idItem);
+                bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
         fragment.setArguments(bundle);
         fragmentTransaction = fragmentManager
                 .beginTransaction();

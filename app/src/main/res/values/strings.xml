@@ -30,4 +30,10 @@
     <string name="dlg_rename_recipe">Переименовать рецепт:</string><!-- * -->
     <string name="dlg_move">Переместить в папку:</string><!-- * -->
     <string name="dlg_confirm_del_recipe">Удалить рецепт:</string><!-- * -->
+
+    <!--FragSingleRecipe-->
+    <string name="title_recipe">Напишите название рецепта:</string>
+    <string name="text_recipe">Напишите рецепт:</string>
+
+
 </resources>

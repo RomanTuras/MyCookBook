@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:android.support.design="urn:oasis:names:tc:xliff:document:1.2"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -23,60 +23,61 @@
 
     </android.support.design.widget.AppBarLayout>
 
+
     <!--<include layout="@layout/content_main" />-->
 
     <include layout="@xml/fragment_holder" />
 
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fabTopCategory"
+        style="@style/MenuButtonsStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_white_24dp"
-        style="@style/MenuButtonsStyle"/>
+        android:src="@drawable/ic_add_white_24dp" />
 
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fabListRecipe"
+        style="@style/MenuButtonsStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_white_24dp"
-        style="@style/MenuButtonsStyle"/>
+        android:src="@drawable/ic_add_white_24dp" />
 
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fabMenuSubCategory"
+        style="@style/MenuButtonsStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        fab:menu_labels_showAnimation="@anim/jump_from_down"
-        fab:menu_labels_hideAnimation="@anim/jump_to_down"
-        fab:menu_animationDelayPerItem="0"
         app:fab_shadowRadius="4dp"
         app:fab_shadowXOffset="1dp"
         app:fab_shadowYOffset="3dp"
+        fab:menu_animationDelayPerItem="0"
         fab:menu_colorNormal="#FF4081"
         fab:menu_colorPressed="#AF1050"
         fab:menu_colorRipple="#FF4081"
         fab:menu_fab_size="normal"
-        fab:menu_shadowColor="#444"
-        style="@style/MenuButtonsStyle">
+        fab:menu_labels_hideAnimation="@anim/jump_to_down"
+        fab:menu_labels_showAnimation="@anim/jump_from_down"
+        fab:menu_shadowColor="#444">
 
-    <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/fabRecipeSubCategory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_description_white_24dp"
-        style="@style/MenuButtonsStyle" />
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fabRecipeSubCategory"
+            style="@style/MenuButtonsStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_description_white_24dp" />
 
-    <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/fabFolderSubCategory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_folder_open_white_24dp"
-        style="@style/MenuButtonsStyle" />
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fabFolderSubCategory"
+            style="@style/MenuButtonsStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_folder_open_white_24dp" />
     </com.github.clans.fab.FloatingActionMenu>
 
 </android.support.design.widget.CoordinatorLayout>

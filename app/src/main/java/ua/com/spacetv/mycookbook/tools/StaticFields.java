@@ -67,9 +67,10 @@ public interface StaticFields {
     String TABLE_LIST_RECIPE = "tableRecipe";
 
     /* id of parent item (was clicked in list and will passed to next fragment) */
-    String PARENT_ITEM_ID = "PARENT_ITEM_ID";
+    String TAG_PARENT_ITEM_ID = "TAG_PARENT_ITEM_ID";
+    String TAG_TYPE_FOLDER = "TYPE_FOLDER";
 
-    /* key of Type Category */
+    /* key of Type Folder */
     int PARENT = 0;
     int CHILD = 1;
 

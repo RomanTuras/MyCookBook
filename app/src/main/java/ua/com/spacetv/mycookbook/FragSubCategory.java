@@ -27,7 +27,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -37,19 +39,16 @@ import java.util.ArrayList;
 
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.FragDialog;
-import ua.com.spacetv.mycookbook.helpers.MenuPopup;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
-import ua.com.spacetv.mycookbook.tools.OnPopupMenuItemClickListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
  * Created by salden on 02/01/2016.
  */
 public class FragSubCategory extends Fragment implements StaticFields,
-        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener,
-        OnPopupMenuItemClickListener {
+        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
     private static Context context;
     private static FragmentManager fragmentManager;
@@ -75,9 +74,9 @@ public class FragSubCategory extends Fragment implements StaticFields,
 
         Bundle bundle = this.getArguments();
         if(bundle != null) {
-            FragSubCategory.idParentItem = bundle.getInt(PARENT_ITEM_ID);
+            FragSubCategory.idParentItem = bundle.getInt(TAG_PARENT_ITEM_ID);
         }
-        Log.d("TG", "PARENT_ITEM_ID = "+ idParentItem);
+        Log.d("TG", "TAG_PARENT_ITEM_ID = "+ idParentItem);
 
         try {
             onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
@@ -103,6 +102,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         recipeInList();
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
+        registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
     }
@@ -187,6 +187,10 @@ public class FragSubCategory extends Fragment implements StaticFields,
         dataBaseHelper.close();
     }
 
+    @Override
+    public void onPause(){
+        super.onPause();
+    }
 
     /** onLongClick() - This returns a boolean to indicate whether you have consumed the event and
      * it should not be carried further. That is, return true to indicate that you have handled
@@ -197,10 +201,45 @@ public class FragSubCategory extends Fragment implements StaticFields,
         nameForAction = adapter.get(position).getListTitle();
         idItem = adapter.get(position).getItemId();
         isFolder = adapter.get(position).getTypeItem();
-        if(isFolder) new MenuPopup(context, view, ID_TABLE_SUB_CATEGORY);
-        else new MenuPopup(context, view, ID_TABLE_LIST_RECIPE);
+        return false;
+    }
 
-        return true;
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        if(isFolder) {
+            menu.add(0, ID_POPUP_ITEM_REN, 0, R.string.item_rename);
+            menu.add(0, ID_POPUP_ITEM_DEL, 0, R.string.item_delete);
+        }else{
+            menu.add(0, ID_POPUP_ITEM_FAV, 0, R.string.item_favorite);
+            menu.add(0, ID_POPUP_ITEM_REN, 0, R.string.item_rename);
+            menu.add(0, ID_POPUP_ITEM_MOV, 0, R.string.item_move);
+            menu.add(0, ID_POPUP_ITEM_DEL, 0, R.string.item_delete);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case ID_POPUP_ITEM_REN:
+                if(isFolder) showDialog(DIALOG_REN_SUBCATEGORY, nameForAction);
+                else showDialog(DIALOG_REN_RECIPE_SUBCATEGORY, nameForAction);
+                break;
+            case ID_POPUP_ITEM_DEL:
+                if(isFolder){
+                    if(isSubCategoryEmpty()) showDialog(DIALOG_DEL_SUBCATEGORY, nameForAction);
+                    else makeSnackbar(context.getResources().getString(R.string.folder_not_empty));
+                }
+                else showDialog(DIALOG_DEL_RECIPE_SUBCATEGORY, nameForAction);
+                break;
+            case ID_POPUP_ITEM_MOV:
+                showDialog(DIALOG_MOV_RECIPE_SUBCATEGORY, nameForAction);
+                break;
+            case ID_POPUP_ITEM_FAV:
+                setUnsetFav();
+                break;
+        }
+        return false;
     }
 
     @Override
@@ -282,29 +321,6 @@ public class FragSubCategory extends Fragment implements StaticFields,
         long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
         showCategoryAndRecipe();
         if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
-    }
-
-    @Override
-    public void onClickPopupMenuItem(int idPopupItem) {
-        switch (idPopupItem){
-            case ID_POPUP_ITEM_REN:
-                if(isFolder) showDialog(DIALOG_REN_SUBCATEGORY, nameForAction);
-                else showDialog(DIALOG_REN_RECIPE_SUBCATEGORY, nameForAction);
-                break;
-            case ID_POPUP_ITEM_DEL:
-                if(isFolder){
-                    if(isSubCategoryEmpty()) showDialog(DIALOG_DEL_SUBCATEGORY, nameForAction);
-                    else makeSnackbar(context.getResources().getString(R.string.folder_not_empty));
-                }
-                else showDialog(DIALOG_DEL_RECIPE_SUBCATEGORY, nameForAction);
-                break;
-            case ID_POPUP_ITEM_MOV:
-                showDialog(DIALOG_MOV_RECIPE_SUBCATEGORY, nameForAction);
-                break;
-            case ID_POPUP_ITEM_FAV:
-                setUnsetFav();
-                break;
-        }
     }
 
     private void deleteRecipe() {
