@@ -92,8 +92,8 @@ public class FragDialog extends DialogFragment implements StaticFields,
                 break;
             case DIALOG_REN_CATEGORY:
                 title = R.string.dlg_rename_category;
-                adb.setView(input);
                 input.setText(nameForAction);
+                adb.setView(input);
                 break;
             case DIALOG_DEL_CATEGORY:
                 title = R.string.dlg_confirm_delete;
@@ -109,8 +109,8 @@ public class FragDialog extends DialogFragment implements StaticFields,
                 break;
             case DIALOG_REN_SUBCATEGORY:
                 title = R.string.dlg_rename_category;
-                adb.setView(input);
                 input.setText(nameForAction);
+                adb.setView(input);
                 break;
             case DIALOG_DEL_SUBCATEGORY:
                 title = R.string.dlg_confirm_delete;
@@ -253,6 +253,7 @@ public class FragDialog extends DialogFragment implements StaticFields,
                 new FragListRecipe().onDialogClick(idDialog, null, typeFolder, idCategory);
             }
         }else onCancel(dialog);
+
     }
 
     @Override

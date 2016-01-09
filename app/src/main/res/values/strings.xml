@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Cook Book</string>
+    <string name="app_name">Моя книга рецептов</string>
 
     <!-- Navigation Draver -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -46,5 +46,16 @@
     <string name="text_recipe_no_title">Рецепт без названия</string>
     <string name="text_recipe_no_text">Добавьте описание рецепта</string>
 
+    <!-- Subtitle fo action bar -->
+    <string name="text_list_favorite_recipe">Любимые рецепты:</string>
+    <string name="text_list_search_result">Результаты поиска:</string>
+    <string name="text_recipe">Рецепт</string>
+
+    <!--Drawer-->
+    <string name="drawer_home">На главную</string>
+    <string name="drawer_favorite">Любимые рецепты</string>
+    <string name="drawer_search">Поиск по составу</string>
+    <string name="drawer_save_restore">Импорт-экспорт</string>
+    <string name="drawer_callback">Обратная связь</string>
 
 </resources>

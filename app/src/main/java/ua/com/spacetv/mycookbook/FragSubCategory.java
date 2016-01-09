@@ -179,6 +179,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         super.onResume();
         showCategoryAndRecipe();
         MainActivity.showFloatMenuSubCategory();
+        MainActivity.overrideActionBar(R.string.app_name, 0);
     }
 
     @Override

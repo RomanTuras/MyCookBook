@@ -16,8 +16,6 @@
 
 package ua.com.spacetv.mycookbook;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -50,6 +48,7 @@ public class MainActivity extends AppCompatActivity
     private static FloatingActionButton fabAddTopCategory, fabAddRecipeListRecipe,
             fabAddRecipeSubCategory, fabAddFolderSubCategory;
     private static FloatingActionMenu fabSubCategory;
+    private static android.support.v7.app.ActionBar actionBar;
     private int typeOfMenu = MENU_MAIN;
 
     @Override
@@ -58,6 +57,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        actionBar = getSupportActionBar();
 
         initFloatAction();
 
@@ -80,6 +80,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    public static void overrideActionBar(int title, int subtitle){
+        if(actionBar != null){
+            actionBar.setTitle(title);
+            actionBar.setSubtitle(subtitle);
+        }
     }
 
     private void initFloatAction() {
@@ -138,21 +145,24 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-
         MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener()
+        {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d("TG", "onQueryTextSubmit = "+query);
+                startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
+                return false;
+            }
 
-        SearchManager searchManager =
-                (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        };
 
-        SearchView searchView = null;
-        if (searchItem != null) {
-            searchView = (SearchView) searchItem.getActionView();
-        }
-        if (searchView != null) {
-            searchView.setSearchableInfo(searchManager.getSearchableInfo
-                    (MainActivity.this.getComponentName()));
-        }
-
+        searchView.setOnQueryTextListener(queryTextListener);
         return true;
     }
 
@@ -172,9 +182,10 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.drawer_home) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.drawer_favorite) {
+            startListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
 
         } else if (id == R.id.nav_slideshow) {
 
@@ -198,7 +209,7 @@ public class MainActivity extends AppCompatActivity
                 startSubCategoryFragment(idItem);
                 break;
             case ID_ACTION_SUB_CATEGORY_CATEGORY:
-                startListRecipeFragment(idItem);
+                startListRecipeFragment(idItem, MODE_RECIPE_FROM_CATEGORY, null);
                 break;
             case ID_ACTION_SUB_CATEGORY_RECIPE:
                 Log.d("TG", "onListItemClick idItem = "+idItem);
@@ -216,7 +227,7 @@ public class MainActivity extends AppCompatActivity
         if(typeFolder == PARENT){
             bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.idParentItem);//get id TOP category
         }
-        else {
+        else if(typeFolder == CHILD){
             bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.idParentItem);//get id SUB category
         }
         bundle.putInt(TAG_ID_RECIPE, idItem);
@@ -231,10 +242,12 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    private void startListRecipeFragment(int idItem) {
+    private void startListRecipeFragment(int idItem, int startMode, String searchRequest) {
         Bundle bundle = new Bundle();
         fragment = new FragListRecipe();
         bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+        bundle.putInt(TAG_MODE, startMode);
+        bundle.putString(TAG_SEARCH_STRING, searchRequest);
         fragment.setArguments(bundle);
         fragmentTransaction = fragmentManager
                 .beginTransaction();
@@ -255,6 +268,7 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
+    /** ADD folders or recipes */
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.fabAddTopCategory) {

@@ -29,6 +29,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +41,7 @@ import java.util.ArrayList;
 
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.FragDialog;
+import ua.com.spacetv.mycookbook.helpers.PrepareListRecipes;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
@@ -63,6 +66,8 @@ public class FragListRecipe extends Fragment implements StaticFields,
     private static int idItem;
     private static int fav; // key, added recipe in favorite list
     public static int idParentItem = 0; //id subcategory where is recipe
+    private static int startupMode = MODE_RECIPE_FROM_CATEGORY;
+    private static String searchString;
 
     @Override
     public void onAttach(Context context) {
@@ -73,9 +78,11 @@ public class FragListRecipe extends Fragment implements StaticFields,
 
         Bundle bundle = this.getArguments();
         if(bundle != null) {
-            FragListRecipe.idParentItem = bundle.getInt(TAG_PARENT_ITEM_ID);
+            idParentItem = bundle.getInt(TAG_PARENT_ITEM_ID);
+            startupMode = bundle.getInt(TAG_MODE);
+            searchString = bundle.getString(TAG_SEARCH_STRING);
         }
-        Log.d("TG", "Frag List Recipe : TAG_PARENT_ITEM_ID = "+ idParentItem);
+        Log.d("TG", "Frag List  = idParentItem"+ idParentItem+"  startupMode= "+startupMode);
 
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
@@ -91,33 +98,32 @@ public class FragListRecipe extends Fragment implements StaticFields,
     }
 
     public void showListRecipe() {
-        adapter = new ArrayList<>();
-        recipeInList();
+        if(startupMode == MODE_RECIPE_FROM_CATEGORY) {
+            adapter = new PrepareListRecipes(context, idParentItem).getFilledAdapter();
+            MainActivity.overrideActionBar(R.string.app_name, 0);
+            MainActivity.showFloatButtonListRecipe();
+        }else if(startupMode == MODE_FAVORITE_RECIPE){
+            MainActivity.overrideActionBar(R.string.app_name, R.string.text_list_favorite_recipe);
+            adapter = new PrepareListRecipes(context).getFilledAdapter();
+            MainActivity.hideAllFloatButtons();
+        }else if(startupMode == MODE_SEARCH_RESULT){
+            MainActivity.overrideActionBar(R.string.app_name, R.string.text_list_search_result);
+            adapter = new PrepareListRecipes(context, searchString).getFilledAdapter();
+            MainActivity.hideAllFloatButtons();
+        }
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
+        setHasOptionsMenu(true);
     }
 
-    private void recipeInList() {
-        String selectQuery ="SELECT * FROM " + TABLE_LIST_RECIPE +
-                " WHERE sub_category_id=" + idParentItem + " ORDER BY recipe_title";
-        Cursor cursor = database.rawQuery(selectQuery, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    int item_id = cursor.getInt(0);
-                    int imgLike = cursor.getInt(4);
-
-                    adapter.add(new ListData(cursor.getString(1),
-                            "", ID_IMG_RECIPE, imgLike, 0, item_id, IS_RECIPE));
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        } else {
-            Log.d("TG", "Table with recipeCategory - is Empty");
-        }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+        Log.d("TG", "onCreateOptionsMenu");
+        menu.clear();
+        if(startupMode == MODE_RECIPE_FROM_CATEGORY) inflater.inflate(R.menu.main, menu);
     }
 
     @Override
@@ -134,12 +140,12 @@ public class FragListRecipe extends Fragment implements StaticFields,
     public void onResume(){
         super.onResume();
         showListRecipe();
-        MainActivity.showFloatButtonListRecipe();
     }
 
     @Override
     public void onPause(){
         super.onPause();
+
     }
 
     @Override

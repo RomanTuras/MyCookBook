@@ -3,16 +3,16 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/drawer_home"
+            android:icon="@drawable/ic_home_black_18dp"
+            android:title="@string/drawer_home" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:id="@+id/drawer_favorite"
+            android:icon="@drawable/ic_favorite_black_18dp"
+            android:title="@string/drawer_favorite" />
         <item
             android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_home_black_24dp"
             android:title="Slideshow" />
         <item
             android:id="@+id/nav_manage"

@@ -97,7 +97,6 @@ public class FragTopCategory extends Fragment implements StaticFields,
         registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
-        listView.requestFocus();
     }
 
     private void categoryInList() {
@@ -175,6 +174,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         super.onResume();
         showAllCategory();
         MainActivity.showFloatButtonTopCategory();
+        MainActivity.overrideActionBar(R.string.app_name, 0);
         Log.d("TG", "TopCategoryFragment onResume");
     }
 

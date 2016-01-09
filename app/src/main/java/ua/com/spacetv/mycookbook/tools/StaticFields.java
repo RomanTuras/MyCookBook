@@ -27,7 +27,7 @@ public interface StaticFields {
     String TAG_SUBCATEGORY = "ID_SUBCATEGORY";
     String TAG_LIST_RECIPE = "ID_LIST_RECIPE";
     String TAG_TEXT_RECIPE = "ID_TEXT_RECIPE";
-    String TAG_SEARCH = "SEARCH";
+    String TAG_SEARCH_FRAGMENT = "ID_SEARCH";
     String TAG_DIALOG = "TAG_DIALOG";
 
 
@@ -76,12 +76,19 @@ public interface StaticFields {
     String TAG_PARENT_ITEM_ID = "TAG_PARENT_ITEM_ID";
     String TAG_TYPE_FOLDER = "TYPE_FOLDER";
     String TAG_MODE = "TAG_MODE";
+    String TAG_SEARCH_STRING = "";
     String TAG_ID_RECIPE = "TAG_ID_RECIPE";
 
-    /* Switch start mode in FragTextRecipe */
+    /* Switch start mode to FragTextRecipe */
     int MODE_EDIT_RECIPE = 0;
     int MODE_REVIEW_RECIPE = 1;
     int MODE_NEW_RECIPE = 2;
+
+    /* Switch start mode to FragListRecipe */
+    int MODE_RECIPE_FROM_CATEGORY = 0;
+    int MODE_SEARCH_RESULT = 1;
+    int MODE_FAVORITE_RECIPE = 2;
+
 
     /* key of Type Folder */
     int PARENT = 0;
