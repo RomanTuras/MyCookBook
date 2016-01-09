@@ -76,6 +76,7 @@ public interface StaticFields {
     String TAG_PARENT_ITEM_ID = "TAG_PARENT_ITEM_ID";
     String TAG_TYPE_FOLDER = "TYPE_FOLDER";
     String TAG_MODE = "TAG_MODE";
+    String TAG_ID_RECIPE = "TAG_ID_RECIPE";
 
     /* Switch start mode in FragTextRecipe */
     int MODE_EDIT_RECIPE = 0;

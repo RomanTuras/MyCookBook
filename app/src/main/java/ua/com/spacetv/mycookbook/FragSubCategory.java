@@ -247,9 +247,8 @@ public class FragSubCategory extends Fragment implements StaticFields,
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ListData ld = adapter.get(position);
         isFolder = adapter.get(position).getTypeItem();
-        idItem = ld.getItemId();
+        idItem = ld.getItemId(); // get id of pressed item: Folder or Recipe
         if(isFolder) {
-            Log.d("TG", "SubCategory - isFolder");
             onFragmentEventsListener.onListItemClick(ID_ACTION_SUB_CATEGORY_CATEGORY, idItem);
         }
         else onFragmentEventsListener.onListItemClick(ID_ACTION_SUB_CATEGORY_RECIPE, idItem);

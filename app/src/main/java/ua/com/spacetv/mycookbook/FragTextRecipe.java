@@ -54,8 +54,9 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private TextView textTitleRecipe, textTextRecipe;
     private String titleRecipeFromDatabase = null;
     private String textRecipeFromDatabase = null;
-    private static int idItem = 0; // id of folder where was or will TEXT of RECIPE
-    private static int typeFolder = 0; // Is two types of folders: PARENT (top) & CHILD (subFolder)
+    private static int idReceivedFolderItem = 0; // id of folder where was or will TEXT of RECIPE
+    private static int idRecipe = 0; // id Received (mode REVIEW) or Just Created recipe (mode NEW)
+    private static int typeReceivedFolder = 0; // Is two types of folders: PARENT (top) & CHILD (subFolder)
     private static int startupMode = MODE_REVIEW_RECIPE;
 
     @Override
@@ -67,10 +68,11 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
         Bundle bundle = this.getArguments();
         if(bundle != null) {
-            idItem = bundle.getInt(TAG_PARENT_ITEM_ID);
-            typeFolder = bundle.getInt(TAG_TYPE_FOLDER);
+            idReceivedFolderItem = bundle.getInt(TAG_PARENT_ITEM_ID);
+            idRecipe = bundle.getInt(TAG_ID_RECIPE);
+            typeReceivedFolder = bundle.getInt(TAG_TYPE_FOLDER);
             startupMode = bundle.getInt(TAG_MODE);
-            Log.d("TG", "idItem= "+idItem+" typeFolder= "+typeFolder+" startupMode= "+startupMode);
+            Log.d("TG", "idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
         }
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
@@ -104,7 +106,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void modeNewRecipe() {
-        startupMode = MODE_NEW_RECIPE;
+        Log.d("TG", "modeNewRecipe *** idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
         editTitleRecipe.requestFocus();
@@ -117,7 +119,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void modeEdit(){
-        startupMode = MODE_EDIT_RECIPE;
+        Log.d("TG", "modeEdit *** idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
         editTextRecipe.setFocusableInTouchMode(true);
@@ -126,12 +128,13 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         textTitleRecipe.setText(R.string.title_recipe_edit);
         textTextRecipe.setText(R.string.text_recipe_edit);
         readRecipeFromDatabase();
+        startupMode = MODE_EDIT_RECIPE;
         setHasOptionsMenu(false);
         setHasOptionsMenu(true);
     }
 
     private void modeReview() {
-        startupMode = MODE_REVIEW_RECIPE;
+        Log.d("TG", "modeReview *** idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
         editTitleRecipe.setFocusableInTouchMode(false);
         editTitleRecipe.setFocusable(false);
         editTextRecipe.setFocusableInTouchMode(false);
@@ -139,6 +142,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         textTitleRecipe.setVisibility(View.GONE);
         textTextRecipe.setText(R.string.text_recipe_review);
         readRecipeFromDatabase();
+        startupMode = MODE_REVIEW_RECIPE;
         setHasOptionsMenu(false);
         setHasOptionsMenu(true);
     }
@@ -146,7 +150,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.action_save: isChangesFromRecipe();
+            case R.id.action_save: if (isChangesFromRecipe()) saveRecipe();
                 break;
             case R.id.action_edit: modeEdit();
                 break;
@@ -157,11 +161,19 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void readRecipeFromDatabase() {
-        Cursor cursor = database.query(TABLE_LIST_RECIPE, null, null, null, null, null, null);
+        Cursor cursor;
+        if(startupMode == MODE_NEW_RECIPE){
+            String selectQuery ="SELECT * FROM " + TABLE_LIST_RECIPE +
+                    " WHERE rowid=last_insert_rowid()";
+            cursor = database.rawQuery(selectQuery, null);
+            cursor.moveToFirst();
+            idRecipe = cursor.getInt(0);
+        } else cursor = database.query(TABLE_LIST_RECIPE, null, null, null, null, null, null);
+
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    if(cursor.getInt(0) == idItem) {
+                    if(cursor.getInt(0) == idRecipe) {
                         titleRecipeFromDatabase = cursor.getString(1);
                         editTitleRecipe.setText(titleRecipeFromDatabase);
                         textRecipeFromDatabase = cursor.getString(2);
@@ -194,6 +206,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     @Override
     public void onPause(){
         super.onPause();
+        Log.d("TG", "onPause  startupMode= "+startupMode);
         if(startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
@@ -227,18 +240,18 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
         contentValues.put("recipe_title" , titleRecipe);
         contentValues.put("recipe" , textRecipe);
-        if(typeFolder == PARENT){
-            contentValues.put("category_id" , idItem);
+        if(typeReceivedFolder == PARENT){
+            contentValues.put("category_id" , idReceivedFolderItem);
             contentValues.put("sub_category_id" , DEFAULT_VALUE_COLUMN);
-        }else if(typeFolder == CHILD){
+        }else if(typeReceivedFolder == CHILD){
             contentValues.put("category_id" , DEFAULT_VALUE_COLUMN);
-            contentValues.put("sub_category_id" , idItem);
+            contentValues.put("sub_category_id" , idReceivedFolderItem);
         }
         long rowId = 0;
-        if(startupMode == MODE_NEW_RECIPE){
+        if(startupMode == MODE_NEW_RECIPE){ // if Added a new recipe -> call 'insert' method
             rowId = database.insert(TABLE_LIST_RECIPE, null, contentValues);
-        }else if(startupMode == MODE_EDIT_RECIPE) {
-            rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idItem, null);
+        }else if(startupMode == MODE_EDIT_RECIPE) { // if edit existing recipe -> call 'update'
+            rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idRecipe, null);
         }
         modeReview();
         if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success_saved));

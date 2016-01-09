@@ -59,7 +59,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
     private static ArrayList<ListData> adapter;
     private static View view;
     private static String nameForAction;
-    public static int idParentCategory;
+    public static int  idParentCategory;
     private static OnFragmentEventsListener onFragmentEventsListener;
     private ArrayList<Integer> arrayIdSubCategories;
     private ContentValues contentValues;

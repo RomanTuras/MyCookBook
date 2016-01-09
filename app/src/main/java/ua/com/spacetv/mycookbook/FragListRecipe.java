@@ -61,8 +61,8 @@ public class FragListRecipe extends Fragment implements StaticFields,
     public static ArrayList<ListData> adapter;
     private static String nameForAction;
     private static int idItem;
-    private static int fav;
-    private static int idParentItem = 0;
+    private static int fav; // key, added recipe in favorite list
+    public static int idParentItem = 0; //id subcategory where is recipe
 
     @Override
     public void onAttach(Context context) {

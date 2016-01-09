@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity
                 startTextRecipeFragment(idItem, PARENT, MODE_REVIEW_RECIPE);
                 break;
             case ID_ACTION_LIST_RECIPE:
-                startTextRecipeFragment(idItem, PARENT, MODE_REVIEW_RECIPE);
+                startTextRecipeFragment(idItem, CHILD, MODE_REVIEW_RECIPE);
                 break;
         }
     }
@@ -213,10 +213,13 @@ public class MainActivity extends AppCompatActivity
     private void startTextRecipeFragment(int idItem, int typeFolder, int startMode) {
         Bundle bundle = new Bundle();
         fragment = new FragTextRecipe();
-        if(startMode == MODE_NEW_RECIPE) {
-            if (typeFolder == PARENT) idItem = FragSubCategory.idParentItem;
+        if(typeFolder == PARENT){
+            bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.idParentItem);//get id TOP category
         }
-        bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+        else {
+            bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.idParentItem);//get id SUB category
+        }
+        bundle.putInt(TAG_ID_RECIPE, idItem);
         Log.d("TG", "startTextRecipeFragment idItem = "+idItem);
         bundle.putInt(TAG_MODE, startMode);
         bundle.putInt(TAG_TYPE_FOLDER, typeFolder);
@@ -258,7 +261,7 @@ public class MainActivity extends AppCompatActivity
             FragTopCategory.showDialog(DIALOG_ADD_CATEGORY, null);
             /** add recipe in TOP folder */
         } else if (view.getId() == R.id.fabAddRecipeSubCategory) {
-            startTextRecipeFragment(FragSubCategory.idParentItem,
+            startTextRecipeFragment(DEFAULT_VALUE_COLUMN,
                     PARENT, MODE_NEW_RECIPE);
             fabSubCategory.close(true);
             /** add folder in TOP folder */
@@ -268,7 +271,7 @@ public class MainActivity extends AppCompatActivity
             /** add recipe in SUB folder */
         } else if (view.getId() == R.id.fabAddRecipeListRecipe) {
             Log.d("TG", "fabAddRecipeListRecipe idItem = "+FragSubCategory.idItem);
-            startTextRecipeFragment(FragSubCategory.idItem, CHILD, MODE_NEW_RECIPE);
+            startTextRecipeFragment(DEFAULT_VALUE_COLUMN, CHILD, MODE_NEW_RECIPE);
             fabSubCategory.close(true);
         }
 
