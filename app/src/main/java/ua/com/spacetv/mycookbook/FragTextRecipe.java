@@ -31,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -111,9 +110,9 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
         editTitleRecipe.requestFocus();
-        InputMethodManager imm = (InputMethodManager) getActivity()
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+//        InputMethodManager imm = (InputMethodManager) getActivity()
+//                .getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
         editTextRecipe.setFocusableInTouchMode(true);
         editTextRecipe.setFocusable(true);
         textTitleRecipe.setVisibility(View.VISIBLE);
@@ -211,7 +210,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     @Override
     public void onPause(){
         super.onPause();
-        Log.d("TG", "onPause  startupMode= "+startupMode);
+        Log.d("TG", "FragTextRecipe is onPause - show ADS -  startupMode= "+startupMode);
         if(startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }

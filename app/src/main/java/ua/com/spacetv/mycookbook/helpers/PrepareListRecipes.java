@@ -3,8 +3,9 @@ package ua.com.spacetv.mycookbook.helpers;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 
 import ua.com.spacetv.mycookbook.tools.ListData;
@@ -12,7 +13,7 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
  * Created by Roman Turas on 09/01/2016.
- * Only to CHILD FOLDERS!!!
+ * Only for the CHILD FOLDERS!!!
  */
 public class PrepareListRecipes implements StaticFields {
     private static ArrayList<ListData> adapter;
@@ -47,8 +48,14 @@ public class PrepareListRecipes implements StaticFields {
         dataBaseHelper = new DataBaseHelper(context);
         database = dataBaseHelper.getWritableDatabase();
         adapter = new ArrayList<>();
-        String[] query = {"%" + searchRequest + "%"};
-        Log.d("TG", "searchRequest = "+searchRequest);
+        String[] query = new String [1];
+
+        searchRequest = setUpperCase(searchRequest);
+        query[0] = "%" + searchRequest + "%";
+        recipeToAdapter(query);
+
+        searchRequest = setLowerCase(searchRequest);
+        query[0] = "%" + searchRequest + "%";
         recipeToAdapter(query);
     }
 
@@ -58,20 +65,8 @@ public class PrepareListRecipes implements StaticFields {
     private void recipeToAdapter(String[] query) {
         Cursor cursor = database.query(TABLE_LIST_RECIPE, null, "recipe_title LIKE ?", query,
                 null, null, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    int item_id = cursor.getInt(0);
-                    int imgLike = cursor.getInt(4);
-
-                    adapter.add(new ListData(cursor.getString(1),
-                            "", ID_IMG_RECIPE, imgLike, 0, item_id, IS_RECIPE));
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        } else {
-            Log.d("TG", "Table with recipeCategory - is Empty");
-        }
+        readDatabaseInToAdapter(cursor);
+        cursor.close();
     }
 
     /**
@@ -80,21 +75,7 @@ public class PrepareListRecipes implements StaticFields {
     private void recipeToAdapter() {
         String selectQuery = "SELECT * FROM " + TABLE_LIST_RECIPE +
                 " WHERE make=" + KEY_FAVORITE + " ORDER BY recipe_title";
-        Cursor cursor = database.rawQuery(selectQuery, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    int item_id = cursor.getInt(0);
-                    int imgLike = cursor.getInt(4);
-
-                    adapter.add(new ListData(cursor.getString(1),
-                            "", ID_IMG_RECIPE, imgLike, 0, item_id, IS_RECIPE));
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        } else {
-            Log.d("TG", "Table with recipeCategory - is Empty");
-        }
+        readDatabaseInToAdapter(database.rawQuery(selectQuery, null));
     }
 
     /**
@@ -103,7 +84,10 @@ public class PrepareListRecipes implements StaticFields {
     private void recipeToAdapter(int idParentFolder) {
         String selectQuery = "SELECT * FROM " + TABLE_LIST_RECIPE +
                 " WHERE sub_category_id=" + idParentFolder + " ORDER BY recipe_title";
-        Cursor cursor = database.rawQuery(selectQuery, null);
+        readDatabaseInToAdapter(database.rawQuery(selectQuery, null));
+    }
+
+    private void readDatabaseInToAdapter(Cursor cursor){
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
@@ -115,8 +99,6 @@ public class PrepareListRecipes implements StaticFields {
                 } while (cursor.moveToNext());
             }
             cursor.close();
-        } else {
-            Log.d("TG", "Table with recipeCategory - is Empty");
         }
     }
 
@@ -126,5 +108,37 @@ public class PrepareListRecipes implements StaticFields {
 
     public static int getIdParentFolder() {
         return idParentFolder;
+    }
+
+    public static String setUpperCase(String s) {
+        StringBuilder sb = new StringBuilder(s.length());
+        CharacterIterator chit = new StringCharacterIterator(s);
+        char ch = chit.current(), prev = ' ';
+        while (ch != CharacterIterator.DONE) {
+            if (Character.isWhitespace(prev) && Character.isLetter(ch)) {
+                sb.append(Character.toUpperCase(ch));
+            } else {
+                sb.append(ch);
+            }
+            prev = ch;
+            ch = chit.next();
+        }
+        return sb.toString();
+    }
+
+    public static String setLowerCase(String s) {
+        StringBuilder sb = new StringBuilder(s.length());
+        CharacterIterator chit = new StringCharacterIterator(s);
+        char ch = chit.current(), prev = ' ';
+        while (ch != CharacterIterator.DONE) {
+            if (Character.isWhitespace(prev) && Character.isLetter(ch)) {
+                sb.append(Character.toLowerCase(ch));
+            } else {
+                sb.append(ch);
+            }
+            prev = ch;
+            ch = chit.next();
+        }
+        return sb.toString();
     }
 }

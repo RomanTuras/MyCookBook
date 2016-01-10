@@ -36,6 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -58,10 +59,11 @@ public class FragListRecipe extends Fragment implements StaticFields,
     private static OnFragmentEventsListener onFragmentEventsListener;
     public static DataBaseHelper dataBaseHelper;
     public static SQLiteDatabase database;
-    private ContentValues contentValues;
     private static ListView listView;
     private static View view;
     public static ArrayList<ListData> adapter;
+    private static TextView text_empty_text_list_recipe;
+    private ContentValues contentValues;
     private static String nameForAction;
     private static int idItem;
     private static int fav; // key, added recipe in favorite list
@@ -91,6 +93,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
                              Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.frag_list_recipe, null);
         listView = (ListView) view.findViewById(R.id.listRecipe);
+        text_empty_text_list_recipe = (TextView) view.findViewById(R.id.text_empty_text_list_recipe);
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
         FragListRecipe.view = view;
@@ -100,15 +103,24 @@ public class FragListRecipe extends Fragment implements StaticFields,
     public void showListRecipe() {
         if(startupMode == MODE_RECIPE_FROM_CATEGORY) {
             adapter = new PrepareListRecipes(context, idParentItem).getFilledAdapter();
+            if(adapter.size() == 0){
+                text_empty_text_list_recipe.setText(R.string.text_add_recipe);
+            }
             MainActivity.overrideActionBar(R.string.app_name, 0);
             MainActivity.showFloatButtonListRecipe();
         }else if(startupMode == MODE_FAVORITE_RECIPE){
             MainActivity.overrideActionBar(R.string.app_name, R.string.text_list_favorite_recipe);
             adapter = new PrepareListRecipes(context).getFilledAdapter();
+            if(adapter.size() == 0){
+                text_empty_text_list_recipe.setText(R.string.text_favorite_not_found);
+            }
             MainActivity.hideAllFloatButtons();
         }else if(startupMode == MODE_SEARCH_RESULT){
             MainActivity.overrideActionBar(R.string.app_name, R.string.text_list_search_result);
             adapter = new PrepareListRecipes(context, searchString).getFilledAdapter();
+            if(adapter.size() == 0){
+                text_empty_text_list_recipe.setText(R.string.text_search_not_found);
+            }
             MainActivity.hideAllFloatButtons();
         }
         ListAdapter listAdapter = new ListAdapter(context, adapter);
@@ -121,7 +133,6 @@ public class FragListRecipe extends Fragment implements StaticFields,
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
-        Log.d("TG", "onCreateOptionsMenu");
         menu.clear();
         if(startupMode == MODE_RECIPE_FROM_CATEGORY) inflater.inflate(R.menu.main, menu);
     }
@@ -145,7 +156,6 @@ public class FragListRecipe extends Fragment implements StaticFields,
     @Override
     public void onPause(){
         super.onPause();
-
     }
 
     @Override
@@ -283,7 +293,6 @@ public class FragListRecipe extends Fragment implements StaticFields,
     }
 
     private void makeSnackbar(String text){
-        Log.d("TG", "Frag List Recipe : makeSnackbar ");
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 }

@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -55,10 +56,11 @@ public class FragSubCategory extends Fragment implements StaticFields,
     private static OnFragmentEventsListener onFragmentEventsListener;
     public static DataBaseHelper dataBaseHelper;
     public static SQLiteDatabase database;
-    private ContentValues contentValues;
     private static ListView listView;
     private static View view;
     public static ArrayList<ListData> adapter;
+    private ContentValues contentValues;
+    private static TextView text_empty_text_subcategory;
     private static String nameForAction;
     public static int idItem; //id sub category
     private static int fav;
@@ -90,6 +92,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
                              Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.frag_sub_category, null);
         listView = (ListView) view.findViewById(R.id.listSubCategory);
+        text_empty_text_subcategory = (TextView) view.findViewById(R.id.text_empty_text_subcategory);
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
         FragSubCategory.view = view;
@@ -100,6 +103,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         adapter = new ArrayList<>();
         subCategoryInList();
         recipeInList();
+        if(adapter.size() == 0) text_empty_text_subcategory.setText(R.string.text_add_folder_or_recipe);
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);

@@ -45,6 +45,17 @@
     <string name="text_recipe_review">Описание рецепта:</string>
     <string name="text_recipe_no_title">Рецепт без названия</string>
     <string name="text_recipe_no_text">Добавьте описание рецепта</string>
+    <string name="text_add_recipe">Добавьте рецепт</string>
+    <string name="text_favorite_not_found">Любимых рецептов не найдено</string>
+    <string name="text_search_not_found">По Вашему запросу ничего не найдено</string>
+
+    <!--FragSubcategory-->
+    <string name="text_add_folder_or_recipe">Добавьте папку или рецепт</string>
+
+    <!--FragTopCategory-->
+    <string name="text_add_folder_top_category">
+        Добавьте папку для рецептов, например \'Первые блюда\'
+    </string>
 
     <!-- Subtitle fo action bar -->
     <string name="text_list_favorite_recipe">Любимые рецепты:</string>

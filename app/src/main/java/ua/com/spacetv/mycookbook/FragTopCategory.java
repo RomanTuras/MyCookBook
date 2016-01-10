@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -58,6 +59,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
     private static ListView listView;
     private static ArrayList<ListData> adapter;
     private static View view;
+    private static TextView text_empty_text_topcategory;
     private static String nameForAction;
     public static int  idParentCategory;
     private static OnFragmentEventsListener onFragmentEventsListener;
@@ -83,6 +85,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
                              Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.frag_top_category, null);
         listView = (ListView) view.findViewById(R.id.listTopCategory);
+        text_empty_text_topcategory = (TextView) view.findViewById(R.id.text_empty_text_topcategory);
         fragmentManager = getFragmentManager();
         database = dataBaseHelper.getWritableDatabase();
         FragTopCategory.view = view;
@@ -92,6 +95,8 @@ public class FragTopCategory extends Fragment implements StaticFields,
     private void showAllCategory() {
         adapter = new ArrayList<>();
         categoryInList();
+        if(adapter.size() == 0) text_empty_text_topcategory
+                .setText(R.string.text_add_folder_top_category);
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);
