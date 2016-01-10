@@ -18,6 +18,7 @@ package ua.com.spacetv.mycookbook;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -110,9 +111,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
         editTitleRecipe.requestFocus();
-//        InputMethodManager imm = (InputMethodManager) getActivity()
-//                .getSystemService(Context.INPUT_METHOD_SERVICE);
-//        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
         editTextRecipe.setFocusableInTouchMode(true);
         editTextRecipe.setFocusable(true);
         textTitleRecipe.setVisibility(View.VISIBLE);
@@ -158,9 +156,25 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             case R.id.action_edit: modeEdit();
                 break;
             case R.id.action_share:
+                shareRecipe();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void shareRecipe(){
+        if(editTitleRecipe.getText().length() > 0 & editTextRecipe.getText().length() > 0) {
+            String title = editTitleRecipe.getText().toString();
+            String text = editTextRecipe.getText().toString();
+            Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+
+            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
+            emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
+
+            emailIntent.setType("text/plain");
+            startActivity(Intent.createChooser(emailIntent, getResources()
+                    .getString(R.string.text_share_recipe)));
+        }
     }
 
     private void readRecipeFromDatabase() {

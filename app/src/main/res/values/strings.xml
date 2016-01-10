@@ -6,6 +6,8 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_search_by_text">Поиск по содержанию</string>
+
 
     <!-- SnackBar -->
     <string name="success">Выполнено успешно!</string>
@@ -48,6 +50,7 @@
     <string name="text_add_recipe">Добавьте рецепт</string>
     <string name="text_favorite_not_found">Любимых рецептов не найдено</string>
     <string name="text_search_not_found">По Вашему запросу ничего не найдено</string>
+    <string name="text_share_recipe">Отправить рецепт:</string>
 
     <!--FragSubcategory-->
     <string name="text_add_folder_or_recipe">Добавьте папку или рецепт</string>
@@ -56,6 +59,9 @@
     <string name="text_add_folder_top_category">
         Добавьте папку для рецептов, например \'Первые блюда\'
     </string>
+
+    <!--Main Activity-->
+    <string name="text_empty_request">Введите пару букв для поиска</string>
 
     <!-- Subtitle fo action bar -->
     <string name="text_list_favorite_recipe">Любимые рецепты:</string>

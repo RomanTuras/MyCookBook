@@ -71,7 +71,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
     public void onAttach(Context context) {
         super.onAttach(context);
         FragSubCategory.context = context;
-        FragSubCategory.dataBaseHelper = new DataBaseHelper(context);
+        dataBaseHelper = new DataBaseHelper(context);
         this.contentValues = new ContentValues();
 
         Bundle bundle = this.getArguments();
@@ -104,6 +104,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         subCategoryInList();
         recipeInList();
         if(adapter.size() == 0) text_empty_text_subcategory.setText(R.string.text_add_folder_or_recipe);
+        else text_empty_text_subcategory.setText(null);
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);

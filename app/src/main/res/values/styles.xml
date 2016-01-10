@@ -16,6 +16,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="dialog_title">?android:attr/textAppearanceMedium</style>
 
     <style name="MenuLabelsStyle">
         <item name="android:background">@drawable/fab_label_background</item>

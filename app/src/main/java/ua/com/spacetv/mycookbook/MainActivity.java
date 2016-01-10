@@ -17,7 +17,9 @@
 package ua.com.spacetv.mycookbook;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -35,6 +37,9 @@ import android.view.View;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
+import java.io.File;
+
+import ua.com.spacetv.mycookbook.helpers.FileDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
@@ -49,16 +54,15 @@ public class MainActivity extends AppCompatActivity
             fabAddRecipeSubCategory, fabAddFolderSubCategory;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
-    private int typeOfMenu = MENU_MAIN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
-
         initFloatAction();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -72,14 +76,23 @@ public class MainActivity extends AppCompatActivity
 
         fragmentManager = getSupportFragmentManager();
         fragment = new FragTopCategory();
-        if (!fragment.isAdded()) addFragment(TAG_CATEGORY);
+
+        setTopCategoryFragment();
         Log.d("TG", "main activity onCreate");
 
     }
 
+    private void setTopCategoryFragment(){
+        if (!fragment.isAdded()) {
+            addFragment(TAG_CATEGORY);
+            fragmentManager.popBackStack(1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+    }
+
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onPause(){
+        super.onPause();
+        clearBackStackFragment();
     }
 
     public static void overrideActionBar(int title, int subtitle){
@@ -146,13 +159,15 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
+        final SearchView searchView = (SearchView) searchItem.getActionView();
         SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener()
         {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d("TG", "onQueryTextSubmit = "+query);
-                startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
+                if(query.length()>1) startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
+                else Snackbar.make(searchView, R.string.text_empty_request,
+                        Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return false;
             }
 
@@ -172,24 +187,35 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_search) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.drawer_home) {
-            // Handle the camera action
+            clearBackStackFragment();
         } else if (id == R.id.drawer_favorite) {
             startListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
 
-        } else if (id == R.id.nav_slideshow) {
-
         } else if (id == R.id.nav_manage) {
+            File mPath = new File(Environment.getExternalStorageDirectory() + "//DIR//");
+            FileDialog fileDialog = new FileDialog(this, mPath);
+            fileDialog.setFileEndsWith(".txt");
+            fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
+                public void fileSelected(File file) {
+                    Log.d(getClass().getName(), "selected file " + file.toString());
+                }
+            });
+            //fileDialog.addDirectoryListener(new FileDialog.DirectorySelectedListener() {
+            //  public void directorySelected(File directory) {
+            //      Log.d(getClass().getName(), "selected dir " + directory.toString());
+            //  }
+            //});
+            //fileDialog.setSelectDirectoryOption(false);
+            fileDialog.showDialog();
 
         } else if (id == R.id.nav_share) {
 
@@ -200,6 +226,12 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void clearBackStackFragment(){
+        for(int i = 0; i < fragmentManager.getBackStackEntryCount(); ++i) {
+            fragmentManager.popBackStack();
+        }
     }
 
     @Override
@@ -289,5 +321,9 @@ public class MainActivity extends AppCompatActivity
             fabSubCategory.close(true);
         }
 
+    }
+
+    private void makeSnackbar(String text){
+//        Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 }

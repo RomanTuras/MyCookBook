@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
 
     <group android:checkableBehavior="single">
         <item
@@ -10,10 +11,6 @@
             android:id="@+id/drawer_favorite"
             android:icon="@drawable/ic_favorite_black_18dp"
             android:title="@string/drawer_favorite" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_home_black_24dp"
-            android:title="Slideshow" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"

@@ -71,7 +71,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         super.onAttach(context);
         this.contentValues = new ContentValues();
         FragTopCategory.context = context;
-        FragTopCategory.dataBaseHelper = new DataBaseHelper(context);
+        dataBaseHelper = new DataBaseHelper(context);
 
         try {
             onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
@@ -97,6 +97,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         categoryInList();
         if(adapter.size() == 0) text_empty_text_topcategory
                 .setText(R.string.text_add_folder_top_category);
+        else text_empty_text_topcategory.setText(null);
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);

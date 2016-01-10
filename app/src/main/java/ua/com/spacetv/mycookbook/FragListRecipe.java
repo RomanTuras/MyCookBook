@@ -75,7 +75,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
     public void onAttach(Context context) {
         super.onAttach(context);
         FragListRecipe.context = context;
-        FragListRecipe.dataBaseHelper = new DataBaseHelper(context);
+        dataBaseHelper = new DataBaseHelper(context);
         this.contentValues = new ContentValues();
 
         Bundle bundle = this.getArguments();
@@ -105,7 +105,8 @@ public class FragListRecipe extends Fragment implements StaticFields,
             adapter = new PrepareListRecipes(context, idParentItem).getFilledAdapter();
             if(adapter.size() == 0){
                 text_empty_text_list_recipe.setText(R.string.text_add_recipe);
-            }
+            }else text_empty_text_list_recipe.setText(null);
+
             MainActivity.overrideActionBar(R.string.app_name, 0);
             MainActivity.showFloatButtonListRecipe();
         }else if(startupMode == MODE_FAVORITE_RECIPE){
@@ -113,14 +114,14 @@ public class FragListRecipe extends Fragment implements StaticFields,
             adapter = new PrepareListRecipes(context).getFilledAdapter();
             if(adapter.size() == 0){
                 text_empty_text_list_recipe.setText(R.string.text_favorite_not_found);
-            }
+            }else text_empty_text_list_recipe.setText(null);
             MainActivity.hideAllFloatButtons();
         }else if(startupMode == MODE_SEARCH_RESULT){
             MainActivity.overrideActionBar(R.string.app_name, R.string.text_list_search_result);
             adapter = new PrepareListRecipes(context, searchString).getFilledAdapter();
             if(adapter.size() == 0){
                 text_empty_text_list_recipe.setText(R.string.text_search_not_found);
-            }
+            }else text_empty_text_list_recipe.setText(null);
             MainActivity.hideAllFloatButtons();
         }
         ListAdapter listAdapter = new ListAdapter(context, adapter);
