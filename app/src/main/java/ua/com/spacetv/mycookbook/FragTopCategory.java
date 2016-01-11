@@ -92,7 +92,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         return view;
     }
 
-    private void showAllCategory() {
+    public void showAllCategory() {
         adapter = new ArrayList<>();
         categoryInList();
         if(adapter.size() == 0) text_empty_text_topcategory

@@ -41,6 +41,22 @@
     <string name="dlg_move">Переместить в папку:</string><!-- * -->
     <string name="dlg_confirm_del_recipe">Удалить рецепт:</string><!-- * -->
 
+    <!--Dialog Save Restore-->
+    <string name="dlg_save_file">Сохранить рецепты</string>
+    <string name="dlg_restore_file">Загрузить рецепты</string>
+    <string name="dlg_path_to_file">Путь:</string>
+    <string name="dlg_name_of_file">Имя файла: \'cook.db\'</string>
+    <string name="dlg_sdcard_disabled">Нет доступа к SD карте!</string>
+    <string name="dlg_sdcard_check_mount">Проверьте ее подключение.</string>
+    <string name="dlg_success_saved">Рецепты сохранены!</string>
+    <string name="dlg_success_loaded">Рецепты загружены!</string>
+    <string name="dlg_error_save_file">Ошибка! Данные не сохранены!</string>
+    <string name="dlg_file_not_found">Ошибка! Нет файла.</string>
+    <string name="dlg_folder_not_found">Ошибка! Папка не найдена.</string>
+    <string name="dlg_sdcard_not_prepared">Или SD карта не готова.</string>
+    <string name="dlg_file_found">Дата последнего сохранения:</string>
+    <string name="dlg_warning">Внимание! Все данные будут перезаписаны!</string>
+
     <!--FragTextRecipe-->
     <string name="title_recipe_edit">Напишите название рецепта:</string>
     <string name="text_recipe_edit">Напишите рецепт:</string>
@@ -72,7 +88,9 @@
     <string name="drawer_home">На главную</string>
     <string name="drawer_favorite">Любимые рецепты</string>
     <string name="drawer_search">Поиск по составу</string>
-    <string name="drawer_save_restore">Импорт-экспорт</string>
+    <string name="drawer_export_db">Сохранить рецепты</string>
+    <string name="drawer_import_db">Загрузить рецепты</string>
+    <string name="drawer_backup_group">Резервное копирование</string>
     <string name="drawer_callback">Обратная связь</string>
 
 </resources>

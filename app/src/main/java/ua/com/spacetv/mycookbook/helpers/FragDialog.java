@@ -321,13 +321,13 @@ public class FragDialog extends DialogFragment implements StaticFields,
     @Override
     public void onDismiss(DialogInterface unused) {
         super.onDismiss(unused);
+        dataBaseHelper.close();
+        database.close();
     }
 
     @Override
     public void onCancel(DialogInterface unused) {
         super.onCancel(unused);
-        dataBaseHelper.close();
-        database.close();
     }
 
 }

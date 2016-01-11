@@ -11,11 +11,19 @@
             android:id="@+id/drawer_favorite"
             android:icon="@drawable/ic_favorite_black_18dp"
             android:title="@string/drawer_favorite" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
     </group>
+    <item android:title="@string/drawer_backup_group">
+        <menu>
+        <item
+            android:id="@+id/drawer_export_db"
+            android:icon="@drawable/ic_sd_storage_black_24dp"
+            android:title="@string/drawer_export_db" />
+        <item
+            android:id="@+id/drawer_import_db"
+            android:icon="@drawable/ic_sd_storage_black_24dp"
+            android:title="@string/drawer_import_db" />
+        </menu>
+    </item>
 
     <item android:title="Communicate">
         <menu>

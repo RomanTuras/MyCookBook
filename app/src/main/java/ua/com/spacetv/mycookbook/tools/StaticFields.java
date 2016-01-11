@@ -22,14 +22,12 @@ package ua.com.spacetv.mycookbook.tools;
 public interface StaticFields {
 
     /* Tags for fragments */
-    String TAG_ABOUT = "ABOUT";
     String TAG_CATEGORY = "ID_CATEGORY";
     String TAG_SUBCATEGORY = "ID_SUBCATEGORY";
     String TAG_LIST_RECIPE = "ID_LIST_RECIPE";
     String TAG_TEXT_RECIPE = "ID_TEXT_RECIPE";
-    String TAG_SEARCH_FRAGMENT = "ID_SEARCH";
     String TAG_DIALOG = "TAG_DIALOG";
-
+    String TAG_FILE_DIALOG = "TAG_FILE_DIALOG";
 
     /* id of Dialogs */
     String ID_DIALOG = "ID_DIALOG";
@@ -56,16 +54,20 @@ public interface StaticFields {
     int ID_ACTION_LIST_RECIPE = 5;
 
     /* id of pressed menu popup item */
-    int ID_POPUP_ITEM_CANCEL = -1;
     int ID_POPUP_ITEM_REN = 0;
     int ID_POPUP_ITEM_DEL = 1;
     int ID_POPUP_ITEM_MOV = 2;
     int ID_POPUP_ITEM_FAV = 3;
 
-    /* Types of Main menu */
-    int MENU_MAIN = 0;
-    int MENU_EDIT_RECIPE = 1;
-    int MENU_REVIEW_RECIPE = 2;
+    /* Save Restore Dialog */
+    int DIALOG_FILE_SAVE = 0;
+    int DIALOG_FILE_RESTORE = 1;
+
+
+    /* Path and Filenames*/
+    String FILENAME_WORKING_DB = "db_cook.db";
+    String BACKUP_FILENAME = "cook.db";
+    String FOLDER_NAME = "myCookBook";
 
     /* Names of a Tables*/
     String TABLE_TOP_CATEGORY = "tableMain";
@@ -88,7 +90,6 @@ public interface StaticFields {
     int MODE_RECIPE_FROM_CATEGORY = 0;
     int MODE_SEARCH_RESULT = 1;
     int MODE_FAVORITE_RECIPE = 2;
-
 
     /* key of Type Folder */
     int PARENT = 0;

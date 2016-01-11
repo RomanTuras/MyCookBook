@@ -16,10 +16,11 @@
 
 package ua.com.spacetv.mycookbook;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -38,8 +39,13 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import ua.com.spacetv.mycookbook.helpers.FileDialog;
+import ua.com.spacetv.mycookbook.helpers.SaveRestoreDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
@@ -47,9 +53,10 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, StaticFields,
         OnFragmentEventsListener, View.OnClickListener {
 
-    private FragmentManager fragmentManager;
+    private static Context context;
+    private static FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
-    private Fragment fragment;
+    private static Fragment fragment;
     private static FloatingActionButton fabAddTopCategory, fabAddRecipeListRecipe,
             fabAddRecipeSubCategory, fabAddFolderSubCategory;
     private static FloatingActionMenu fabSubCategory;
@@ -60,6 +67,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        context = getBaseContext();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
@@ -82,7 +90,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void setTopCategoryFragment(){
+    private void setTopCategoryFragment() {
         if (!fragment.isAdded()) {
             addFragment(TAG_CATEGORY);
             fragmentManager.popBackStack(1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -90,13 +98,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         clearBackStackFragment();
     }
 
-    public static void overrideActionBar(int title, int subtitle){
-        if(actionBar != null){
+    public static void overrideActionBar(int title, int subtitle) {
+        if (actionBar != null) {
             actionBar.setTitle(title);
             actionBar.setSubtitle(subtitle);
         }
@@ -160,12 +168,11 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.main, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) searchItem.getActionView();
-        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener()
-        {
+        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d("TG", "onQueryTextSubmit = "+query);
-                if(query.length()>1) startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
+                Log.d("TG", "onQueryTextSubmit = " + query);
+                if (query.length() > 1) startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
                 else Snackbar.make(searchView, R.string.text_empty_request,
                         Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return false;
@@ -200,24 +207,11 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.drawer_favorite) {
             startListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
 
-        } else if (id == R.id.nav_manage) {
-            File mPath = new File(Environment.getExternalStorageDirectory() + "//DIR//");
-            FileDialog fileDialog = new FileDialog(this, mPath);
-            fileDialog.setFileEndsWith(".txt");
-            fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
-                public void fileSelected(File file) {
-                    Log.d(getClass().getName(), "selected file " + file.toString());
-                }
-            });
-            //fileDialog.addDirectoryListener(new FileDialog.DirectorySelectedListener() {
-            //  public void directorySelected(File directory) {
-            //      Log.d(getClass().getName(), "selected dir " + directory.toString());
-            //  }
-            //});
-            //fileDialog.setSelectDirectoryOption(false);
-            fileDialog.showDialog();
+        } else if (id == R.id.drawer_export_db) {
+            showSaveRestoreDialog(DIALOG_FILE_SAVE);
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.drawer_import_db) {
+            showSaveRestoreDialog(DIALOG_FILE_RESTORE);
 
         } else if (id == R.id.nav_send) {
 
@@ -228,8 +222,55 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void clearBackStackFragment(){
-        for(int i = 0; i < fragmentManager.getBackStackEntryCount(); ++i) {
+    public void restoreDatabase(String pathFolder) throws IOException {
+        File workDatabase = context.getDatabasePath(FILENAME_WORKING_DB);
+        File backupOfDatabase = new File(pathFolder, BACKUP_FILENAME);
+        OutputStream receiverStream = new FileOutputStream(workDatabase);
+        InputStream sourceStream = new FileInputStream(backupOfDatabase);
+        byte[] buffer = new byte[1024];
+        int lenght;
+        while ((lenght = sourceStream.read(buffer)) > 0) {
+            receiverStream.write(buffer, 0, lenght);
+        }
+        receiverStream.flush();
+        receiverStream.close();
+        sourceStream.close();
+
+        makeSnackbar(context.getResources().getString(R.string.dlg_success_loaded));
+
+        new FragTopCategory().showAllCategory();
+    }
+
+    public void saveDatabaseFile(String pathFolder) throws IOException {
+        boolean success;
+        File workDatabase = context.getDatabasePath(FILENAME_WORKING_DB);
+        File newFolder = new File(pathFolder);
+        if (!newFolder.exists()) success = newFolder.mkdirs();
+        else success = true;
+        if (success) {
+            File backupDatabase = new File(pathFolder, BACKUP_FILENAME);
+            if (!backupDatabase.exists()) {
+                success = backupDatabase.createNewFile();
+            }
+            if (success) {
+                OutputStream receiverStream = new FileOutputStream(backupDatabase);
+                InputStream sourceStream = new FileInputStream(workDatabase);
+                byte[] buffer = new byte[1024];
+                int lenght;
+                while ((lenght = sourceStream.read(buffer)) > 0) {
+                    receiverStream.write(buffer, 0, lenght);
+                }
+                receiverStream.flush();
+                receiverStream.close();
+                sourceStream.close();
+            } else makeSnackbar(context.getResources().getString(R.string.dlg_error_save_file));
+
+        } else makeSnackbar(context.getResources().getString(R.string.dlg_error_save_file));
+        makeSnackbar(context.getResources().getString(R.string.success_saved));
+    }
+
+    private void clearBackStackFragment() {
+        for (int i = 0; i < fragmentManager.getBackStackEntryCount(); ++i) {
             fragmentManager.popBackStack();
         }
     }
@@ -244,7 +285,7 @@ public class MainActivity extends AppCompatActivity
                 startListRecipeFragment(idItem, MODE_RECIPE_FROM_CATEGORY, null);
                 break;
             case ID_ACTION_SUB_CATEGORY_RECIPE:
-                Log.d("TG", "onListItemClick idItem = "+idItem);
+                Log.d("TG", "onListItemClick idItem = " + idItem);
                 startTextRecipeFragment(idItem, PARENT, MODE_REVIEW_RECIPE);
                 break;
             case ID_ACTION_LIST_RECIPE:
@@ -256,14 +297,13 @@ public class MainActivity extends AppCompatActivity
     private void startTextRecipeFragment(int idItem, int typeFolder, int startMode) {
         Bundle bundle = new Bundle();
         fragment = new FragTextRecipe();
-        if(typeFolder == PARENT){
+        if (typeFolder == PARENT) {
             bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.idParentItem);//get id TOP category
-        }
-        else if(typeFolder == CHILD){
+        } else if (typeFolder == CHILD) {
             bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.idParentItem);//get id SUB category
         }
         bundle.putInt(TAG_ID_RECIPE, idItem);
-        Log.d("TG", "startTextRecipeFragment idItem = "+idItem);
+        Log.d("TG", "startTextRecipeFragment idItem = " + idItem);
         bundle.putInt(TAG_MODE, startMode);
         bundle.putInt(TAG_TYPE_FOLDER, typeFolder);
         fragment.setArguments(bundle);
@@ -300,7 +340,25 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    /** ADD folders or recipes */
+    public void showSaveRestoreDialog(int idDialog) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Bundle bundle = new Bundle();
+        bundle.putInt(ID_DIALOG, idDialog);
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        Fragment fragment = fragmentManager.findFragmentByTag(TAG_FILE_DIALOG);
+        if (fragment != null) {
+            ft.remove(fragment);
+        }
+        ft.addToBackStack(null);
+
+        DialogFragment dialogFragment = new SaveRestoreDialog();
+        dialogFragment.setArguments(bundle);
+        dialogFragment.show(fragmentManager, TAG_FILE_DIALOG);
+    }
+
+    /**
+     * ADD folders or recipes
+     */
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.fabAddTopCategory) {
@@ -316,14 +374,14 @@ public class MainActivity extends AppCompatActivity
             fabSubCategory.close(true);
             /** add recipe in SUB folder */
         } else if (view.getId() == R.id.fabAddRecipeListRecipe) {
-            Log.d("TG", "fabAddRecipeListRecipe idItem = "+FragSubCategory.idItem);
+            Log.d("TG", "fabAddRecipeListRecipe idItem = " + FragSubCategory.idItem);
             startTextRecipeFragment(DEFAULT_VALUE_COLUMN, CHILD, MODE_NEW_RECIPE);
             fabSubCategory.close(true);
         }
 
     }
 
-    private void makeSnackbar(String text){
-//        Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+    private void makeSnackbar(String text) {
+        Snackbar.make(fabSubCategory, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 }
