@@ -22,10 +22,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AbsListView;
@@ -46,30 +46,32 @@ import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /** Created by Roman Turas on 02/01/2016.
- *  Class created dialog with views depends from input params
+ * Create dialog with different views, depends from input params
  * Input params: ID_DIALOG (what dialog was do) and string NAME_FOR_ACTION
  * Output: ID_DIALOG, String param, int typeFolder (parent or child), int idCategory*/
 
 public class FragDialog extends DialogFragment implements StaticFields,
-        DialogInterface.OnClickListener {
+        DialogInterface.OnClickListener, AdapterView.OnItemClickListener {
     private EditText input;
     private ListView listView;
-    private String nameForAction = "";
     private ArrayList<Map<String, Object>> data = new ArrayList<>();
     private Map<String, Object> map;
     private Context context;
     private SQLiteDatabase database;
     private DataBaseHelper dataBaseHelper;
+    private AlertDialog.Builder adb;
+    private TextView textView;
 
-    private int idDialog;
-    private int typeFolder;
-    private int idCategory = NOP;
     private static final String TITLE_CATEGORY = "title_category";
     private static final String TITLE_SUBCATEGORY = "title_subcategory";
     private static final String ID_ITEM = "id_item";
     private static final String TYPE_FOLDER = "type_folder";
     private static final String IMG = "img";
     private String title = "";
+    private String nameForAction = "";
+    private int idDialog;
+    private int typeFolder;
+    private int idCategory = NOP;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,40 +90,40 @@ public class FragDialog extends DialogFragment implements StaticFields,
     }
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
-        input = new EditText(getActivity());
-        listView = new ListView(getActivity());
-        final TextView textView = new TextView(getActivity());
-//        textView.setTextSize(getResources().getDimension(R.dimen.title_dialog));
-        textView.setTextAppearance(context, android.R.style.TextAppearance_Material_Large);
-        int color = ContextCompat.getColor(context, R.color.colorWhite);
-        textView.setTextColor(color);
-        color = ContextCompat.getColor(context, R.color.colorPrimary);
-        textView.setBackgroundColor(color);
-        textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        int pdH = (int) getResources().getDimension(R.dimen.dialog_padding_left_right);
-        int pdV = (int) getResources().getDimension(R.dimen.dialog_padding_up_down);
-        textView.setPadding(pdH, pdV, pdH, pdV);
-        input.setPadding(pdH, pdV, pdH, pdV);
+        initAllViewsInDialog();
+        dialogForCategory();
+        dialogForSubcategory();
+        dialogForListRecipe();
 
+        textView.setText(title);
+        adb.setCustomTitle(textView);
+        adb.setPositiveButton(android.R.string.ok, this);
+        adb.setNegativeButton(android.R.string.cancel, null);
+        return adb.create();
+    }
+
+    private void dialogForListRecipe() {
         switch (idDialog) {
-            /** Dialog Category */
-            case DIALOG_ADD_CATEGORY:
-                title = getResources().getString(R.string.dlg_add_category);
-                input.setHint(R.string.dlg_hint);
-                adb.setView(input);
-                break;
-            case DIALOG_REN_CATEGORY:
-                title = getResources().getString(R.string.dlg_rename_category);
+            case DIALOG_REN_RECIPE_LISTRECIPE:
+                title = getResources().getString(R.string.dlg_rename_recipe);
                 input.setText(nameForAction);
                 adb.setView(input);
                 break;
-            case DIALOG_DEL_CATEGORY:
-                title = getResources().getString(R.string.dlg_confirm_delete);
+            case DIALOG_DEL_RECIPE_LISTRECIPE:
+                title = getResources().getString(R.string.dlg_confirm_del_recipe);
                 adb.setMessage(nameForAction + "?");
                 break;
+            case DIALOG_MOV_RECIPE_LISTRECIPE:
+                title = getResources().getString(R.string.dlg_move);
+                categoryInList();
+                adb.setView(listView);
+                break;
+        }
+    }
 
-            /** Dialog Sub Category */
+    private void dialogForSubcategory() {
+        switch (idDialog) {
+            /** Dialog Category in Sub Category */
             case DIALOG_ADD_SUBCATEGORY:
                 title = getResources().getString(R.string.dlg_add_category);
                 input.setHint(R.string.dlg_hint);
@@ -150,50 +152,76 @@ public class FragDialog extends DialogFragment implements StaticFields,
             case DIALOG_MOV_RECIPE_SUBCATEGORY:
                 title = getResources().getString(R.string.dlg_move);
                 categoryInList();
-                listView.setSelected(true);
-                listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-                listView.setSelector(R.drawable.list_color_selector);
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        typeFolder = (int) data.get(position).get(TYPE_FOLDER);
-                        idCategory = (int) data.get(position).get(ID_ITEM);
-                        if(typeFolder == PARENT) {
-                            textView.setText(title + "\n" + data.get(position).get(TITLE_CATEGORY));
-                        }else textView.setText(title + "\n" + data.get(position).get(TITLE_SUBCATEGORY));
-                        Log.d("TG", "map.get = " +data.get(position).get(TITLE_CATEGORY));
-                    }
-                });
-                listView.requestFocus();
-                adb.setView(listView);
-                break;
-
-            /** Dialog Recipe in list of recipe */
-            case DIALOG_REN_RECIPE_LISTRECIPE:
-                title = getResources().getString(R.string.dlg_rename_recipe);
-                input.setText(nameForAction);
-                adb.setView(input);
-                break;
-            case DIALOG_DEL_RECIPE_LISTRECIPE:
-                title = getResources().getString(R.string.dlg_confirm_del_recipe);
-                adb.setMessage(nameForAction + "?");
-                break;
-            case DIALOG_MOV_RECIPE_LISTRECIPE:
-                title = getResources().getString(R.string.dlg_move);
-                categoryInList();
-                listView.setSelected(true);
-                listView.setSelector(R.drawable.list_color_selector);
-                listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-                listView.setOnItemClickListener(null);
-                listView.requestFocus();
                 adb.setView(listView);
                 break;
         }
-        textView.setText(title);
-        adb.setCustomTitle(textView);
-        adb.setPositiveButton(android.R.string.ok, this);
-        adb.setNegativeButton(android.R.string.cancel, null);
-        return adb.create();
+    }
+
+    private void dialogForCategory() {
+        switch (idDialog) {
+            case DIALOG_ADD_CATEGORY:
+                title = getResources().getString(R.string.dlg_add_category);
+                input.setHint(R.string.dlg_hint);
+                adb.setView(input);
+                break;
+            case DIALOG_REN_CATEGORY:
+                title = getResources().getString(R.string.dlg_rename_category);
+                input.setText(nameForAction);
+                adb.setView(input);
+                break;
+            case DIALOG_DEL_CATEGORY:
+                title = getResources().getString(R.string.dlg_confirm_delete);
+                adb.setMessage(nameForAction + "?");
+                break;
+        }
+    }
+
+    private void initAllViewsInDialog(){
+        adb = new AlertDialog.Builder(getActivity());
+        input = new EditText(getActivity());
+        listView = new ListView(getActivity());
+        textView = new TextView(getActivity());
+
+        int paddingH = (int) getResources().getDimension(R.dimen.dialog_padding_left_right);
+        int paddingV = (int) getResources().getDimension(R.dimen.dialog_padding_up_down);
+        int textColor = ContextCompat.getColor(context, R.color.colorWhite);
+        int barColor = ContextCompat.getColor(context, R.color.colorPrimary);
+        int bgColor = ContextCompat.getColor(context, R.color.colorPrimaryBackground);
+
+        if (Build.VERSION.SDK_INT < 23) {
+            textView.setTextAppearance(context, android.R.style.TextAppearance_Large);
+        } else {
+            textView.setTextAppearance(android.R.style.TextAppearance_Large);
+        }
+
+        textView.setTextColor(textColor);
+        textView.setBackgroundColor(barColor);
+        textView.setGravity(Gravity.CENTER_HORIZONTAL);
+
+        textView.setPadding(paddingH, paddingV, paddingH, paddingV);
+        input.setPadding(paddingH, paddingV, paddingH, paddingV);
+
+        listView.setSelected(true);
+        listView.setBackgroundColor(bgColor);
+        listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+        listView.setSelector(R.drawable.list_color_selector);
+        listView.setOnItemClickListener(this);
+        listView.requestFocus();
+    }
+
+    /** Define variables for transfer in called class
+     * Add in selected folder to title*/
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        typeFolder = (int) data.get(position).get(TYPE_FOLDER);
+        idCategory = (int) data.get(position).get(ID_ITEM);
+        String txt;
+        if(typeFolder == PARENT) {
+            txt = title + "\n" + "\'" + data.get(position).get(TITLE_CATEGORY) +"\'";
+        }else {
+            txt = title + "\n"+"\'" + data.get(position).get(TITLE_SUBCATEGORY)+"\'";
+        }
+        textView.setText(txt);
     }
 
     private void categoryInList() {
@@ -302,11 +330,4 @@ public class FragDialog extends DialogFragment implements StaticFields,
         database.close();
     }
 
-    /** Save params of select item*/
-//    @Override
-//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//        typeFolder = (int) data.get(position).get(TYPE_FOLDER);
-//        idCategory = (int) data.get(position).get(ID_ITEM);
-//        Log.d("TG", "typeFolder= "+typeFolder+"  idCategory = "+idCategory);
-//    }
 }

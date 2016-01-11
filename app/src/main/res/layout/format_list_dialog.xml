@@ -51,7 +51,7 @@
                 android:textSize="16sp"
                 android:typeface="normal"
                 android:textColor="@color/colorBlack"
-                android:textStyle="bold" />
+                android:textStyle="normal" />
 
             <TextView
                 android:id="@+id/textListDialogSubTitle"
@@ -59,9 +59,9 @@
                 android:layout_height="wrap_content"
                 android:text="TextView"
                 android:textSize="16sp"
-                android:textStyle="bold|italic"
+                android:textStyle="normal|italic"
                 android:visibility="visible"
-                android:textColor="@color/colorDarkGray"/>
+                android:textColor="@color/colorBlack"/>
 
         </FrameLayout>
 
