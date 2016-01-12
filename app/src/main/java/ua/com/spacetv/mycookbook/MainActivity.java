@@ -17,6 +17,8 @@
 package ua.com.spacetv.mycookbook;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity
     private static Context context;
     private static FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
-    private static Fragment fragment;
+    private static Fragment fragTopCategory, fragSubCategory, fragListRecipe, fragTextRecipe;
     private static FloatingActionButton fabAddTopCategory, fabAddRecipeListRecipe,
             fabAddRecipeSubCategory, fabAddFolderSubCategory;
     private static FloatingActionMenu fabSubCategory;
@@ -66,6 +68,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        fragmentManager = getSupportFragmentManager();
 
         context = getBaseContext();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -82,31 +86,20 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        fragmentManager = getSupportFragmentManager();
-        fragment = new FragTopCategory();
+
 
         setTopCategoryFragment();
         Log.d("TG", "main activity onCreate");
 
     }
 
-    private void setTopCategoryFragment() {
-        if (!fragment.isAdded()) {
-            addFragment(TAG_CATEGORY);
-            fragmentManager.popBackStack(1, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        clearBackStackFragment();
-    }
-
-    public static void overrideActionBar(int title, int subtitle) {
+    public static void overrideActionBar(String title, String subtitle) {
         if (actionBar != null) {
-            actionBar.setTitle(title);
-            actionBar.setSubtitle(subtitle);
+            if(title == null) actionBar.setTitle(R.string.app_name);
+            else actionBar.setTitle(title);
+
+            if(subtitle == null) actionBar.setSubtitle("");
+            else actionBar.setSubtitle(subtitle);
         }
     }
 
@@ -147,12 +140,6 @@ public class MainActivity extends AppCompatActivity
         fabAddRecipeListRecipe.hide(false);
     }
 
-    private void addFragment(String tag) {
-        fragmentTransaction = getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, fragment, tag);
-        fragmentTransaction.commit();
-    }
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -172,7 +159,16 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d("TG", "onQueryTextSubmit = " + query);
-                if (query.length() > 1) startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
+                if (query.length() > 1) {
+                    fragListRecipe = new FragListRecipe();
+                    if (!fragListRecipe.isAdded()) {
+                        startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
+                    }else {
+                        FragListRecipe.setParams(0, MODE_SEARCH_RESULT, query);
+                        new FragListRecipe().showListRecipe();
+                    }
+
+                }
                 else Snackbar.make(searchView, R.string.text_empty_request,
                         Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return false;
@@ -204,8 +200,15 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.drawer_home) {
             clearBackStackFragment();
+            setTopCategoryFragment();
         } else if (id == R.id.drawer_favorite) {
-            startListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
+            fragListRecipe = new FragListRecipe();
+            if (!fragListRecipe.isAdded()) {
+                startListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
+            }else {
+                FragListRecipe.setParams(0, MODE_FAVORITE_RECIPE, null);
+                new FragListRecipe().showListRecipe();
+            }
 
         } else if (id == R.id.drawer_export_db) {
             showSaveRestoreDialog(DIALOG_FILE_SAVE);
@@ -213,13 +216,27 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.drawer_import_db) {
             showSaveRestoreDialog(DIALOG_FILE_RESTORE);
 
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.drawer_send_question) {
+            sendMailToDevelopers();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void sendMailToDevelopers() {
+        String title = context.getResources().getString(R.string.email_theme);
+        String email = context.getResources().getString(R.string.email);
+        Intent emailIntent = new Intent(android.content.Intent.ACTION_SENDTO);
+        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
+        emailIntent.setType("text/plain");
+
+        emailIntent.setData(Uri.parse(email));
+        // this will make such that when user returns to your app, your app is displayed,
+        // instead of the email app.
+        emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(emailIntent);
     }
 
     public void restoreDatabase(String pathFolder) throws IOException {
@@ -294,50 +311,67 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void setTopCategoryFragment() {
+        fragTopCategory = new FragTopCategory();
+        if (!fragTopCategory.isAdded()) {
+            fragmentTransaction = fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragTopCategory, TAG_CATEGORY);
+            fragmentTransaction.commit();
+        }
+    }
+
     private void startTextRecipeFragment(int idItem, int typeFolder, int startMode) {
         Bundle bundle = new Bundle();
-        fragment = new FragTextRecipe();
-        if (typeFolder == PARENT) {
-            bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.idParentItem);//get id TOP category
-        } else if (typeFolder == CHILD) {
-            bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.idParentItem);//get id SUB category
+        fragTextRecipe = new FragTextRecipe();
+        if (!fragTextRecipe.isAdded()) {
+            if (typeFolder == PARENT) {
+                bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.idParentItem);//get id TOP category
+            } else if (typeFolder == CHILD) {
+                bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.idParentItem);//get id SUB category
+            }
+            bundle.putInt(TAG_ID_RECIPE, idItem);
+            Log.d("TG", "startTextRecipeFragment idItem = " + idItem);
+            bundle.putInt(TAG_MODE, startMode);
+            bundle.putInt(TAG_TYPE_FOLDER, typeFolder);
+            fragTextRecipe.setArguments(bundle);
+            fragmentTransaction = fragmentManager
+                    .beginTransaction();
+            fragmentTransaction.replace(R.id.container, fragTextRecipe)
+                    .addToBackStack(TAG_TEXT_RECIPE)
+                    .commit();
         }
-        bundle.putInt(TAG_ID_RECIPE, idItem);
-        Log.d("TG", "startTextRecipeFragment idItem = " + idItem);
-        bundle.putInt(TAG_MODE, startMode);
-        bundle.putInt(TAG_TYPE_FOLDER, typeFolder);
-        fragment.setArguments(bundle);
-        fragmentTransaction = fragmentManager
-                .beginTransaction();
-        fragmentTransaction.replace(R.id.container, fragment)
-                .addToBackStack(TAG_TEXT_RECIPE)
-                .commit();
     }
 
     private void startListRecipeFragment(int idItem, int startMode, String searchRequest) {
+        Log.d("TG", "startListRecipeFragment:"+
+        "idItem= "+idItem+"  startMode= "+startMode+"  searchRequest= "+searchRequest);
         Bundle bundle = new Bundle();
-        fragment = new FragListRecipe();
-        bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
-        bundle.putInt(TAG_MODE, startMode);
-        bundle.putString(TAG_SEARCH_STRING, searchRequest);
-        fragment.setArguments(bundle);
-        fragmentTransaction = fragmentManager
-                .beginTransaction();
-        fragmentTransaction.replace(R.id.container, fragment)
-                .addToBackStack(TAG_LIST_RECIPE)
-                .commit();
+        fragListRecipe = new FragListRecipe();
+        if (!fragListRecipe.isAdded()) {
+            bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+            bundle.putInt(TAG_MODE, startMode);
+            bundle.putString(TAG_SEARCH_STRING, searchRequest);
+            fragListRecipe.setArguments(bundle);
+            fragmentTransaction = fragmentManager
+                    .beginTransaction();
+            fragmentTransaction.replace(R.id.container, fragListRecipe)
+                    .addToBackStack(TAG_LIST_RECIPE)
+                    .commit();
+        }
     }
 
     private void startSubCategoryFragment(int idItem) {
         Bundle bundle = new Bundle();
-        fragment = new FragSubCategory();
-        bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
-        fragment.setArguments(bundle);
-        fragmentTransaction = fragmentManager
-                .beginTransaction();
-        fragmentTransaction.replace(R.id.container, fragment)
-                .addToBackStack(TAG_SUBCATEGORY)
-                .commit();
+        fragSubCategory = new FragSubCategory();
+        if (!fragSubCategory.isAdded()) {
+            bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+            fragSubCategory.setArguments(bundle);
+            fragmentTransaction = fragmentManager
+                    .beginTransaction();
+            fragmentTransaction.replace(R.id.container, fragSubCategory)
+                    .addToBackStack(TAG_SUBCATEGORY)
+                    .commit();
+        }
     }
 
     public void showSaveRestoreDialog(int idDialog) {

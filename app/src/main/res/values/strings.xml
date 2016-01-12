@@ -88,9 +88,13 @@
     <string name="drawer_home">На главную</string>
     <string name="drawer_favorite">Любимые рецепты</string>
     <string name="drawer_search">Поиск по составу</string>
-    <string name="drawer_export_db">Сохранить рецепты</string>
-    <string name="drawer_import_db">Загрузить рецепты</string>
+    <string name="drawer_export_db">Сохранить</string>
+    <string name="drawer_import_db">Загрузить</string>
     <string name="drawer_backup_group">Резервное копирование</string>
-    <string name="drawer_callback">Обратная связь</string>
+    <string name="drawer_callback">Разработчикам</string>
+    <string name="drawer_send_question">Отправить вопрос</string>
+
+    <string name="email">mailto:salden.com@gmail.com</string>
+    <string name="email_theme">Вопрос по приложению \'Моя Книга Рецептов\'</string>
 
 </resources>

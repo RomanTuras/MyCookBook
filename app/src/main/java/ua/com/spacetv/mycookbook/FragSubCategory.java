@@ -62,10 +62,12 @@ public class FragSubCategory extends Fragment implements StaticFields,
     private ContentValues contentValues;
     private static TextView text_empty_text_subcategory;
     private static String nameForAction;
+    public static String nameOfSubCategory;
     public static int idItem; //id sub category
     private static int fav;
     public static int idParentItem = 0; //id TOP category, income in params
     private static boolean isFolder;
+
 
     @Override
     public void onAttach(Context context) {
@@ -95,6 +97,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         text_empty_text_subcategory = (TextView) view.findViewById(R.id.text_empty_text_subcategory);
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
+
         FragSubCategory.view = view;
         return view;
     }
@@ -184,7 +187,9 @@ public class FragSubCategory extends Fragment implements StaticFields,
         super.onResume();
         showCategoryAndRecipe();
         MainActivity.showFloatMenuSubCategory();
-        MainActivity.overrideActionBar(R.string.app_name, 0);
+        if(FragTopCategory.nameOfTopCategory != null){
+            MainActivity.overrideActionBar(null, FragTopCategory.nameOfTopCategory);
+        }else MainActivity.overrideActionBar(null, null);
     }
 
     @Override
@@ -192,11 +197,6 @@ public class FragSubCategory extends Fragment implements StaticFields,
         super.onDetach();
         database.close();
         dataBaseHelper.close();
-    }
-
-    @Override
-    public void onPause(){
-        super.onPause();
     }
 
     /** onLongClick() - This returns a boolean to indicate whether you have consumed the event and
@@ -254,6 +254,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         ListData ld = adapter.get(position);
         isFolder = adapter.get(position).getTypeItem();
         idItem = ld.getItemId(); // get id of pressed item: Folder or Recipe
+        nameOfSubCategory = ld.getListTitle();
         if(isFolder) {
             onFragmentEventsListener.onListItemClick(ID_ACTION_SUB_CATEGORY_CATEGORY, idItem);
         }

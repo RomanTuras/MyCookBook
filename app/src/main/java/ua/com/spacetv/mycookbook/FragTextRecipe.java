@@ -73,7 +73,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             idRecipe = bundle.getInt(TAG_ID_RECIPE);
             typeReceivedFolder = bundle.getInt(TAG_TYPE_FOLDER);
             startupMode = bundle.getInt(TAG_MODE);
-            Log.d("TG", "idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
+            Log.d("TG", "TextRecipe: idRecipe = "+idRecipe+" idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
         }
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
@@ -99,7 +99,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
-        Log.d("TG", "onCreateOptionsMenu");
         menu.clear();
         if(startupMode == MODE_REVIEW_RECIPE) inflater.inflate(R.menu.menu_review_recipe, menu);
         else if(startupMode == MODE_EDIT_RECIPE |
@@ -107,7 +106,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void modeNewRecipe() {
-        Log.d("TG", "modeNewRecipe *** idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
+        Log.d("TG", "modeNewRecipe *** ");
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
         editTitleRecipe.requestFocus();
@@ -120,7 +119,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void modeEdit(){
-        Log.d("TG", "modeEdit *** idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
+        Log.d("TG", "modeEdit *** ");
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
         editTextRecipe.setFocusableInTouchMode(true);
@@ -135,7 +134,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void modeReview() {
-        Log.d("TG", "modeReview *** idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
+        Log.d("TG", "modeReview *** ");
         editTitleRecipe.setFocusableInTouchMode(false);
         editTitleRecipe.setFocusable(false);
         editTextRecipe.setFocusableInTouchMode(false);
@@ -193,6 +192,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                     if(cursor.getInt(0) == idRecipe) {
                         titleRecipeFromDatabase = cursor.getString(1);
                         editTitleRecipe.setText(titleRecipeFromDatabase);
+                        Log.d("TG", "readRecipeFromDatabase title= "+titleRecipeFromDatabase);
                         textRecipeFromDatabase = cursor.getString(2);
                         editTextRecipe.setText(textRecipeFromDatabase);
                     }
@@ -205,11 +205,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
@@ -217,7 +212,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     @Override
     public void onResume(){
         super.onResume();
-        MainActivity.overrideActionBar(R.string.text_recipe, 0);
+        MainActivity.overrideActionBar(getResources().getString(R.string.text_recipe), null);
         MainActivity.hideAllFloatButtons();
     }
 
@@ -228,6 +223,11 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         if(startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
     }
 
     /* If at least one from two editText contains any text -> save recipe in database*/

@@ -65,6 +65,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
     private static OnFragmentEventsListener onFragmentEventsListener;
     private ArrayList<Integer> arrayIdSubCategories;
     private ContentValues contentValues;
+    public static String nameOfTopCategory = null;
 
     @Override
     public void onAttach(Context context) {
@@ -171,16 +172,11 @@ public class FragTopCategory extends Fragment implements StaticFields,
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         showAllCategory();
         MainActivity.showFloatButtonTopCategory();
-        MainActivity.overrideActionBar(R.string.app_name, 0);
+        MainActivity.overrideActionBar(null, null);
         Log.d("TG", "TopCategoryFragment onResume");
     }
 
@@ -319,6 +315,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ListData ld = adapter.get(position);
+        nameOfTopCategory = ld.getListTitle();
         onFragmentEventsListener.onListItemClick(ID_ACTION_TOP_CATEGORY, ld.getItemId());
     }
 
