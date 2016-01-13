@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.SaveRestoreDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
@@ -212,9 +213,12 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.drawer_export_db) {
             showSaveRestoreDialog(DIALOG_FILE_SAVE);
+            new Analytics(context).sendAnalytics("myCookBook","Main Activity","Save db", "nop");
+
 
         } else if (id == R.id.drawer_import_db) {
             showSaveRestoreDialog(DIALOG_FILE_RESTORE);
+            new Analytics(context).sendAnalytics("myCookBook","Main Activity","Restore db", "nop");
 
         } else if (id == R.id.drawer_send_question) {
             sendMailToDevelopers();

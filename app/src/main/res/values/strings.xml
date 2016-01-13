@@ -11,7 +11,7 @@
 
     <!-- SnackBar -->
     <string name="success">Выполнено успешно!</string>
-    <string name="success_saved">Рецепт успешно сохранен!</string>
+    <string name="success_saved">База рецептов сохранена!</string>
     <string name="folder_not_empty">Невозможно! Эта папка не пуста!</string>
     <string name="folder_folder_not_select">Папка не выбрана!</string>
     <string name="there_is_no_change">Изменений нет!</string>

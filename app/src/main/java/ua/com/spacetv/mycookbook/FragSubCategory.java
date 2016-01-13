@@ -38,6 +38,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.FragDialog;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
@@ -235,7 +236,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
             case ID_POPUP_ITEM_DEL:
                 if(isFolder){
                     if(isSubCategoryEmpty()) showDialog(DIALOG_DEL_SUBCATEGORY, nameForAction);
-                    else makeSnackbar(context.getResources().getString(R.string.folder_not_empty));
+                    else makeSnackbar(context.getString(R.string.folder_not_empty));
                 }
                 else showDialog(DIALOG_DEL_RECIPE_SUBCATEGORY, nameForAction);
                 break;
@@ -317,7 +318,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
                 break;
             case DIALOG_MOV_RECIPE_SUBCATEGORY:
                 if(idCategory != NOP) moveRecipe(typeFolder, idCategory);
-                else makeSnackbar(context.getResources()
+                else makeSnackbar(context
                         .getString(R.string.folder_folder_not_select));
                 break;
         }
@@ -335,13 +336,13 @@ public class FragSubCategory extends Fragment implements StaticFields,
         }
         long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
         showCategoryAndRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
     }
 
     private void deleteRecipe() {
         long rowId = database.delete(TABLE_LIST_RECIPE, "_ID="+idItem,null);
         showCategoryAndRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
     }
 
     private void renameRecipe(String param) {
@@ -349,7 +350,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         contentValues.put("recipe_title" , param);
         long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
         showCategoryAndRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
     }
 
     private void renameSubCategory(String param) {
@@ -357,17 +358,19 @@ public class FragSubCategory extends Fragment implements StaticFields,
         contentValues.put("name" , param);
         long rowId = database.update(TABLE_SUB_CATEGORY, contentValues, "_ID="+idItem, null);
         showCategoryAndRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
     }
 
     /** Add subcategory in to parent category */
     private void addSubCategory(String param) {
+        new Analytics(context).sendAnalytics("myCookBook","Sub Category","Add sub category", param);
+
         contentValues = new ContentValues();
         contentValues.put("name" , param);
         contentValues.put("parent_id", idParentItem);
         long rowId = database.insert(TABLE_SUB_CATEGORY, null, contentValues);
         showCategoryAndRecipe();
-        if(rowId >= 0) makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0) makeSnackbar(context.getString(R.string.success));
     }
 
     /** Search in table 'TABLE_LIST_RECIPE' recipe with 'sub_category_id = pressed id' */
@@ -389,7 +392,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
     private void deleteSubCategory() {
         long rowId = database.delete(TABLE_SUB_CATEGORY, "_ID="+idItem,null);
         showCategoryAndRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
     }
 
     private void makeSnackbar(String text){

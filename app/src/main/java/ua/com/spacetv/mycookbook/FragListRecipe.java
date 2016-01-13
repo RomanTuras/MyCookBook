@@ -125,7 +125,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
         }else if(startupMode == MODE_FAVORITE_RECIPE){
 
             MainActivity.overrideActionBar(null,
-                    getResources().getString(R.string.text_list_favorite_recipe));
+                    context.getString(R.string.text_list_favorite_recipe));
             adapter = new PrepareListRecipes(context).getFilledAdapter();
             if(adapter.size() == 0){
                 text_empty_text_list_recipe.setText(R.string.text_favorite_not_found);
@@ -133,7 +133,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
             MainActivity.hideAllFloatButtons();
         }else if(startupMode == MODE_SEARCH_RESULT){
             MainActivity.overrideActionBar(null,
-                    getResources().getString(R.string.text_list_search_result));
+                    context.getString(R.string.text_list_search_result));
 
             adapter = new PrepareListRecipes(context, searchString).getFilledAdapter();
             if(adapter.size() == 0){
@@ -270,7 +270,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
                 break;
             case DIALOG_MOV_RECIPE_LISTRECIPE:
                 if(idCategory != NOP) moveRecipe(typeFolder, idCategory);
-                else makeSnackbar(context.getResources()
+                else makeSnackbar(context
                         .getString(R.string.folder_folder_not_select));
                 break;
         }
@@ -290,13 +290,13 @@ public class FragListRecipe extends Fragment implements StaticFields,
         showListRecipe();
         Log.d("TG", "Frag List Recipe : moveRecipe ");
 
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
     }
 
     private void deleteRecipe() {
         long rowId = database.delete(TABLE_LIST_RECIPE, "_ID="+idItem,null);
         showListRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
     }
 
     private void renameRecipe(String param) {
@@ -304,7 +304,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
         contentValues.put("recipe_title" , param);
         long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
         showListRecipe();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success));
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
     }
 
     private void makeSnackbar(String text){

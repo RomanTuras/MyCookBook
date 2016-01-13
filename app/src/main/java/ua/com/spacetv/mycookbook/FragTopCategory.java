@@ -38,6 +38,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.FragDialog;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
@@ -52,16 +53,16 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
 public class FragTopCategory extends Fragment implements StaticFields,
         AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
-    private static DataBaseHelper dataBaseHelper;
+    private DataBaseHelper dataBaseHelper;
+    private SQLiteDatabase database;
     private static Context context;
-    private static SQLiteDatabase database;
     private static FragmentManager fragmentManager;
     private static ListView listView;
     private static ArrayList<ListData> adapter;
     private static View view;
     private static TextView text_empty_text_topcategory;
     private static String nameForAction;
-    public static int  idParentCategory;
+    public static int idParentCategory;
     private static OnFragmentEventsListener onFragmentEventsListener;
     private ArrayList<Integer> arrayIdSubCategories;
     private ContentValues contentValues;
@@ -72,7 +73,6 @@ public class FragTopCategory extends Fragment implements StaticFields,
         super.onAttach(context);
         this.contentValues = new ContentValues();
         FragTopCategory.context = context;
-        dataBaseHelper = new DataBaseHelper(context);
 
         try {
             onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
@@ -88,15 +88,24 @@ public class FragTopCategory extends Fragment implements StaticFields,
         listView = (ListView) view.findViewById(R.id.listTopCategory);
         text_empty_text_topcategory = (TextView) view.findViewById(R.id.text_empty_text_topcategory);
         fragmentManager = getFragmentManager();
+        dataBaseHelper = new DataBaseHelper(context);
         database = dataBaseHelper.getWritableDatabase();
+        Log.d("TG", "onCreateView: dataBaseHelper = " + dataBaseHelper.toString() + "  database =" + database.toString());
         FragTopCategory.view = view;
         return view;
     }
 
     public void showAllCategory() {
         adapter = new ArrayList<>();
+
+        if(database == null | dataBaseHelper == null) {
+            dataBaseHelper = new DataBaseHelper(context);
+            database = dataBaseHelper.getWritableDatabase();
+        }
+        Log.d("TG", "showAllCategory: dataBaseHelper = " + dataBaseHelper.toString() + "  database =" + database.toString());
+
         categoryInList();
-        if(adapter.size() == 0) text_empty_text_topcategory
+        if (adapter.size() == 0) text_empty_text_topcategory
                 .setText(R.string.text_add_folder_top_category);
         else text_empty_text_topcategory.setText(null);
         ListAdapter listAdapter = new ListAdapter(context, adapter);
@@ -104,6 +113,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
+
     }
 
     private void categoryInList() {
@@ -189,9 +199,10 @@ public class FragTopCategory extends Fragment implements StaticFields,
     @Override
     public void onDetach() {
         super.onDetach();
-        database.close();
         dataBaseHelper.close();
+        database.close();
     }
+
 
     /**
      * onLongClick() - This returns a boolean to indicate whether you have consumed the event and
@@ -203,7 +214,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         nameForAction = adapter.get(position).getListTitle();
         idParentCategory = adapter.get(position).getItemId();
-        Log.d("TG", "onItemLongClick "+idParentCategory);
+        Log.d("TG", "onItemLongClick " + idParentCategory);
         return false;
     }
 
@@ -220,10 +231,9 @@ public class FragTopCategory extends Fragment implements StaticFields,
         if (item.getItemId() == ID_POPUP_ITEM_REN) {
             showDialog(DIALOG_REN_CATEGORY, nameForAction);
         } else if (item.getItemId() == ID_POPUP_ITEM_DEL) {
-            if (isCategoryEmpty()){
+            if (isCategoryEmpty()) {
                 showDialog(DIALOG_DEL_CATEGORY, nameForAction);
-            }
-            else makeSnackbar(context.getResources().getString(R.string.folder_not_empty));
+            } else makeSnackbar(context.getString(R.string.folder_not_empty));
         } else {
             return false;
         }
@@ -261,25 +271,34 @@ public class FragTopCategory extends Fragment implements StaticFields,
     }
 
     private void addCategory(String param) {
+        new Analytics(context).sendAnalytics("myCookBook", "Top Category", "Add top category", param);
+        dataBaseHelper = new DataBaseHelper(context);
+        database = dataBaseHelper.getWritableDatabase();
+        Log.d("TG", "addCategory: dataBaseHelper = " + dataBaseHelper.toString() + "  database =" + database.toString());
+
         contentValues = new ContentValues();
         contentValues.put("category", param);
         long rowId = database.insert(TABLE_TOP_CATEGORY, null, contentValues);
         showAllCategory();
-        if (rowId >= 0) makeSnackbar(context.getResources().getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
     }
 
     private void renameCategory(String param) {
+        dataBaseHelper = new DataBaseHelper(context);
+        database = dataBaseHelper.getWritableDatabase();
         contentValues = new ContentValues();
         contentValues.put("category", param);
         long rowId = database.update(TABLE_TOP_CATEGORY, contentValues, "_ID=" + idParentCategory, null);
         showAllCategory();
-        if (rowId >= 0) makeSnackbar(context.getResources().getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
     }
 
     private void deleteCategory() {
+        dataBaseHelper = new DataBaseHelper(context);
+        database = dataBaseHelper.getWritableDatabase();
         long rowId = database.delete(TABLE_TOP_CATEGORY, "_ID=" + idParentCategory, null);
         showAllCategory();
-        if (rowId >= 0) makeSnackbar(context.getResources().getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
     }
 
     /**

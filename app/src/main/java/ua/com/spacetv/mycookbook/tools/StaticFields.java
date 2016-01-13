@@ -112,4 +112,10 @@ public interface StaticFields {
 
     /* Default value of columns 'category_id' and 'sub_category_id'*/
     int DEFAULT_VALUE_COLUMN = -1;
+
+    /* Google services */
+    String TRACK_ID ="UA-64362552-1";
+    String AD_UNIT_ID = "ca-app-pub-7481052517653982/5697171795";
+    boolean isDebugModeOn = false;
+    String TEST_DEVICE = "77A1F05FE188A3F51A0FF103708EDEF9";
 }

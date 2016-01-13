@@ -35,6 +35,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import ua.com.spacetv.mycookbook.google_services.Ads;
+import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
@@ -50,6 +52,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     public static DataBaseHelper dataBaseHelper;
     public static SQLiteDatabase database;
     private ContentValues contentValues;
+    private static Ads ads;
     private static View view;
     private EditText editTitleRecipe, editTextRecipe;
     private TextView textTitleRecipe, textTextRecipe;
@@ -76,6 +79,11 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             Log.d("TG", "TextRecipe: idRecipe = "+idRecipe+" idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
         }
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
+    }
+
+    private void loadAds(){
+        ads = new Ads(context);
+        ads.initAds(); // init and preload Ads
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
@@ -134,6 +142,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void modeReview() {
+        new Analytics(context).sendAnalytics("myCookBook","Text Category","Review recipe", "nop");
+
         Log.d("TG", "modeReview *** ");
         editTitleRecipe.setFocusableInTouchMode(false);
         editTitleRecipe.setFocusable(false);
@@ -171,7 +181,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
 
             emailIntent.setType("text/plain");
-            startActivity(Intent.createChooser(emailIntent, getResources()
+            startActivity(Intent.createChooser(emailIntent, context
                     .getString(R.string.text_share_recipe)));
         }
     }
@@ -212,23 +222,30 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     @Override
     public void onResume(){
         super.onResume();
-        MainActivity.overrideActionBar(getResources().getString(R.string.text_recipe), null);
+        MainActivity.overrideActionBar(context.getString(R.string.text_recipe), null);
         MainActivity.hideAllFloatButtons();
+        loadAds();
     }
 
     @Override
     public void onPause(){
         super.onPause();
-        Log.d("TG", "FragTextRecipe is onPause - show ADS -  startupMode= "+startupMode);
+        Log.d("TG", "FragTextRecipe is onPause - startupMode= "+startupMode);
         if(startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
     }
 
     @Override
-    public void onStop(){
-        super.onStop();
+    public void onDetach() {
+        super.onDetach();
+        Log.d("TG", "FragTextRecipe is onDetach - show ADS -  ");
+        database.close();
+        dataBaseHelper.close();
+        ads.showAd();
     }
+
+
 
     /* If at least one from two editText contains any text -> save recipe in database*/
     private boolean isChangesFromRecipe(){
@@ -238,12 +255,12 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
             if(tempTitle.equals(titleRecipeFromDatabase) &
                     tempText.equals(textRecipeFromDatabase)){
-                makeSnackbar(context.getResources().getString(R.string.there_is_no_change));
+                makeSnackbar(context.getString(R.string.there_is_no_change));
                 return false;
             }
         }else if(editTitleRecipe.getText().length() == 0 & editTextRecipe.getText().length() == 0){
             Log.d("TG", "editText's == 0");
-            makeSnackbar(context.getResources().getString(R.string.nothing_was_entered));
+            makeSnackbar(context.getString(R.string.nothing_was_entered));
             return false;
         }
         return true;
@@ -272,14 +289,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idRecipe, null);
         }
         modeReview();
-        if(rowId >= 0)makeSnackbar(context.getResources().getString(R.string.success_saved));
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        database.close();
-        dataBaseHelper.close();
+        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
+        new Analytics(context).sendAnalytics("myCookBook","Text Category","Save recipe", titleRecipe);
     }
 
     private void makeSnackbar(String text){

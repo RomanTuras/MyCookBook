@@ -15,8 +15,7 @@
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:src="@drawable/cookie" />
+        android:paddingTop="@dimen/nav_header_vertical_spacing" />
 
     <TextView
         android:layout_width="match_parent"

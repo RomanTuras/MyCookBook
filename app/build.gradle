@@ -8,8 +8,8 @@ android {
         applicationId "ua.com.spacetv.mycookbook"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 5
-        versionName "2.0"
+        versionCode 6
+        versionName "2.1"
     }
     buildTypes {
         release {
@@ -25,4 +25,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.github.clans:fab:1.6.2'
+    compile 'com.google.android.gms:play-services-analytics:8.4.0'
+    compile 'com.google.android.gms:play-services-ads:8.4.0'
 }

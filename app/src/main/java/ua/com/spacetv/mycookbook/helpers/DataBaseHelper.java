@@ -1,71 +1,20 @@
 package ua.com.spacetv.mycookbook.helpers;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.util.Log;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
  * Created by salden on 14/12/2015.
- *
  */
 public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields {
-
-    public SQLiteDatabase mDataBase;
-    private Context mContext;
-    private ContentValues mContentValues =new ContentValues();
-//    private static String mSdState = Environment.getExternalStorageDirectory().getAbsolutePath();
-//    private static String mPath = (mSdState + "/" + DB_FOLDER + "/" + DB_FILE);
-    private static int versDb =2;
-    private static String file = "db_cook.db", folder = "myCookBook";
-    private static String DB_PATH=(Environment.getExternalStorageDirectory().getAbsolutePath()+"/myCookBook/");
+    private static int versDb = 2;
 
     public DataBaseHelper(Context context) {
         super(context, DB_FILE, null, versDb);
-        mContext = context;
-//        if(checkDataBase()) try {
-//            restoreDataBase();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-    }
-
-    public void restoreDataBase() throws IOException
-    {
-        File dbFile = mContext.getDatabasePath(file);
-        File aaa = new File(DB_PATH, file);
-        OutputStream myOutput=new FileOutputStream(dbFile);
-        InputStream myInput= new FileInputStream(aaa);
-        Log.d("TG","copy from "+aaa+ " to: "+dbFile);
-
-        byte[] buffer=new byte[1024];
-        int lenght;
-        while((lenght=myInput.read(buffer))>0)
-        {
-            myOutput.write(buffer,0,lenght);
-        }
-        myOutput.flush(); //закрыть потоки
-        myOutput.close();
-        myInput.close();
-    }
-
-
-    /** Checking availability of database file and return true if it is */
-    private boolean checkDataBase() {
-        File dbFile = mContext.getDatabasePath(DB_FILE);
-        Log.d("TG", "checkDataBase ="+dbFile.exists());
-        return dbFile.exists();
     }
 
     @Override
@@ -93,11 +42,18 @@ public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields {
         String upgradeQuery2 = "ALTER TABLE tableRecipe ADD COLUMN image text;";
         String tableSubCategory = "create table tableSubCat (_id integer primary key autoincrement, "
                 + "name text, hierarchy integer, parent_id integer);";
+
         if (oldVersDb == 1 && versDb == 2) {
-            sqLiteDatabase.execSQL(upgradeQuery);
-            sqLiteDatabase.execSQL(upgradeQuery2);
-            sqLiteDatabase.execSQL(tableSubCategory);
-            Log.d("TG", "on Upgrade make a new db");
+            sqLiteDatabase.beginTransaction();
+            try {
+                sqLiteDatabase.execSQL(tableSubCategory);
+                sqLiteDatabase.execSQL(upgradeQuery);
+                sqLiteDatabase.execSQL(upgradeQuery2);
+                Log.d("TG", "on Upgrade make a new db");
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
         }
     }
 }
