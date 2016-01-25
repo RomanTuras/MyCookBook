@@ -126,10 +126,12 @@ public class FragSubCategory extends Fragment implements StaticFields,
                 do {
                     int item_id = cursor.getInt(0);
                     int imgLike = cursor.getInt(4);
+                    int topFolder_id = cursor.getInt(3);
+                    int subFolder_id = cursor.getInt(5);
 
                     adapter.add(new ListData(cursor.getString(1),
                             "", ID_IMG_RECIPE,
-                            imgLike, 0, item_id, IS_RECIPE));
+                            imgLike, 0, item_id, IS_RECIPE, topFolder_id, subFolder_id));
                 } while (cursor.moveToNext());
             }
             cursor.close();
@@ -147,8 +149,8 @@ public class FragSubCategory extends Fragment implements StaticFields,
                 do {
                     int item_id = cursor.getInt(0);
                     int numberRecipe = countRecipe(item_id);
-                    adapter.add(new ListData(cursor.getString(1), "",
-                            ID_IMG_FOLDER, ID_IMG_LIKE_OFF, numberRecipe, item_id, IS_FOLDER));
+                    adapter.add(new ListData(cursor.getString(1), "", ID_IMG_FOLDER, ID_IMG_LIKE_OFF,
+                            numberRecipe, item_id, IS_FOLDER, 0, 0));
                 } while (cursor.moveToNext());
             }
             cursor.close();

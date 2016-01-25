@@ -79,12 +79,12 @@ public class FragListRecipe extends Fragment implements StaticFields,
         this.contentValues = new ContentValues();
 
         Bundle bundle = this.getArguments();
-        if(bundle != null) {
+        if (bundle != null) {
             idParentItem = bundle.getInt(TAG_PARENT_ITEM_ID);
             startupMode = bundle.getInt(TAG_MODE);
             searchString = bundle.getString(TAG_SEARCH_STRING);
         }
-        Log.d("TG", "ListResipe:   = idParentItem"+ idParentItem+"  startupMode= "+startupMode);
+        Log.d("TG", "ListResipe:   = idParentItem" + idParentItem + "  startupMode= " + startupMode);
 
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
@@ -100,47 +100,55 @@ public class FragListRecipe extends Fragment implements StaticFields,
         return view;
     }
 
-    public static void setParams(int idParentItem, int startupMode, String searchString){
+    public static void setParams(int idParentItem, int startupMode, String searchString) {
         FragListRecipe.startupMode = startupMode;
         FragListRecipe.idParentItem = idParentItem;
         FragListRecipe.searchString = searchString;
     }
 
     public void showListRecipe() {
-        if(startupMode == MODE_RECIPE_FROM_CATEGORY) {
-            adapter = new PrepareListRecipes(context, idParentItem).getFilledAdapter();
-            if(adapter.size() == 0){
-                text_empty_text_list_recipe.setText(R.string.text_add_recipe);
-            }else text_empty_text_list_recipe.setText(null);
+        switch (startupMode) {
+            case MODE_RECIPE_FROM_CATEGORY:
+                adapter = new PrepareListRecipes(context, idParentItem).getFilledAdapter();
+                Log.d("TG", "MODE_RECIPE_FROM_CATEGORY");
+                if (adapter.size() == 0) {
+                    text_empty_text_list_recipe.setText(R.string.text_add_recipe);
+                } else text_empty_text_list_recipe.setText(null);
 
-            if(FragTopCategory.nameOfTopCategory != null){
-                String path = FragTopCategory.nameOfTopCategory;
-                if(FragSubCategory.nameOfSubCategory != null){
-                    path += "\\ " + FragSubCategory.nameOfSubCategory;
-                }
-                MainActivity.overrideActionBar(null, path);
-            }else MainActivity.overrideActionBar(null, null);
+                if (FragTopCategory.nameOfTopCategory != null) {
+                    String path = FragTopCategory.nameOfTopCategory;
+                    if (FragSubCategory.nameOfSubCategory != null) {
+                        path += "\\ " + FragSubCategory.nameOfSubCategory;
+                    }
+                    MainActivity.overrideActionBar(null, path);
+                } else MainActivity.overrideActionBar(null, null);
 
-            MainActivity.showFloatButtonListRecipe();
-        }else if(startupMode == MODE_FAVORITE_RECIPE){
+                MainActivity.showFloatButtonListRecipe();
+                break;
 
-            MainActivity.overrideActionBar(null,
-                    context.getString(R.string.text_list_favorite_recipe));
-            adapter = new PrepareListRecipes(context).getFilledAdapter();
-            if(adapter.size() == 0){
-                text_empty_text_list_recipe.setText(R.string.text_favorite_not_found);
-            }else text_empty_text_list_recipe.setText(null);
-            MainActivity.hideAllFloatButtons();
-        }else if(startupMode == MODE_SEARCH_RESULT){
-            MainActivity.overrideActionBar(null,
-                    context.getString(R.string.text_list_search_result));
+            case MODE_FAVORITE_RECIPE:
+                MainActivity.overrideActionBar(null,
+                        context.getString(R.string.text_list_favorite_recipe));
+                Log.d("TG", "MODE_FAVORITE_RECIPE");
+                adapter = new PrepareListRecipes(context).getFilledAdapter();
+                if (adapter.size() == 0) {
+                    text_empty_text_list_recipe.setText(R.string.text_favorite_not_found);
+                } else text_empty_text_list_recipe.setText(null);
+                MainActivity.hideAllFloatButtons();
+                break;
 
-            adapter = new PrepareListRecipes(context, searchString).getFilledAdapter();
-            if(adapter.size() == 0){
-                text_empty_text_list_recipe.setText(R.string.text_search_not_found);
-            }else text_empty_text_list_recipe.setText(null);
-            MainActivity.hideAllFloatButtons();
+            case MODE_SEARCH_RESULT:
+                MainActivity.overrideActionBar(null,
+                        context.getString(R.string.text_list_search_result));
+                Log.d("TG", "MODE_SEARCH_RESULT");
+                adapter = new PrepareListRecipes(context, searchString).getFilledAdapter();
+                if (adapter.size() == 0) {
+                    text_empty_text_list_recipe.setText(R.string.text_search_not_found);
+                } else text_empty_text_list_recipe.setText(null);
+                MainActivity.hideAllFloatButtons();
+                break;
         }
+
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);
@@ -151,9 +159,9 @@ public class FragListRecipe extends Fragment implements StaticFields,
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        if(startupMode == MODE_RECIPE_FROM_CATEGORY) inflater.inflate(R.menu.main, menu);
+        if (startupMode == MODE_RECIPE_FROM_CATEGORY) inflater.inflate(R.menu.main, menu);
     }
 
     @Override
@@ -167,7 +175,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         showListRecipe();
     }
@@ -179,10 +187,12 @@ public class FragListRecipe extends Fragment implements StaticFields,
         dataBaseHelper.close();
     }
 
-    /** onLongClick() - This returns a boolean to indicate whether you have consumed the event and
+    /**
+     * onLongClick() - This returns a boolean to indicate whether you have consumed the event and
      * it should not be carried further. That is, return true to indicate that you have handled
      * the event and it should stop here; return false if you have not handled it and/or the event
-     * should continue to any other on-click listeners.*/
+     * should continue to any other on-click listeners.
+     */
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         nameForAction = adapter.get(position).getListTitle();
@@ -193,15 +203,15 @@ public class FragListRecipe extends Fragment implements StaticFields,
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
-            menu.add(0, ID_POPUP_ITEM_FAV, 0, R.string.item_favorite);
-            menu.add(0, ID_POPUP_ITEM_REN, 0, R.string.item_rename);
-            menu.add(0, ID_POPUP_ITEM_MOV, 0, R.string.item_move);
-            menu.add(0, ID_POPUP_ITEM_DEL, 0, R.string.item_delete);
+        menu.add(0, ID_POPUP_ITEM_FAV, 0, R.string.item_favorite);
+        menu.add(0, ID_POPUP_ITEM_REN, 0, R.string.item_rename);
+        menu.add(0, ID_POPUP_ITEM_MOV, 0, R.string.item_move);
+        menu.add(0, ID_POPUP_ITEM_DEL, 0, R.string.item_delete);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case ID_POPUP_ITEM_REN:
                 showDialog(DIALOG_REN_RECIPE_LISTRECIPE, nameForAction);
                 break;
@@ -221,7 +231,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ListData ld = adapter.get(position);
-        Log.d("TG","ListResipe: onItemClick = "+ld.getItemId());
+        Log.d("TG", "ListResipe: onItemClick = " + ld.getItemId());
         onFragmentEventsListener.onListItemClick(ID_ACTION_LIST_RECIPE, ld.getItemId());
     }
 
@@ -231,11 +241,11 @@ public class FragListRecipe extends Fragment implements StaticFields,
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    if(cursor.getInt(0) == idItem) {
+                    if (cursor.getInt(0) == idItem) {
                         fav = cursor.getInt(4);
                         fav = fav == 0 ? 1 : 0; // if recipe was 'like' unlike him
                     }
-                }while (cursor.moveToNext());
+                } while (cursor.moveToNext());
             }
             contentValues = new ContentValues();
             contentValues.put("make", fav);
@@ -260,8 +270,8 @@ public class FragListRecipe extends Fragment implements StaticFields,
         dialogFragment.show(fragmentManager, TAG_DIALOG);
     }
 
-    public void onDialogClick(int idDialog, String param, int typeFolder, int idCategory){
-        switch (idDialog){
+    public void onDialogClick(int idDialog, String param, int typeFolder, int idCategory) {
+        switch (idDialog) {
             case DIALOG_REN_RECIPE_LISTRECIPE:
                 renameRecipe(param);
                 break;
@@ -269,45 +279,47 @@ public class FragListRecipe extends Fragment implements StaticFields,
                 deleteRecipe();
                 break;
             case DIALOG_MOV_RECIPE_LISTRECIPE:
-                if(idCategory != NOP) moveRecipe(typeFolder, idCategory);
+                if (idCategory != NOP) moveRecipe(typeFolder, idCategory);
                 else makeSnackbar(context
                         .getString(R.string.folder_folder_not_select));
                 break;
         }
     }
 
-    /** Just change value in columns "category_id" & "sub_category_id" in TABLE_LIST_RECIPE */
+    /**
+     * Just change value in columns "category_id" & "sub_category_id" in TABLE_LIST_RECIPE
+     */
     private void moveRecipe(int typeFolder, int idCategory) {
         contentValues = new ContentValues();
-        if(typeFolder == PARENT){
-            contentValues.put("category_id" , idCategory);
-            contentValues.put("sub_category_id" , DEFAULT_VALUE_COLUMN);
-        }else if(typeFolder == CHILD){
-            contentValues.put("category_id" , DEFAULT_VALUE_COLUMN);
-            contentValues.put("sub_category_id" , idCategory);
+        if (typeFolder == PARENT) {
+            contentValues.put("category_id", idCategory);
+            contentValues.put("sub_category_id", DEFAULT_VALUE_COLUMN);
+        } else if (typeFolder == CHILD) {
+            contentValues.put("category_id", DEFAULT_VALUE_COLUMN);
+            contentValues.put("sub_category_id", idCategory);
         }
-        long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
+        long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idItem, null);
         showListRecipe();
         Log.d("TG", "Frag List Recipe : moveRecipe ");
 
-        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
     }
 
     private void deleteRecipe() {
-        long rowId = database.delete(TABLE_LIST_RECIPE, "_ID="+idItem,null);
+        long rowId = database.delete(TABLE_LIST_RECIPE, "_ID=" + idItem, null);
         showListRecipe();
-        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
     }
 
     private void renameRecipe(String param) {
         contentValues = new ContentValues();
-        contentValues.put("recipe_title" , param);
-        long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID="+idItem, null);
+        contentValues.put("recipe_title", param);
+        long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idItem, null);
         showListRecipe();
-        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
     }
 
-    private void makeSnackbar(String text){
+    private void makeSnackbar(String text) {
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 }

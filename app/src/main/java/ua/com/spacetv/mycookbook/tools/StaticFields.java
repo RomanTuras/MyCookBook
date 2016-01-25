@@ -116,6 +116,6 @@ public interface StaticFields {
     /* Google services */
     String TRACK_ID ="UA-64362552-1";
     String AD_UNIT_ID = "ca-app-pub-7481052517653982/5697171795";
-    boolean isDebugModeOn = false;
+    boolean isDebugModeOn = true;
     String TEST_DEVICE = "77A1F05FE188A3F51A0FF103708EDEF9";
 }

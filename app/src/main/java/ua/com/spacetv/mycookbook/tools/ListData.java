@@ -27,10 +27,12 @@ public class ListData {
     private int imgLike;
     private int number;
     private int item_id;
+    private int topFolder_id;
+    private int subFolder_id;
     private boolean isFolder;
 
-    public ListData(String listTitle, String listSubTitle,
-                    int imgIcon, int imgLike, int number, int item_id, boolean isFolder){
+    public ListData(String listTitle, String listSubTitle, int imgIcon, int imgLike, int number,
+                    int item_id, boolean isFolder, int topFolder_id, int subFolder_id){
         this.listTitle = listTitle;
         this.listSubTitle = listSubTitle;
         this.imgIcon = imgIcon;
@@ -38,6 +40,8 @@ public class ListData {
         this.number = number;
         this.item_id = item_id;
         this.isFolder = isFolder;
+        this.topFolder_id = topFolder_id;
+        this.subFolder_id = subFolder_id;
     }
 
     public String getListTitle() {
@@ -61,6 +65,10 @@ public class ListData {
     }
 
     public int getItemId() { return item_id; }
+
+    public int getTopfolderId() { return topFolder_id; }
+
+    public int getSubfolderId() { return subFolder_id; }
 
     public boolean getTypeItem(){
         return isFolder;

@@ -60,7 +60,9 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private String textRecipeFromDatabase = null;
     private static int idReceivedFolderItem = 0; // id of folder where was or will TEXT of RECIPE
     private static int idRecipe = 0; // id Received (mode REVIEW) or Just Created recipe (mode NEW)
-    private static int typeReceivedFolder = 0; // Is two types of folders: PARENT (top) & CHILD (subFolder)
+    private static int typeReceivedFolder = 0; // Is two types of folders: PARENT=0 (top) & CHILD=1 (subFolder)
+    private static int topFolder_id = 0; //id top folder received from database
+    private static int subFolder_id = 0; //id sub folder received from database
     private static int startupMode = MODE_REVIEW_RECIPE;
 
     @Override
@@ -72,7 +74,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
         Bundle bundle = this.getArguments();
         if(bundle != null) {
-            idReceivedFolderItem = bundle.getInt(TAG_PARENT_ITEM_ID);
+            idReceivedFolderItem = bundle.getInt(TAG_PARENT_ITEM_ID, DEFAULT_VALUE_COLUMN);
             idRecipe = bundle.getInt(TAG_ID_RECIPE);
             typeReceivedFolder = bundle.getInt(TAG_TYPE_FOLDER);
             startupMode = bundle.getInt(TAG_MODE);
@@ -205,6 +207,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                         Log.d("TG", "readRecipeFromDatabase title= "+titleRecipeFromDatabase);
                         textRecipeFromDatabase = cursor.getString(2);
                         editTextRecipe.setText(textRecipeFromDatabase);
+                        topFolder_id = cursor.getInt(3);
+                        subFolder_id = cursor.getInt(5);
                     }
                 }while (cursor.moveToNext());
             }
@@ -245,8 +249,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         ads.showAd();
     }
 
-
-
     /* If at least one from two editText contains any text -> save recipe in database*/
     private boolean isChangesFromRecipe(){
         if(editTitleRecipe.getText().length()>0 & editTextRecipe.getText().length()>0){
@@ -275,12 +277,17 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
         contentValues.put("recipe_title" , titleRecipe);
         contentValues.put("recipe" , textRecipe);
-        if(typeReceivedFolder == PARENT){
-            contentValues.put("category_id" , idReceivedFolderItem);
-            contentValues.put("sub_category_id" , DEFAULT_VALUE_COLUMN);
-        }else if(typeReceivedFolder == CHILD){
-            contentValues.put("category_id" , DEFAULT_VALUE_COLUMN);
-            contentValues.put("sub_category_id" , idReceivedFolderItem);
+        if(startupMode == MODE_NEW_RECIPE) {
+            if (typeReceivedFolder == PARENT) {
+                contentValues.put("category_id", idReceivedFolderItem);
+                contentValues.put("sub_category_id", DEFAULT_VALUE_COLUMN);
+            } else if (typeReceivedFolder == CHILD) {
+                contentValues.put("category_id", DEFAULT_VALUE_COLUMN);
+                contentValues.put("sub_category_id", idReceivedFolderItem);
+            }
+        }else{
+            contentValues.put("category_id", topFolder_id);
+            contentValues.put("sub_category_id", subFolder_id);
         }
         long rowId = 0;
         if(startupMode == MODE_NEW_RECIPE){ // if Added a new recipe -> call 'insert' method

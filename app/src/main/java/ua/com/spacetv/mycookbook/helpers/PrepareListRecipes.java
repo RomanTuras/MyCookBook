@@ -117,9 +117,11 @@ public class PrepareListRecipes implements StaticFields {
                 do {
                     int item_id = cursor.getInt(0);
                     int imgLike = cursor.getInt(4);
+                    int topFolder_id = cursor.getInt(3);
+                    int subFolder_id = cursor.getInt(5);
 
-                    adapter.add(new ListData(cursor.getString(1),
-                            "", ID_IMG_RECIPE, imgLike, 0, item_id, IS_RECIPE));
+                    adapter.add(new ListData(cursor.getString(1), "", ID_IMG_RECIPE, imgLike, 0,
+                            item_id, IS_RECIPE, topFolder_id, subFolder_id));
                 } while (cursor.moveToNext());
             }
             cursor.close();
