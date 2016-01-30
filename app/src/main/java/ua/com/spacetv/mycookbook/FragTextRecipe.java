@@ -16,6 +16,7 @@
 
 package ua.com.spacetv.mycookbook;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +31,9 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -52,6 +55,7 @@ import java.io.InputStream;
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.ImagePicker;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
@@ -78,6 +82,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private static int topFolder_id = 0; //id top folder received from database
     private static int subFolder_id = 0; //id sub folder received from database
     private static int startupMode = MODE_REVIEW_RECIPE;
+    private static ImageView imageView;
+    private String selectedImagePath = "";
 
     @Override
     public void onAttach(Context context) {
@@ -117,7 +123,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         else if(startupMode == MODE_REVIEW_RECIPE) modeReview();
         else if(startupMode == MODE_NEW_RECIPE) modeNewRecipe();
 
-        setImage(R.id.imageRecipe, "img.jpg");
+//        setImage(R.id.imageRecipe, "img.jpg");
         return view;
     }
 
@@ -165,9 +171,9 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         setHasOptionsMenu(true);
     }
 
-    private void setImage(int idImageView, String fileName){
-        Bitmap bitmap = getBitmapFromAsset(fileName);
-        ImageView imageView = (ImageView) view.findViewById(idImageView);
+    public void setImage(Bitmap bitmap){
+//        Bitmap bitmap = getBitmapFromAsset("img.jpg");
+        imageView = (ImageView) view.findViewById(R.id.imageRecipe);
 
         bitmap = getRoundedCornerBitmap(bitmap, 30);
         imageView.setImageBitmap(bitmap);
@@ -227,11 +233,48 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                 break;
             case R.id.action_edit: modeEdit();
                 break;
-            case R.id.action_share:
-                shareRecipe();
+            case R.id.action_share: shareRecipe();
+                break;
+            case R.id.action_photo: onPickImage(view);
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onPickImage(View view) {
+        int PICK_IMAGE_ID = 234;
+        Intent chooseImageIntent = ImagePicker.getPickImageIntent(context);
+        startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_CANCELED) {
+            Log.d("TG", "onActivityResult ");
+            switch (requestCode) {
+                case 234:
+                    selectedImagePath = getAbsolutePath(data.getData());
+                    Bitmap bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
+//                Log.d("TG", "data = "+data.getData().toString());
+//                new FragTextRecipe().setImage(bitmap);
+                    break;
+                default:
+                    super.onActivityResult(requestCode, resultCode, data);
+                    break;
+            }
+        }
+    }
+
+    public String getAbsolutePath(Uri uri) {
+        String[] projection = { MediaStore.MediaColumns.DATA };
+        @SuppressWarnings("deprecation")
+        Cursor cursor = getActivity().managedQuery(uri, projection, null, null, null);
+        if (cursor != null) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } else
+            return null;
     }
 
     private void shareRecipe(){
@@ -293,8 +336,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     @Override
-    public void onPause(){
-        super.onPause();
+    public void onStop(){
+        super.onStop();
         Log.d("TG", "FragTextRecipe is onPause - startupMode= "+startupMode);
         if(startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();

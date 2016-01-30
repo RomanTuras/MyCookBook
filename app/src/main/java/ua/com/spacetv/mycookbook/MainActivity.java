@@ -18,6 +18,7 @@ package ua.com.spacetv.mycookbook;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -48,6 +49,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import ua.com.spacetv.mycookbook.google_services.Analytics;
+import ua.com.spacetv.mycookbook.helpers.ImagePicker;
 import ua.com.spacetv.mycookbook.helpers.SaveRestoreDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
@@ -315,6 +317,8 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
     }
+
+
 
     private void setTopCategoryFragment() {
         fragTopCategory = new FragTopCategory();
