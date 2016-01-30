@@ -1,0 +1,98 @@
+<resources>
+    <string name="app_name">Моя книга рецептів</string>
+
+    <!-- Navigation Draver -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="action_search_by_text">Пошук за складом</string>
+
+
+    <!-- SnackBar -->
+    <string name="success">Виконано успішно!</string>
+    <string name="success_saved">База рецептів збережена!</string>
+    <string name="folder_not_empty">Неможливо! Ця папка не порожня.</string>
+    <string name="folder_folder_not_select">Папка не вибрана!</string>
+    <string name="there_is_no_change">Змін немає!</string>
+    <string name="nothing_was_entered">Нічого не введено!</string>
+
+    <!-- Popup Menu Items -->
+    <string name="item_rename">Переіменувати</string>
+    <string name="item_delete">Видалити</string>
+    <string name="item_move">Перемістити</string>
+    <string name="item_favorite">Сподобалось :)</string>
+    <!--Main Menu Items-->
+    <string name="item_edit_recipe">Редагувати</string>
+    <string name="item_share_recipe">Поділитися</string>
+    <string name="item_save_recipe">Зберегти</string>
+
+    <!-- Dialog -->
+    <string name="dlg_add_category">Додати папку:</string><!-- * -->
+    <string name="dlg_hint">напішіть назву</string><!-- * -->
+    <string name="dlg_space"> </string><!-- * -->
+    <string name="dlg_rename_category">Переіменувати папку:</string><!-- * -->
+    <string name="dlg_confirm_delete">Видалити папку:</string><!-- * -->
+    <string name="dlg_cannot_delete">Неможливо видалити!</string><!-- * -->
+    <string name="dlg_cannot_delete_text">Ця папка не порожня!</string><!-- * -->
+    <string name="dlg_btn_cancel">Cancel</string>
+    <string name="dlg_add_recipe">Додати рецепт:</string><!-- * -->
+    <string name="dlg_rename_recipe">Переіменувати рецепт:</string><!-- * -->
+    <string name="dlg_move">Перемістити в папку:</string><!-- * -->
+    <string name="dlg_confirm_del_recipe">Видалити рецепт:</string><!-- * -->
+
+    <!--Dialog Save Restore-->
+    <string name="dlg_save_file">Зберегти рецепти</string>
+    <string name="dlg_restore_file">Завантажити рецепти</string>
+    <string name="dlg_path_to_file">Шлях:</string>
+    <string name="dlg_name_of_file">Назва файлу: \'cook.db\'</string>
+    <string name="dlg_sdcard_disabled">Немає доступа до SD карти!</string>
+    <string name="dlg_sdcard_check_mount">Перевірте підключення</string>
+    <string name="dlg_success_saved">Рецепти збережені!</string>
+    <string name="dlg_success_loaded">Рецепти завантажені!</string>
+    <string name="dlg_error_save_file">Помилка! Дані не збережені!</string>
+    <string name="dlg_file_not_found">Помилка! Немає файла.</string>
+    <string name="dlg_folder_not_found">Помилка! Папка не знайдена.</string>
+    <string name="dlg_sdcard_not_prepared">Або SD картка не готова.</string>
+    <string name="dlg_file_found">Дата останнього збереження:</string>
+    <string name="dlg_warning">Увага! Усі дані будуть перезаписані!</string>
+
+    <!--FragTextRecipe-->
+    <string name="title_recipe_edit">Назва:</string>
+    <string name="text_recipe_edit">Рецепт:</string>
+    <string name="text_recipe_review">Склад рецепту:</string>
+    <string name="text_recipe_no_title">Рецепт без назви</string>
+    <string name="text_recipe_no_text">Додайте склад рецепту</string>
+    <string name="text_add_recipe">Додайте рецепт</string>
+    <string name="text_favorite_not_found">Улюбленних рецептів не знайдено</string>
+    <string name="text_search_not_found">За Вашим запитом нічого не знайдено</string>
+    <string name="text_share_recipe">Відправити рецепт:</string>
+
+    <!--FragSubcategory-->
+    <string name="text_add_folder_or_recipe">Додайте папку або рецепт</string>
+
+    <!--FragTopCategory-->
+    <string name="text_add_folder_top_category">Додайте папку для рецептів, наприклад \'Перші страви\'</string>
+
+    <!--Main Activity-->
+    <string name="text_empty_request">Введить хочь пару літер для пошука</string>
+
+    <!-- Subtitle fo action bar -->
+    <string name="text_list_favorite_recipe">Улюблені рецепти:</string>
+    <string name="text_list_search_result">Результати пошуку:</string>
+    <string name="text_recipe">Рецепт</string>
+
+    <!--Drawer-->
+    <string name="drawer_home">На головну</string>
+    <string name="drawer_favorite">Улюблені рецепти</string>
+    <string name="drawer_search">Пошук за складом</string>
+    <string name="drawer_export_db">Зберегти</string>
+    <string name="drawer_import_db">Завантажити</string>
+    <string name="drawer_backup_group">Резервне копіювання</string>
+    <string name="drawer_callback">Розробникам</string>
+    <string name="drawer_send_question">Відправити питання</string>
+
+    <string name="email">mailto:salden.com@gmail.com</string>
+    <string name="email_theme">Питання по додатку \'Моя Книга Рецептів\'</string>
+
+</resources>

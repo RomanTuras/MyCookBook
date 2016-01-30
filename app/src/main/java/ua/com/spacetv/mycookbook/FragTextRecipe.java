@@ -19,13 +19,23 @@ package ua.com.spacetv.mycookbook;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +43,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
@@ -55,7 +69,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private static Ads ads;
     private static View view;
     private EditText editTitleRecipe, editTextRecipe;
-    private TextView textTitleRecipe, textTextRecipe;
+    private TextView textTextRecipe;
     private String titleRecipeFromDatabase = null;
     private String textRecipeFromDatabase = null;
     private static int idReceivedFolderItem = 0; // id of folder where was or will TEXT of RECIPE
@@ -90,20 +104,20 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle saveInstanceState) {
-        View view = inflater.inflate(R.layout.frag_text_recipe, null);
+        view = inflater.inflate(R.layout.frag_text_recipe, null);
         editTitleRecipe = (EditText) view.findViewById(R.id.editTitleRecipe);
         editTextRecipe = (EditText) view.findViewById(R.id.editTextRecipe);
-        textTitleRecipe = (TextView) view.findViewById(R.id.textTitleRecipe);
         textTextRecipe = (TextView) view.findViewById(R.id.textTextRecipe);
 
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
-        FragTextRecipe.view = view;
+//        FragTextRecipe.view = view;
 
         if(startupMode == MODE_EDIT_RECIPE) modeEdit();
         else if(startupMode == MODE_REVIEW_RECIPE) modeReview();
         else if(startupMode == MODE_NEW_RECIPE) modeNewRecipe();
 
+        setImage(R.id.imageRecipe, "img.jpg");
         return view;
     }
 
@@ -122,9 +136,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         editTitleRecipe.requestFocus();
         editTextRecipe.setFocusableInTouchMode(true);
         editTextRecipe.setFocusable(true);
-        textTitleRecipe.setVisibility(View.VISIBLE);
-        textTitleRecipe.setText(R.string.title_recipe_edit);
-        textTextRecipe.setText(R.string.text_recipe_edit);
         setHasOptionsMenu(true);
     }
 
@@ -134,9 +145,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         editTitleRecipe.setFocusable(true);
         editTextRecipe.setFocusableInTouchMode(true);
         editTextRecipe.setFocusable(true);
-        textTitleRecipe.setVisibility(View.VISIBLE);
-        textTitleRecipe.setText(R.string.title_recipe_edit);
-        textTextRecipe.setText(R.string.text_recipe_edit);
         readRecipeFromDatabase();
         startupMode = MODE_EDIT_RECIPE;
         setHasOptionsMenu(false);
@@ -151,12 +159,65 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         editTitleRecipe.setFocusable(false);
         editTextRecipe.setFocusableInTouchMode(false);
         editTextRecipe.setFocusable(false);
-        textTitleRecipe.setVisibility(View.GONE);
-        textTextRecipe.setText(R.string.text_recipe_review);
         readRecipeFromDatabase();
         startupMode = MODE_REVIEW_RECIPE;
         setHasOptionsMenu(false);
         setHasOptionsMenu(true);
+    }
+
+    private void setImage(int idImageView, String fileName){
+        Bitmap bitmap = getBitmapFromAsset(fileName);
+        ImageView imageView = (ImageView) view.findViewById(idImageView);
+
+        bitmap = getRoundedCornerBitmap(bitmap, 30);
+        imageView.setImageBitmap(bitmap);
+
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
+        display.getMetrics(metrics);
+
+        int width = metrics.widthPixels;
+        int picWidth = bitmap.getWidth();
+        int picHeight = bitmap.getHeight();
+        if(picWidth>width) {
+            float scale = (float) picWidth / (float) width;
+            picHeight = (int) ((float) picHeight / scale);
+            imageView.getLayoutParams().height=picHeight;
+        }
+
+    }
+
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
+                .getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+        final float roundPx = pixels;
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        return output;
+    }
+
+    private Bitmap getBitmapFromAsset(String strName) {
+        AssetManager assetManager = getActivity().getAssets();
+        InputStream inputStream = null;
+        try {
+            inputStream = assetManager.open(strName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return BitmapFactory.decodeStream(inputStream);
     }
 
     @Override

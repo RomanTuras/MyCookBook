@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity
 
         context = getBaseContext();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         initFloatAction();

@@ -23,9 +23,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-
-    <!--<include layout="@layout/content_main" />-->
-
     <include layout="@xml/fragment_holder" />
 
     <com.github.clans.fab.FloatingActionButton

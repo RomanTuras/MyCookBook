@@ -5,64 +5,76 @@
     android:orientation="vertical">
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/scrollView" >
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/textTitleRecipe"
-            android:text="@string/title_recipe_edit"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="10dp"
-            android:textColor="@color/colorPrimaryDark"
-            android:textStyle="bold|italic" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageRecipe"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="7dp"
+                android:layout_marginRight="7dp" />
 
-        <EditText
-            android:id="@+id/editTitleRecipe"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:focusableInTouchMode="false"
-            android:inputType="textMultiLine"
-            android:overScrollMode="always"
-            android:padding="5dp"
-            android:scrollbarStyle="insideInset"
-            android:scrollbars="vertical"
-            android:textSize="18sp" >
-            <requestFocus />
-        </EditText>
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/textTextRecipe"
-            android:text="@string/text_recipe_edit"
-            android:layout_marginLeft="10dp"
-            android:textColor="@color/colorPrimaryDark"
-            android:textStyle="bold|italic"/>
+                <EditText
+                    android:id="@+id/editTitleRecipe"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:focusableInTouchMode="false"
+                    android:hint="@string/title_recipe_edit"
+                    android:inputType="textMultiLine"
+                    android:overScrollMode="always"
+                    android:padding="5dp"
+                    android:scrollbarStyle="insideInset"
+                    android:scrollbars="vertical"
+                    android:textAppearance="?android:attr/textAppearanceMedium">
 
-        <EditText
-            android:id="@+id/editTextRecipe"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:focusableInTouchMode="false"
-            android:inputType="textMultiLine"
-            android:overScrollMode="always"
-            android:padding="5dp"
-            android:scrollbarStyle="insideInset"
-            android:scrollbars="vertical"
-            android:textSize="18sp" >
-        </EditText>
+                    <requestFocus />
+                </EditText>
+            </android.support.design.widget.TextInputLayout>
+
+            <TextView
+                android:id="@+id/textTextRecipe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="@string/text_recipe_edit"
+                android:visibility="gone"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/colorPrimaryDark"
+                android:textStyle="bold|italic" />
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/editTextRecipe"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:hint="@string/text_recipe_edit"
+                    android:focusableInTouchMode="false"
+                    android:inputType="textMultiLine"
+                    android:overScrollMode="always"
+                    android:padding="5dp"
+                    android:scrollbarStyle="insideInset"
+                    android:scrollbars="vertical"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </android.support.design.widget.TextInputLayout>
         </LinearLayout>
     </ScrollView>
 

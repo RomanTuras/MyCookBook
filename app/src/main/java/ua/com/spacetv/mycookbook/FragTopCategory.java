@@ -87,6 +87,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         View view = inflater.inflate(R.layout.frag_top_category, null);
         listView = (ListView) view.findViewById(R.id.listTopCategory);
         text_empty_text_topcategory = (TextView) view.findViewById(R.id.text_empty_text_topcategory);
+
         fragmentManager = getFragmentManager();
         dataBaseHelper = new DataBaseHelper(context);
         database = dataBaseHelper.getWritableDatabase();
@@ -188,6 +189,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         MainActivity.showFloatButtonTopCategory();
         MainActivity.overrideActionBar(null, null);
         Log.d("TG", "TopCategoryFragment onResume");
+
     }
 
     @Override
