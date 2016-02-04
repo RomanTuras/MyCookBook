@@ -28,6 +28,7 @@ public interface StaticFields {
     String TAG_TEXT_RECIPE = "ID_TEXT_RECIPE";
     String TAG_DIALOG = "TAG_DIALOG";
     String TAG_FILE_DIALOG = "TAG_FILE_DIALOG";
+    String TAG_PICK_IMG_DIALOG = "TAG_PICK_IMG_DIALOG";
 
     /* id of Dialogs */
     String ID_DIALOG = "ID_DIALOG";

@@ -57,6 +57,11 @@
     <string name="dlg_file_found">Дата последнего сохранения:</string>
     <string name="dlg_warning">Внимание! Все данные будут перезаписаны!</string>
 
+    <!--Dialog Pick Image-->
+    <string name="dlg_pick_image_title">Выберите источник:</string>
+    <string name="dlg_pick_image_camera">Камера</string>
+    <string name="dlg_pick_image_gallery">Галерея</string>
+
     <!--FragTextRecipe-->
     <string name="title_recipe_edit">Название:</string>
     <string name="text_recipe_edit">Рецепт:</string>

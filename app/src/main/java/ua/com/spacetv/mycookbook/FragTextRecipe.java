@@ -17,7 +17,6 @@
 package ua.com.spacetv.mycookbook;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -33,13 +32,9 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -53,13 +48,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
-import java.io.IOException;
 
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.ImagePicker;
-import ua.com.spacetv.mycookbook.helpers.PickImageDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
@@ -86,6 +79,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private static int topFolder_id = 0; //id top folder received from database
     private static int subFolder_id = 0; //id sub folder received from database
     private static int startupMode = MODE_REVIEW_RECIPE;
+    private final int CHOOSE_IMAGE = 1;
     private static ImageView imageView;
     private String selectedImagePath = null;
     private static Intent chooseImageIntent;
@@ -183,16 +177,14 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     public void setImage(File pathToBitmap) {
-//        Bitmap bitmap = getBitmapFromAsset("img.jpg");
-        Bitmap bitmap = getBitmapFromFile(pathToBitmap);
-
-
-        bitmap = getRoundedCornerBitmap(bitmap, 30);
-        imageView.setImageBitmap(bitmap);
-
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
         display.getMetrics(metrics);
+
+        Bitmap bitmap = getBitmapFromFile(pathToBitmap);
+        bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, true);
+        bitmap = getRoundedCornerBitmap(bitmap, 30);
+        imageView.setImageBitmap(bitmap);
 
         int width = metrics.widthPixels;
         int picWidth = bitmap.getWidth();
@@ -230,9 +222,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private static Bitmap getBitmapFromFile(File pathToBitmap) {
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         Bitmap bitmap = BitmapFactory.decodeFile(pathToBitmap.getAbsolutePath(), bmOptions);
-        Log.d("TG", "getBitmapFromFile bitmap = "+bitmap);
-
-        bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, true);
         return bitmap;
     }
 
@@ -249,7 +238,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                 shareRecipe();
                 break;
             case R.id.action_photo:
-//                showPickImageDialog();
                 getPickImageIntent();
                 break;
         }
@@ -258,49 +246,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
     private void getPickImageIntent() {
         chooseImageIntent = ImagePicker.getPickImageIntent(context);
-        startActivityForResult(chooseImageIntent, 1);
-    }
-
-
-
-    public void showPickImageDialog() {
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        Fragment fragment = fragmentManager.findFragmentByTag(TAG_PICK_IMG_DIALOG);
-        if (fragment != null) {
-            ft.remove(fragment);
-        }
-        ft.addToBackStack(null);
-
-        DialogFragment dialogFragment = new PickImageDialog();
-        dialogFragment.show(fragmentManager, TAG_PICK_IMG_DIALOG);
-    }
-
-    public void onPickImage() {
-        int PICK_IMAGE_ID = 1;
-        try {
-            Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                    MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-            startActivityForResult(pickPhoto, 1);
-
-
-//            chooseImageIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-//            chooseImageIntent = ImagePicker.getPickImageIntent(context);
-//
-//            fileBitmap = null;
-//            try {
-//                fileBitmap = createImageFile();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            if (fileBitmap != null) {
-//                chooseImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(fileBitmap));
-//                startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
-//            }
-//
-        } catch (ActivityNotFoundException anfe) {
-            String errorMessage = "Whoops - your device doesn't support capturing images!";
-            makeSnackbar(errorMessage);
-        }
+        startActivityForResult(chooseImageIntent, CHOOSE_IMAGE);
     }
 
     @Override
@@ -308,43 +254,18 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_CANCELED) {
             Log.d("TG", "onActivityResult ");
-
             switch (requestCode) {
-                case 234:
-//                    selectedImagePath = getAbsolutePath(data.getData());
-//                    Bitmap bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
+                case CHOOSE_IMAGE:
                     Bitmap bitmap;
-                    if (data != null) {
-                        Log.d("TG", "data != null");
-                        if (data.hasExtra("data")) {
-                            bitmap = data.getParcelableExtra("data");
-                            bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, false);
-//                            setImage(bitmap);
-                            // TODO Какие-то действия с миниатюрой
-                        }
-                    } else {
-                        Log.d("TG", "data == null");
-//                        bitmap = getBitmapFromFile(fileBitmap);
-                        setImage(fileBitmap);
-                    }
-                    Log.d("TG", "data = " + data);
-                    break;
-                default:
-
-                    break;
-                case 1:
                     if(data!=null) {
                         selectedImagePath = getDataColumn(data.getData());
                         Log.d("TG", "getPath = " + selectedImagePath);
                         setImage(new File(selectedImagePath));
-//                        setPathToImage(selectedImagePath);
                     }else{
                         bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
-//                        imageView.setImageBitmap(bitmap);
                         selectedImagePath = ImagePicker.getImagePath();
                         Log.d("TG", "getPath = " + selectedImagePath);
                         setImage(new File(selectedImagePath));
-//                        setPathToImage(selectedImagePath);
                     }
                     break;
             }
@@ -373,35 +294,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                 cursor.close();
         }
         return null;
-    }
-
-    private File createImageFile() throws IOException {
-        storageDir = new File(getPath());
-        // Create an image file name
-        Log.d("TG", "createImageFile");
-//        String timeStamp =
-//                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File image = File.createTempFile(
-                "asd",
-                ".jpg",
-                storageDir
-        );
-
-        String mCurrentPhotoPath = image.getAbsolutePath();
-        Log.d("TG", "mCurrentPhotoPath = " + mCurrentPhotoPath);
-        return image;
-    }
-
-    private String getPath() {
-        String pathDcim = android.os.Environment.DIRECTORY_DCIM;
-        String sdState = Environment.getExternalStorageState();
-        String path = null;
-        if (sdState.equals(Environment.MEDIA_MOUNTED)) {
-            path = Environment.getExternalStorageDirectory().getAbsolutePath();
-            path += "/" + pathDcim + "/";
-        }
-        Log.d("TG", "path = " + path);
-        return path;
     }
 
     private void shareRecipe() {
@@ -467,29 +359,22 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         loadAds();
     }
 
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d("TG", "FragTextRecipe is onStop - startupMode= " + startupMode);
-        if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
-            if (isChangesFromRecipe()) saveRecipe();
-        }
-    }
-
     @Override
     public void onDetach() {
         super.onDetach();
         Log.d("TG", "FragTextRecipe is onDetach - show ADS -  ");
+        if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
+            if (isChangesFromRecipe()) saveRecipe();
+        }
         database.close();
         dataBaseHelper.close();
         ads.showAd();
     }
 
-    /* If at least one from two editText contains any text -> save recipe in database*/
+    /* If text or image was changed -> save recipe in database*/
     private boolean isChangesFromRecipe() {
         if(selectedImagePath != null && !selectedImagePath.equals(databaseImagePath)){
+            databaseImagePath = selectedImagePath;
             return true; // image was changed
         }
         if (editTitleRecipe.getText().length() > 0 & editTextRecipe.getText().length() > 0) {
@@ -523,16 +408,16 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             if (typeReceivedFolder == PARENT) {
                 contentValues.put("category_id", idReceivedFolderItem);
                 contentValues.put("sub_category_id", DEFAULT_VALUE_COLUMN);
-                contentValues.put("image", selectedImagePath);
+                contentValues.put("image", databaseImagePath);
             } else if (typeReceivedFolder == CHILD) {
                 contentValues.put("category_id", DEFAULT_VALUE_COLUMN);
                 contentValues.put("sub_category_id", idReceivedFolderItem);
-                contentValues.put("image", selectedImagePath);
+                contentValues.put("image", databaseImagePath);
             }
         } else {
             contentValues.put("category_id", topFolder_id);
             contentValues.put("sub_category_id", subFolder_id);
-            contentValues.put("image", selectedImagePath);
+            contentValues.put("image", databaseImagePath);
         }
         long rowId = 0;
         if (startupMode == MODE_NEW_RECIPE) { // if Added a new recipe -> call 'insert' method
@@ -546,6 +431,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void makeSnackbar(String text) {
-        Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+        try {
+            Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+        }catch (NullPointerException npe){}
     }
 }

@@ -1,9 +1,5 @@
 package ua.com.spacetv.mycookbook.helpers;
 
-/**
- * Created by salden on 30/01/2016.
- *
- */
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,12 +12,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +35,7 @@ public class ImagePicker {
     private static final int DEFAULT_MIN_WIDTH_QUALITY = 400;        // min pixels
     private static final String TAG = "ImagePicker";
     private static final String TEMP_IMAGE_NAME = "tempImage";
+    private static String imagePath = null;
 
     public static int minWidthQuality = DEFAULT_MIN_WIDTH_QUALITY;
 
@@ -75,7 +74,6 @@ public class ImagePicker {
         return list;
     }
 
-
     public static Bitmap getImageFromResult(Context context, int resultCode,
                                             Intent imageReturnedIntent) {
         Log.d(TAG, "getImageFromResult, resultCode: " + resultCode);
@@ -87,7 +85,9 @@ public class ImagePicker {
                     imageReturnedIntent.getData() == null  ||
                     imageReturnedIntent.getData().equals(Uri.fromFile(imageFile)));
             if (isCamera) {     /** CAMERA **/
+                Log.d(TAG, "** CAMERA **, imageFile: " + imageFile);
                 selectedImage = Uri.fromFile(imageFile);
+                imagePath = imageFile.getPath();
             } else {            /** ALBUM **/
                 selectedImage = imageReturnedIntent.getData();
             }
@@ -100,11 +100,45 @@ public class ImagePicker {
         return bm;
     }
 
+    public static String getImagePath(){
+        return imagePath;
+    }
+
+
 
     private static File getTempFile(Context context) {
-        File imageFile = new File(context.getExternalCacheDir(), TEMP_IMAGE_NAME);
-        imageFile.getParentFile().mkdirs();
-        return imageFile;
+        File fileBitmap = new File(context.getExternalCacheDir(), TEMP_IMAGE_NAME);
+        fileBitmap.getParentFile().mkdirs();
+        return fileBitmap;
+    }
+
+    private static File createImageFile() throws IOException {
+        File storageDir = new File(getPath());
+        // Create an image file name
+        Log.d("TG", "createImageFile");
+//        String timeStamp =
+//                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File image = File.createTempFile(
+                "asd",
+                ".jpg",
+                storageDir
+        );
+
+        String mCurrentPhotoPath = image.getAbsolutePath();
+        Log.d("TG", "mCurrentPhotoPath = " + mCurrentPhotoPath);
+        return image;
+    }
+
+    private static String getPath() {
+        String pathDcim = android.os.Environment.DIRECTORY_DCIM;
+        String sdState = Environment.getExternalStorageState();
+        String path = null;
+        if (sdState.equals(Environment.MEDIA_MOUNTED)) {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+            path += "/" + pathDcim + "/";
+        }
+        Log.d("TG", "path = " + path);
+        return path;
     }
 
     private static Bitmap decodeBitmap(Context context, Uri theUri, int sampleSize) {

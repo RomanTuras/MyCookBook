@@ -7,5 +7,5 @@
 /build
 /captures
 /.gitignore
-/app/src/main/java/ua/com/spacetv/mycookbook/google_services/Ads.java
-/app/src/main/java/ua/com/spacetv/mycookbook/google_services/Analytics.java
+/app/src/main/java/ua/com/spacetv/mycookbook/tools/StaticFields.java
+

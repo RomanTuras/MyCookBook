@@ -43,7 +43,7 @@ import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /** Created by Roman Turas on 11/01/2016.
- * The class is responsible for the save dialog box and restore the database
+ * This class is responsible for the save dialog box and restore the database
  * Input: type of the dialog 'DIALOG_FILE_SAVE' or 'DIALOG_FILE_RESTORE'
  * Output: path to backup folder on SD-card, or Error massage
  * */

@@ -16,11 +16,16 @@
 
 package ua.com.spacetv.mycookbook;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
@@ -43,13 +48,13 @@ import com.github.clans.fab.FloatingActionMenu;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import ua.com.spacetv.mycookbook.google_services.Analytics;
-import ua.com.spacetv.mycookbook.helpers.ImagePicker;
 import ua.com.spacetv.mycookbook.helpers.SaveRestoreDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
@@ -66,6 +71,7 @@ public class MainActivity extends AppCompatActivity
             fabAddRecipeSubCategory, fabAddFolderSubCategory;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
+    public static String path_to_image = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         fragmentManager = getSupportFragmentManager();
+        path_to_image = null;
 
         context = getBaseContext();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -318,7 +325,146 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+//    private Bitmap getBitmapFromFile() {
+////        AssetManager assetManager = getActivity().getAssets();
+////        InputStream inputStream = null;
+////        try {
+////            inputStream = assetManager.open(strName);
+////        } catch (IOException e) {
+////            e.printStackTrace();
+////        }
+//
+//        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+//        Bitmap bitmap = BitmapFactory.decodeFile(fileBitmap.getAbsolutePath(), bmOptions);
+//        bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, true);
+//        return bitmap;
+//    }
 
+    public void pickImage(){
+        Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(pickPhoto, 1);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.d("TG", "activity onPause");
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d("TG", "activity onResume");
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        Log.d("TG", "activity onStop");
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != Activity.RESULT_CANCELED) {
+            Log.d("TG", "MainActivity - onActivityResult requestCode = "+requestCode+
+                    "resultCode = "+resultCode);
+            switch (requestCode) {
+                case 234:
+//                    selectedImagePath = getAbsolutePath(data.getData());
+//                    Bitmap bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
+                    Bitmap bitmap;
+                    if (data != null) {
+                        Log.d("TG", "data != null");
+                        if (data.hasExtra("data")) {
+                            bitmap = data.getParcelableExtra("data");
+                            bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, false);
+//                            setImage(bitmap);
+                            // TODO Какие-то действия с миниатюрой
+                        }
+                    } else {
+                        Log.d("TG", "data == null");
+//                        bitmap = getBitmapFromFile();
+//                        setImage(bitmap);
+                    }
+                    Log.d("TG", "data = " + data);
+                    break;
+                case 262145:
+                    Log.d("TG", " case 1");
+
+                    Uri selectedImage = data.getData();
+                    InputStream inputStream;
+                    try {
+                        inputStream = context.getContentResolver().openInputStream(data.getData());
+                        bitmap = BitmapFactory.decodeStream(inputStream);
+
+                        path_to_image = getDataColumn(data.getData());
+                        Log.d("TG", "getPath = " + path_to_image);
+
+//                        setImage(bitmap);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    Log.d("TG", "selectedImage = " + selectedImage.getEncodedPath());
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Get the value of the data column for this Uri. This is useful for
+     * MediaStore Uris, and other file-based ContentProviders.
+     *
+     * @param uri The Uri to query.
+     * @return The value of the _data column, which is typically a file path.
+     */
+    public static String getDataColumn(Uri uri) {
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {column};
+        try {
+            cursor = context.getContentResolver().query(uri, projection, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+//    private File createImageFile() throws IOException {
+//        storageDir = new File(getPath());
+//        // Create an image file name
+//        Log.d("TG", "createImageFile");
+////        String timeStamp =
+////                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//        File image = File.createTempFile(
+//                "asd",
+//                ".jpg",
+//                storageDir
+//        );
+//
+//        String mCurrentPhotoPath = image.getAbsolutePath();
+//        Log.d("TG", "mCurrentPhotoPath = " + mCurrentPhotoPath);
+//        return image;
+//    }
+
+    private String getPath() {
+        String pathDcim = android.os.Environment.DIRECTORY_DCIM;
+        String sdState = Environment.getExternalStorageState();
+        String path = null;
+        if (sdState.equals(Environment.MEDIA_MOUNTED)) {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+            path += "/" + pathDcim + "/";
+        }
+        Log.d("TG", "path = " + path);
+        return path;
+    }
 
     private void setTopCategoryFragment() {
         fragTopCategory = new FragTopCategory();

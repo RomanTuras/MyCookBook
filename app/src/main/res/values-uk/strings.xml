@@ -95,4 +95,9 @@
     <string name="email">mailto:salden.com@gmail.com</string>
     <string name="email_theme">Питання по додатку \'Моя Книга Рецептів\'</string>
 
+    <!--Dialog Pick Image-->
+    <string name="dlg_pick_image_camera">Камера</string>
+    <string name="dlg_pick_image_gallery">Галерея</string>
+    <string name="dlg_pick_image_title">Виберіть джерело:</string>
+
 </resources>
