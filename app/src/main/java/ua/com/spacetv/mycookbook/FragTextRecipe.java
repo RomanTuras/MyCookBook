@@ -17,10 +17,10 @@
 package ua.com.spacetv.mycookbook;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -33,10 +33,13 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -49,13 +52,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.ImagePicker;
+import ua.com.spacetv.mycookbook.helpers.PickImageDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
@@ -83,7 +87,13 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private static int subFolder_id = 0; //id sub folder received from database
     private static int startupMode = MODE_REVIEW_RECIPE;
     private static ImageView imageView;
-    private String selectedImagePath = "";
+    private String selectedImagePath = null;
+    private static Intent chooseImageIntent;
+    private Uri picUri;
+    private String path;
+    private static String databaseImagePath = null;
+    private File storageDir;
+    private static File fileBitmap;
 
     @Override
     public void onAttach(Context context) {
@@ -93,17 +103,17 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         this.contentValues = new ContentValues();
 
         Bundle bundle = this.getArguments();
-        if(bundle != null) {
+        if (bundle != null) {
             idReceivedFolderItem = bundle.getInt(TAG_PARENT_ITEM_ID, DEFAULT_VALUE_COLUMN);
             idRecipe = bundle.getInt(TAG_ID_RECIPE);
             typeReceivedFolder = bundle.getInt(TAG_TYPE_FOLDER);
             startupMode = bundle.getInt(TAG_MODE);
-            Log.d("TG", "TextRecipe: idRecipe = "+idRecipe+" idReceivedFolderItem= "+ idReceivedFolderItem +" typeReceivedFolder= "+ typeReceivedFolder +" startupMode= "+startupMode);
+            Log.d("TG", "TextRecipe: idRecipe = " + idRecipe + " idReceivedFolderItem= " + idReceivedFolderItem + " typeReceivedFolder= " + typeReceivedFolder + " startupMode= " + startupMode);
         }
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
 
-    private void loadAds(){
+    private void loadAds() {
         ads = new Ads(context);
         ads.initAds(); // init and preload Ads
     }
@@ -114,24 +124,25 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         editTitleRecipe = (EditText) view.findViewById(R.id.editTitleRecipe);
         editTextRecipe = (EditText) view.findViewById(R.id.editTextRecipe);
         textTextRecipe = (TextView) view.findViewById(R.id.textTextRecipe);
+        imageView = (ImageView) view.findViewById(R.id.imageRecipe);
 
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
 //        FragTextRecipe.view = view;
 
-        if(startupMode == MODE_EDIT_RECIPE) modeEdit();
-        else if(startupMode == MODE_REVIEW_RECIPE) modeReview();
-        else if(startupMode == MODE_NEW_RECIPE) modeNewRecipe();
+        if (startupMode == MODE_EDIT_RECIPE) modeEdit();
+        else if (startupMode == MODE_REVIEW_RECIPE) modeReview();
+        else if (startupMode == MODE_NEW_RECIPE) modeNewRecipe();
 
 //        setImage(R.id.imageRecipe, "img.jpg");
         return view;
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        if(startupMode == MODE_REVIEW_RECIPE) inflater.inflate(R.menu.menu_review_recipe, menu);
-        else if(startupMode == MODE_EDIT_RECIPE |
+        if (startupMode == MODE_REVIEW_RECIPE) inflater.inflate(R.menu.menu_review_recipe, menu);
+        else if (startupMode == MODE_EDIT_RECIPE |
                 startupMode == MODE_NEW_RECIPE) inflater.inflate(R.menu.menu_edit_recipe, menu);
     }
 
@@ -145,7 +156,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         setHasOptionsMenu(true);
     }
 
-    private void modeEdit(){
+    private void modeEdit() {
         Log.d("TG", "modeEdit *** ");
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
@@ -158,7 +169,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void modeReview() {
-        new Analytics(context).sendAnalytics("myCookBook","Text Category","Review recipe", "nop");
+        new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
 
         Log.d("TG", "modeReview *** ");
         editTitleRecipe.setFocusableInTouchMode(false);
@@ -171,9 +182,10 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         setHasOptionsMenu(true);
     }
 
-    public void setImage(Bitmap bitmap){
+    public void setImage(File pathToBitmap) {
 //        Bitmap bitmap = getBitmapFromAsset("img.jpg");
-        imageView = (ImageView) view.findViewById(R.id.imageRecipe);
+        Bitmap bitmap = getBitmapFromFile(pathToBitmap);
+
 
         bitmap = getRoundedCornerBitmap(bitmap, 30);
         imageView.setImageBitmap(bitmap);
@@ -185,10 +197,10 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         int width = metrics.widthPixels;
         int picWidth = bitmap.getWidth();
         int picHeight = bitmap.getHeight();
-        if(picWidth>width) {
+        if (picWidth > width) {
             float scale = (float) picWidth / (float) width;
             picHeight = (int) ((float) picHeight / scale);
-            imageView.getLayoutParams().height=picHeight;
+            imageView.getLayoutParams().height = picHeight;
         }
 
     }
@@ -215,70 +227,185 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         return output;
     }
 
-    private Bitmap getBitmapFromAsset(String strName) {
-        AssetManager assetManager = getActivity().getAssets();
-        InputStream inputStream = null;
-        try {
-            inputStream = assetManager.open(strName);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return BitmapFactory.decodeStream(inputStream);
+    private static Bitmap getBitmapFromFile(File pathToBitmap) {
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        Bitmap bitmap = BitmapFactory.decodeFile(pathToBitmap.getAbsolutePath(), bmOptions);
+        Log.d("TG", "getBitmapFromFile bitmap = "+bitmap);
+
+        bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, true);
+        return bitmap;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_save: if (isChangesFromRecipe()) saveRecipe();
+        switch (item.getItemId()) {
+            case R.id.action_save:
+                if (isChangesFromRecipe()) saveRecipe();
                 break;
-            case R.id.action_edit: modeEdit();
+            case R.id.action_edit:
+                modeEdit();
                 break;
-            case R.id.action_share: shareRecipe();
+            case R.id.action_share:
+                shareRecipe();
                 break;
-            case R.id.action_photo: onPickImage(view);
+            case R.id.action_photo:
+//                showPickImageDialog();
+                getPickImageIntent();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void onPickImage(View view) {
-        int PICK_IMAGE_ID = 234;
-        Intent chooseImageIntent = ImagePicker.getPickImageIntent(context);
-        startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
+    private void getPickImageIntent() {
+        chooseImageIntent = ImagePicker.getPickImageIntent(context);
+        startActivityForResult(chooseImageIntent, 1);
+    }
+
+
+
+    public void showPickImageDialog() {
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        Fragment fragment = fragmentManager.findFragmentByTag(TAG_PICK_IMG_DIALOG);
+        if (fragment != null) {
+            ft.remove(fragment);
+        }
+        ft.addToBackStack(null);
+
+        DialogFragment dialogFragment = new PickImageDialog();
+        dialogFragment.show(fragmentManager, TAG_PICK_IMG_DIALOG);
+    }
+
+    public void onPickImage() {
+        int PICK_IMAGE_ID = 1;
+        try {
+            Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                    MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+            startActivityForResult(pickPhoto, 1);
+
+
+//            chooseImageIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+//            chooseImageIntent = ImagePicker.getPickImageIntent(context);
+//
+//            fileBitmap = null;
+//            try {
+//                fileBitmap = createImageFile();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            if (fileBitmap != null) {
+//                chooseImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(fileBitmap));
+//                startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
+//            }
+//
+        } catch (ActivityNotFoundException anfe) {
+            String errorMessage = "Whoops - your device doesn't support capturing images!";
+            makeSnackbar(errorMessage);
+        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_CANCELED) {
             Log.d("TG", "onActivityResult ");
+
             switch (requestCode) {
                 case 234:
-                    selectedImagePath = getAbsolutePath(data.getData());
-                    Bitmap bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
-//                Log.d("TG", "data = "+data.getData().toString());
-//                new FragTextRecipe().setImage(bitmap);
+//                    selectedImagePath = getAbsolutePath(data.getData());
+//                    Bitmap bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
+                    Bitmap bitmap;
+                    if (data != null) {
+                        Log.d("TG", "data != null");
+                        if (data.hasExtra("data")) {
+                            bitmap = data.getParcelableExtra("data");
+                            bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, false);
+//                            setImage(bitmap);
+                            // TODO Какие-то действия с миниатюрой
+                        }
+                    } else {
+                        Log.d("TG", "data == null");
+//                        bitmap = getBitmapFromFile(fileBitmap);
+                        setImage(fileBitmap);
+                    }
+                    Log.d("TG", "data = " + data);
                     break;
                 default:
-                    super.onActivityResult(requestCode, resultCode, data);
+
+                    break;
+                case 1:
+                    if(data!=null) {
+                        selectedImagePath = getDataColumn(data.getData());
+                        Log.d("TG", "getPath = " + selectedImagePath);
+                        setImage(new File(selectedImagePath));
+//                        setPathToImage(selectedImagePath);
+                    }else{
+                        bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
+//                        imageView.setImageBitmap(bitmap);
+                        selectedImagePath = ImagePicker.getImagePath();
+                        Log.d("TG", "getPath = " + selectedImagePath);
+                        setImage(new File(selectedImagePath));
+//                        setPathToImage(selectedImagePath);
+                    }
                     break;
             }
         }
     }
 
-    public String getAbsolutePath(Uri uri) {
-        String[] projection = { MediaStore.MediaColumns.DATA };
-        @SuppressWarnings("deprecation")
-        Cursor cursor = getActivity().managedQuery(uri, projection, null, null, null);
-        if (cursor != null) {
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } else
-            return null;
+    /**
+     * Get the value of the data column for this Uri. This is useful for
+     * MediaStore Uris, and other file-based ContentProviders.
+     *
+     * @param uri The Uri to query.
+     * @return The value of the _data column, which is typically a file path.
+     */
+    public static String getDataColumn(Uri uri) {
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {column};
+        try {
+            cursor = context.getContentResolver().query(uri, projection, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
     }
 
-    private void shareRecipe(){
-        if(editTitleRecipe.getText().length() > 0 & editTextRecipe.getText().length() > 0) {
+    private File createImageFile() throws IOException {
+        storageDir = new File(getPath());
+        // Create an image file name
+        Log.d("TG", "createImageFile");
+//        String timeStamp =
+//                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File image = File.createTempFile(
+                "asd",
+                ".jpg",
+                storageDir
+        );
+
+        String mCurrentPhotoPath = image.getAbsolutePath();
+        Log.d("TG", "mCurrentPhotoPath = " + mCurrentPhotoPath);
+        return image;
+    }
+
+    private String getPath() {
+        String pathDcim = android.os.Environment.DIRECTORY_DCIM;
+        String sdState = Environment.getExternalStorageState();
+        String path = null;
+        if (sdState.equals(Environment.MEDIA_MOUNTED)) {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+            path += "/" + pathDcim + "/";
+        }
+        Log.d("TG", "path = " + path);
+        return path;
+    }
+
+    private void shareRecipe() {
+        if (editTitleRecipe.getText().length() > 0 & editTextRecipe.getText().length() > 0) {
             String title = editTitleRecipe.getText().toString();
             String text = editTextRecipe.getText().toString();
             Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
@@ -294,8 +421,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
     private void readRecipeFromDatabase() {
         Cursor cursor;
-        if(startupMode == MODE_NEW_RECIPE){
-            String selectQuery ="SELECT * FROM " + TABLE_LIST_RECIPE +
+        if (startupMode == MODE_NEW_RECIPE) {
+            String selectQuery = "SELECT * FROM " + TABLE_LIST_RECIPE +
                     " WHERE rowid=last_insert_rowid()";
             cursor = database.rawQuery(selectQuery, null);
             cursor.moveToFirst();
@@ -305,16 +432,21 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    if(cursor.getInt(0) == idRecipe) {
+                    if (cursor.getInt(0) == idRecipe) {
                         titleRecipeFromDatabase = cursor.getString(1);
                         editTitleRecipe.setText(titleRecipeFromDatabase);
-                        Log.d("TG", "readRecipeFromDatabase title= "+titleRecipeFromDatabase);
+                        Log.d("TG", "readRecipeFromDatabase title= " + titleRecipeFromDatabase);
                         textRecipeFromDatabase = cursor.getString(2);
                         editTextRecipe.setText(textRecipeFromDatabase);
                         topFolder_id = cursor.getInt(3);
                         subFolder_id = cursor.getInt(5);
+                        databaseImagePath = cursor.getString(6);
+                        if(databaseImagePath != null && databaseImagePath != ""){
+                            Log.d("TG", "databaseImagePath = "+ databaseImagePath);
+                            setImage(new File(databaseImagePath));
+                        }
                     }
-                }while (cursor.moveToNext());
+                } while (cursor.moveToNext());
             }
             cursor.close();
         } else {
@@ -328,18 +460,20 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         MainActivity.overrideActionBar(context.getString(R.string.text_recipe), null);
         MainActivity.hideAllFloatButtons();
         loadAds();
     }
 
+
+
     @Override
-    public void onStop(){
+    public void onStop() {
         super.onStop();
-        Log.d("TG", "FragTextRecipe is onPause - startupMode= "+startupMode);
-        if(startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
+        Log.d("TG", "FragTextRecipe is onStop - startupMode= " + startupMode);
+        if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
     }
@@ -354,17 +488,20 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     /* If at least one from two editText contains any text -> save recipe in database*/
-    private boolean isChangesFromRecipe(){
-        if(editTitleRecipe.getText().length()>0 & editTextRecipe.getText().length()>0){
+    private boolean isChangesFromRecipe() {
+        if(selectedImagePath != null && !selectedImagePath.equals(databaseImagePath)){
+            return true; // image was changed
+        }
+        if (editTitleRecipe.getText().length() > 0 & editTextRecipe.getText().length() > 0) {
             String tempTitle = editTitleRecipe.getText().toString();
             String tempText = editTextRecipe.getText().toString();
 
-            if(tempTitle.equals(titleRecipeFromDatabase) &
-                    tempText.equals(textRecipeFromDatabase)){
+            if (tempTitle.equals(titleRecipeFromDatabase) &
+                    tempText.equals(textRecipeFromDatabase)) {
                 makeSnackbar(context.getString(R.string.there_is_no_change));
                 return false;
             }
-        }else if(editTitleRecipe.getText().length() == 0 & editTextRecipe.getText().length() == 0){
+        } else if (editTitleRecipe.getText().length() == 0 & editTextRecipe.getText().length() == 0) {
             Log.d("TG", "editText's == 0");
             makeSnackbar(context.getString(R.string.nothing_was_entered));
             return false;
@@ -376,35 +513,39 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         contentValues = new ContentValues();
         String titleRecipe = getString(R.string.text_recipe_no_title);
         String textRecipe = getString(R.string.text_recipe_no_text);
-        if(editTitleRecipe.getText().length()>0) titleRecipe = editTitleRecipe.getText().toString();
-        if(editTextRecipe.getText().length()>0) textRecipe = editTextRecipe.getText().toString();
+        if (editTitleRecipe.getText().length() > 0)
+            titleRecipe = editTitleRecipe.getText().toString();
+        if (editTextRecipe.getText().length() > 0) textRecipe = editTextRecipe.getText().toString();
 
-        contentValues.put("recipe_title" , titleRecipe);
-        contentValues.put("recipe" , textRecipe);
-        if(startupMode == MODE_NEW_RECIPE) {
+        contentValues.put("recipe_title", titleRecipe);
+        contentValues.put("recipe", textRecipe);
+        if (startupMode == MODE_NEW_RECIPE) {
             if (typeReceivedFolder == PARENT) {
                 contentValues.put("category_id", idReceivedFolderItem);
                 contentValues.put("sub_category_id", DEFAULT_VALUE_COLUMN);
+                contentValues.put("image", selectedImagePath);
             } else if (typeReceivedFolder == CHILD) {
                 contentValues.put("category_id", DEFAULT_VALUE_COLUMN);
                 contentValues.put("sub_category_id", idReceivedFolderItem);
+                contentValues.put("image", selectedImagePath);
             }
-        }else{
+        } else {
             contentValues.put("category_id", topFolder_id);
             contentValues.put("sub_category_id", subFolder_id);
+            contentValues.put("image", selectedImagePath);
         }
         long rowId = 0;
-        if(startupMode == MODE_NEW_RECIPE){ // if Added a new recipe -> call 'insert' method
+        if (startupMode == MODE_NEW_RECIPE) { // if Added a new recipe -> call 'insert' method
             rowId = database.insert(TABLE_LIST_RECIPE, null, contentValues);
-        }else if(startupMode == MODE_EDIT_RECIPE) { // if edit existing recipe -> call 'update'
+        } else if (startupMode == MODE_EDIT_RECIPE) { // if edit existing recipe -> call 'update'
             rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idRecipe, null);
         }
         modeReview();
-        if(rowId >= 0)makeSnackbar(context.getString(R.string.success));
-        new Analytics(context).sendAnalytics("myCookBook","Text Category","Save recipe", titleRecipe);
+        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
+        new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Save recipe", titleRecipe);
     }
 
-    private void makeSnackbar(String text){
+    private void makeSnackbar(String text) {
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 }
