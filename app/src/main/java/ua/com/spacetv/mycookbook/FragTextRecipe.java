@@ -46,8 +46,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.File;
-
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
@@ -80,15 +78,10 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private static int startupMode = MODE_REVIEW_RECIPE;
     private final int CHOOSE_IMAGE = 1;
     private static ImageView imageView;
-    private String selectedImagePath = null;
+    private String selectedImagePath;
     private static Intent chooseImageIntent;
     private static int displayWidth;
-    private static int displayHeight;
-    private Uri picUri;
-    private String path;
-    private static String databaseImagePath = null;
-    private File storageDir;
-    private static File fileBitmap;
+    private static String databaseImagePath;
 
     @Override
     public void onAttach(Context context) {
@@ -105,6 +98,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             startupMode = bundle.getInt(TAG_MODE);
             Log.d("TG", "TextRecipe: idRecipe = " + idRecipe + " idReceivedFolderItem= " + idReceivedFolderItem + " typeReceivedFolder= " + typeReceivedFolder + " startupMode= " + startupMode);
         }
+        selectedImagePath = null;
+        databaseImagePath = null;
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
 
@@ -130,8 +125,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         if (startupMode == MODE_EDIT_RECIPE) modeEdit();
         else if (startupMode == MODE_REVIEW_RECIPE) modeReview();
         else if (startupMode == MODE_NEW_RECIPE) modeNewRecipe();
-
-//        setImage(R.id.imageRecipe, "img.jpg");
 
         return view;
     }
@@ -188,8 +181,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     public void setImage(Bitmap bitmap) {
-//        Bitmap bitmap = getBitmapFromFile(pathToBitmap);
-//        bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, true);
         bitmap = getRoundedCornerBitmap(bitmap, 30);
         imageView.setImageBitmap(bitmap);
 
@@ -200,7 +191,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             picHeight = (int) ((float) picHeight / scale);
             imageView.getLayoutParams().height = picHeight;
         }
-
     }
 
     public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
@@ -266,8 +256,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                         selectedImagePath = ImagePicker.getImageFromResult(context, resultCode, data);
                         bitmap = ImagePicker.decodeBitmapFromPath(selectedImagePath,
                                 (displayWidth*90)/100); //width of display - 10%
-//                        bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
-//                        selectedImagePath = ImagePicker.getImagePath();
                         if(bitmap != null) setImage(bitmap);
                         Log.d("TG", "data==null; getPath = " + selectedImagePath);
                     }
@@ -308,8 +296,14 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
             emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
+            if(databaseImagePath != null && databaseImagePath != "") {
+                Uri imageUri = Uri.parse("file://"+databaseImagePath);
+                emailIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
+            }
 
-            emailIntent.setType("text/plain");
+//            emailIntent.setType("text/plain");
+            emailIntent.setType("image/jpeg");
+//            emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(emailIntent, context
                     .getString(R.string.text_share_recipe)));
         }
