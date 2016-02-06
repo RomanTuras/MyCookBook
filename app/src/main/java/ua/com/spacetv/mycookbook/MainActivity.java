@@ -437,22 +437,6 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
-//    private File createImageFile() throws IOException {
-//        storageDir = new File(getPath());
-//        // Create an image file name
-//        Log.d("TG", "createImageFile");
-////        String timeStamp =
-////                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//        File image = File.createTempFile(
-//                "asd",
-//                ".jpg",
-//                storageDir
-//        );
-//
-//        String mCurrentPhotoPath = image.getAbsolutePath();
-//        Log.d("TG", "mCurrentPhotoPath = " + mCurrentPhotoPath);
-//        return image;
-//    }
 
     private String getPath() {
         String pathDcim = android.os.Environment.DIRECTORY_DCIM;

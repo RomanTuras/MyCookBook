@@ -19,7 +19,6 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,9 +48,12 @@ public class ImagePicker {
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         takePhotoIntent.putExtra("return-data", true);
-        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(context)));
+        File tempFile = getTempFile(context);
+        if(tempFile != null) {
+            takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tempFile));
+            intentList = addIntentsToList(context, intentList, takePhotoIntent);
+        }
         intentList = addIntentsToList(context, intentList, pickIntent);
-        intentList = addIntentsToList(context, intentList, takePhotoIntent);
 
         if (intentList.size() > 0) {
             chooserIntent = Intent.createChooser(intentList.remove(intentList.size() - 1),
@@ -74,30 +76,25 @@ public class ImagePicker {
         return list;
     }
 
-    public static Bitmap getImageFromResult(Context context, int resultCode,
+    public static String getImageFromResult(Context context, int resultCode,
                                             Intent imageReturnedIntent) {
         Log.d(TAG, "getImageFromResult, resultCode: " + resultCode);
-        Bitmap bm = null;
         File imageFile = getTempFile(context);
         if (resultCode == Activity.RESULT_OK) {
-            Uri selectedImage;
+//            Uri selectedImage;
             boolean isCamera = (imageReturnedIntent == null ||
                     imageReturnedIntent.getData() == null  ||
                     imageReturnedIntent.getData().equals(Uri.fromFile(imageFile)));
             if (isCamera) {     /** CAMERA **/
-                Log.d(TAG, "** CAMERA **, imageFile: " + imageFile);
-                selectedImage = Uri.fromFile(imageFile);
+//                selectedImage = Uri.fromFile(imageFile);
                 imagePath = imageFile.getPath();
+                Log.d(TAG, "** CAMERA **, imagePath: " + imagePath);
+                return imagePath; //decodeBitmapFromPath(imagePath, 430);
             } else {            /** ALBUM **/
-                selectedImage = imageReturnedIntent.getData();
-            }
-            Log.d(TAG, "selectedImage: " + selectedImage);
-
-            bm = getImageResized(context, selectedImage);
-            int rotation = getRotation(context, selectedImage, isCamera);
-            bm = rotate(bm, rotation);
+                imagePath = imageReturnedIntent.getData().getPath();
+                Log.d(TAG, "** ALBUM ** -> imagePath: " + imagePath);}
         }
-        return bm;
+        return imagePath;
     }
 
     public static String getImagePath(){
@@ -105,28 +102,16 @@ public class ImagePicker {
     }
 
 
-
     private static File getTempFile(Context context) {
-        File fileBitmap = new File(context.getExternalCacheDir(), TEMP_IMAGE_NAME);
-        fileBitmap.getParentFile().mkdirs();
+        String sdState = Environment.getExternalStorageState();
+        File fileBitmap = null;
+        if (sdState.equals(Environment.MEDIA_MOUNTED)) {
+            fileBitmap = new File(context.getExternalCacheDir(), TEMP_IMAGE_NAME);
+            fileBitmap.getParentFile().mkdirs();
+        }else {
+            Log.d("TG", "ImagePicker -> SD card not found or was unmounted ");
+        }
         return fileBitmap;
-    }
-
-    private static File createImageFile() throws IOException {
-        File storageDir = new File(getPath());
-        // Create an image file name
-        Log.d("TG", "createImageFile");
-//        String timeStamp =
-//                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File image = File.createTempFile(
-                "asd",
-                ".jpg",
-                storageDir
-        );
-
-        String mCurrentPhotoPath = image.getAbsolutePath();
-        Log.d("TG", "mCurrentPhotoPath = " + mCurrentPhotoPath);
-        return image;
     }
 
     private static String getPath() {
@@ -174,6 +159,23 @@ public class ImagePicker {
             i++;
         } while (bm.getWidth() < minWidthQuality && i < sampleSizes.length);
         return bm;
+    }
+
+    public static Bitmap decodeBitmapFromPath(String path, int reqWidth) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        if(bitmap == null) return null; // image was deleted from SD
+        float wBmp = bitmap.getWidth();
+        float hBmp = bitmap.getHeight();
+        float scale = wBmp/reqWidth;
+        if(scale > 1){
+            wBmp = wBmp/scale;
+            hBmp = hBmp/scale;
+        }
+        options.inJustDecodeBounds = false;
+        bitmap = Bitmap.createScaledBitmap(bitmap, (int)wBmp, (int)hBmp, false);
+        return bitmap;
     }
 
 

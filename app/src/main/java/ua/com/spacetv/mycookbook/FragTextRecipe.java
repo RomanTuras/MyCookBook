@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -83,6 +82,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private static ImageView imageView;
     private String selectedImagePath = null;
     private static Intent chooseImageIntent;
+    private static int displayWidth;
+    private static int displayHeight;
     private Uri picUri;
     private String path;
     private static String databaseImagePath = null;
@@ -120,6 +121,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         textTextRecipe = (TextView) view.findViewById(R.id.textTextRecipe);
         imageView = (ImageView) view.findViewById(R.id.imageRecipe);
 
+        getDisplayMetrics();
+
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
 //        FragTextRecipe.view = view;
@@ -129,6 +132,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         else if (startupMode == MODE_NEW_RECIPE) modeNewRecipe();
 
 //        setImage(R.id.imageRecipe, "img.jpg");
+
         return view;
     }
 
@@ -176,21 +180,23 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         setHasOptionsMenu(true);
     }
 
-    public void setImage(File pathToBitmap) {
+    private void getDisplayMetrics(){
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
         display.getMetrics(metrics);
+        displayWidth = metrics.widthPixels;
+    }
 
-        Bitmap bitmap = getBitmapFromFile(pathToBitmap);
-        bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, true);
+    public void setImage(Bitmap bitmap) {
+//        Bitmap bitmap = getBitmapFromFile(pathToBitmap);
+//        bitmap = Bitmap.createScaledBitmap(bitmap, 400, 400, true);
         bitmap = getRoundedCornerBitmap(bitmap, 30);
         imageView.setImageBitmap(bitmap);
 
-        int width = metrics.widthPixels;
         int picWidth = bitmap.getWidth();
         int picHeight = bitmap.getHeight();
-        if (picWidth > width) {
-            float scale = (float) picWidth / (float) width;
+        if (picWidth > displayWidth) {
+            float scale = (float) picWidth / (float) displayWidth;
             picHeight = (int) ((float) picHeight / scale);
             imageView.getLayoutParams().height = picHeight;
         }
@@ -217,12 +223,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         canvas.drawBitmap(bitmap, rect, rect, paint);
 
         return output;
-    }
-
-    private static Bitmap getBitmapFromFile(File pathToBitmap) {
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        Bitmap bitmap = BitmapFactory.decodeFile(pathToBitmap.getAbsolutePath(), bmOptions);
-        return bitmap;
     }
 
     @Override
@@ -253,19 +253,23 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_CANCELED) {
-            Log.d("TG", "onActivityResult ");
             switch (requestCode) {
                 case CHOOSE_IMAGE:
                     Bitmap bitmap;
                     if(data!=null) {
                         selectedImagePath = getDataColumn(data.getData());
-                        Log.d("TG", "getPath = " + selectedImagePath);
-                        setImage(new File(selectedImagePath));
+                        bitmap = ImagePicker.decodeBitmapFromPath(selectedImagePath,
+                                (displayWidth*90)/100); //width of display - 10%
+                        if(bitmap != null) setImage(bitmap);
+                        Log.d("TG", "data!=null; getPath = " + selectedImagePath);
                     }else{
-                        bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
-                        selectedImagePath = ImagePicker.getImagePath();
-                        Log.d("TG", "getPath = " + selectedImagePath);
-                        setImage(new File(selectedImagePath));
+                        selectedImagePath = ImagePicker.getImageFromResult(context, resultCode, data);
+                        bitmap = ImagePicker.decodeBitmapFromPath(selectedImagePath,
+                                (displayWidth*90)/100); //width of display - 10%
+//                        bitmap = ImagePicker.getImageFromResult(context, resultCode, data);
+//                        selectedImagePath = ImagePicker.getImagePath();
+                        if(bitmap != null) setImage(bitmap);
+                        Log.d("TG", "data==null; getPath = " + selectedImagePath);
                     }
                     break;
             }
@@ -334,8 +338,11 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                         subFolder_id = cursor.getInt(5);
                         databaseImagePath = cursor.getString(6);
                         if(databaseImagePath != null && databaseImagePath != ""){
-                            Log.d("TG", "databaseImagePath = "+ databaseImagePath);
-                            setImage(new File(databaseImagePath));
+                            Log.d("TG", "readRecipeFromDatabase -> databaseImagePath = "+ databaseImagePath);
+                            Bitmap bitmap = ImagePicker.decodeBitmapFromPath(databaseImagePath,
+                                    (displayWidth*90)/100); //width of display - 10%
+                            if(bitmap != null) setImage(bitmap);
+                            else Log.d("TG", "Picture not found!");
                         }
                     }
                 } while (cursor.moveToNext());
