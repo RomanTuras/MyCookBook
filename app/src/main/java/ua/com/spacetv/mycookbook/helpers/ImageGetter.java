@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ua.com.spacetv.mycookbook.helpers;
 
 import android.app.Activity;
@@ -22,19 +38,16 @@ import java.util.List;
 import ua.com.spacetv.mycookbook.R;
 
 /**
- * Author: Mario Velasco Casquero
- * Date: 08/09/2015
- * Email: m3ario@gmail.com
- */
-public class ImagePicker {
+ * Created by Roman Turas on 07/02/2016
+ * It creates options to pick images from different sources, like camera, gallery, photos e.t.c.
+ * */
 
-    private static final String TAG = "ImagePicker";
-    private static final String TEMP_IMAGE_NAME = "tempImage";
+public class ImageGetter {
+    private static final String TAG = "TG";
     private static final String JPEG_FILE_PREFIX = "cook";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
     private static String imagePath = null;
     private static File tempFile = null;
-
 
     public static Intent getPickImageIntent(Context context) {
         Intent chooserIntent = null;
@@ -45,7 +58,7 @@ public class ImagePicker {
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         takePhotoIntent.putExtra("return-data", true);
-        tempFile = getTempFile(context);
+        tempFile = getTempFile();
         if(tempFile != null) {
             takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tempFile));
             intentList = addIntentsToList(context, intentList, takePhotoIntent);
@@ -73,17 +86,14 @@ public class ImagePicker {
         return list;
     }
 
-    public static String getImageFromResult(Context context, int resultCode,
+    public static String getImageFromResult(int resultCode,
                                             Intent imageReturnedIntent) {
         Log.d(TAG, "getImageFromResult, resultCode: " + resultCode);
-//        File imageFile = getTempFile(context);
         if (resultCode == Activity.RESULT_OK) {
-//            Uri selectedImage;
             boolean isCamera = (imageReturnedIntent == null ||
                     imageReturnedIntent.getData() == null  ||
                     imageReturnedIntent.getData().equals(Uri.fromFile(tempFile)));
             if (isCamera) {     /** CAMERA **/
-//                selectedImage = Uri.fromFile(imageFile);
                 imagePath = tempFile.getPath();
                 Log.d(TAG, "** CAMERA **, imagePath: " + imagePath);
                 return imagePath;
@@ -94,19 +104,17 @@ public class ImagePicker {
         return imagePath;
     }
 
-    private static File getTempFile(Context context) {
+    private static File getTempFile() {
         String sdState = Environment.getExternalStorageState();
         File fileBitmap = null;
         if (sdState.equals(Environment.MEDIA_MOUNTED)) {
-//            fileBitmap = new File(context.getExternalCacheDir(), TEMP_IMAGE_NAME);
-//            fileBitmap.getParentFile().mkdirs();
             try {
                 fileBitmap = createImageFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }else {
-            Log.d("TG", "ImagePicker -> SD card not found or was unmounted ");
+            Log.d("TG", "ImageGetter -> SD card not found or was unmounted ");
         }
         return fileBitmap;
     }
@@ -131,7 +139,7 @@ public class ImagePicker {
                 JPEG_FILE_SUFFIX,
                 getPath()
         );
-        Log.d("TG", "ImagePicker -> path = " + image.getAbsolutePath());
+        Log.d("TG", "ImageGetter -> path = " + image.getAbsolutePath());
         return image;
     }
 

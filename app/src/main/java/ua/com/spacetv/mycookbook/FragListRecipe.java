@@ -34,6 +34,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -52,7 +53,7 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
  * Created by Roman Turas on 07/01/2016.
  */
 public class FragListRecipe extends Fragment implements StaticFields,
-        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
 
     private static Context context;
     private static FragmentManager fragmentManager;
@@ -70,6 +71,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
     public static int idParentItem = 0; //id subcategory where is recipe
     private static int startupMode = MODE_RECIPE_FROM_CATEGORY;
     private static String searchString;
+    private static int firstVisibleItem = 0;
 
     @Override
     public void onAttach(Context context) {
@@ -154,6 +156,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
         registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
+        listView.setSelection(firstVisibleItem); //mechanism save and restore state of list view
         setHasOptionsMenu(true);
         setHasOptionsMenu(false);
     }
@@ -165,8 +168,9 @@ public class FragListRecipe extends Fragment implements StaticFields,
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onPause() {
+        super.onPause();
+        MainActivity.saveListState(TAG_LIST_RECIPE, firstVisibleItem); //save list view state
     }
 
     @Override
@@ -177,12 +181,14 @@ public class FragListRecipe extends Fragment implements StaticFields,
     @Override
     public void onResume() {
         super.onResume();
+        firstVisibleItem = MainActivity.restoreListState(TAG_LIST_RECIPE); //restore list view state
         showListRecipe();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        MainActivity.saveListState(TAG_LIST_RECIPE, 0); //reset list view state
         database.close();
         dataBaseHelper.close();
     }
@@ -321,5 +327,15 @@ public class FragListRecipe extends Fragment implements StaticFields,
 
     private void makeSnackbar(String text) {
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        FragListRecipe.firstVisibleItem = firstVisibleItem;
     }
 }

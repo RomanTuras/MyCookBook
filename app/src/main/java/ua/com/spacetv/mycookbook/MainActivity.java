@@ -46,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.SaveRestoreDialog;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity
             fabAddRecipeSubCategory, fabAddFolderSubCategory;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
+    private static HashMap<String, Integer> mapState = new HashMap<>();
     public static String path_to_image = null;
 
     @Override
@@ -442,5 +444,16 @@ public class MainActivity extends AppCompatActivity
 
     private void makeSnackbar(String text) {
         Snackbar.make(fabSubCategory, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+    }
+
+    public static void saveListState(String idFragment, int firstVisibleItem){
+        mapState.put(idFragment, firstVisibleItem);
+        Log.d("TG", "saveListState : "+idFragment+" - "+firstVisibleItem);
+    }
+
+    public static int restoreListState(String idFragment) {
+        if (mapState.size() != 0 && mapState.containsKey(idFragment))
+            return mapState.get(idFragment);
+        else return 0;
     }
 }

@@ -14,7 +14,7 @@ public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields {
     private static int versDb = 2;
 
     public DataBaseHelper(Context context) {
-        super(context, DB_FILE, null, versDb);
+        super(context, FILENAME_WORKING_DB, null, versDb);
     }
 
     @Override

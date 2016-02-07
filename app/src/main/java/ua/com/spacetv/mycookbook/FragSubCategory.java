@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -50,7 +51,7 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
  * Created by salden on 02/01/2016.
  */
 public class FragSubCategory extends Fragment implements StaticFields,
-        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener{
 
     private static Context context;
     private static FragmentManager fragmentManager;
@@ -68,7 +69,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
     private static int fav;
     public static int idParentItem = 0; //id TOP category, income in params
     private static boolean isFolder;
-
+    private static int firstVisibleItem = 0;
 
     @Override
     public void onAttach(Context context) {
@@ -95,6 +96,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
                              Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.frag_sub_category, null);
         listView = (ListView) view.findViewById(R.id.listSubCategory);
+        listView.setOnScrollListener(this);
         text_empty_text_subcategory = (TextView) view.findViewById(R.id.text_empty_text_subcategory);
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
@@ -114,6 +116,7 @@ public class FragSubCategory extends Fragment implements StaticFields,
         registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
+        listView.setSelection(firstVisibleItem); //mechanism save and restore state of list view
         listView.requestFocus();
     }
 
@@ -176,8 +179,9 @@ public class FragSubCategory extends Fragment implements StaticFields,
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onPause() {
+        super.onPause();
+        MainActivity.saveListState(TAG_SUBCATEGORY, firstVisibleItem); //save list view state
     }
 
     @Override
@@ -188,6 +192,8 @@ public class FragSubCategory extends Fragment implements StaticFields,
     @Override
     public void onResume(){
         super.onResume();
+        firstVisibleItem = MainActivity.restoreListState(TAG_SUBCATEGORY); //restore list view state
+        Log.d("TG", "onResume SUB : "+firstVisibleItem);
         showCategoryAndRecipe();
         MainActivity.showFloatMenuSubCategory();
         if(FragTopCategory.nameOfTopCategory != null){
@@ -198,6 +204,8 @@ public class FragSubCategory extends Fragment implements StaticFields,
     @Override
     public void onDetach() {
         super.onDetach();
+        MainActivity.saveListState(TAG_SUBCATEGORY, 0); //reset list view state
+        Log.d("TG", "onDetach SUB : ");
         database.close();
         dataBaseHelper.close();
     }
@@ -399,5 +407,15 @@ public class FragSubCategory extends Fragment implements StaticFields,
 
     private void makeSnackbar(String text){
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        FragSubCategory.firstVisibleItem = firstVisibleItem;
     }
 }

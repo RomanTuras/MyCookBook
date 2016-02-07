@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -51,7 +52,7 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
  * Class is responsible for list top category
  */
 public class FragTopCategory extends Fragment implements StaticFields,
-        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
 
     private DataBaseHelper dataBaseHelper;
     private SQLiteDatabase database;
@@ -67,6 +68,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
     private ArrayList<Integer> arrayIdSubCategories;
     private ContentValues contentValues;
     public static String nameOfTopCategory = null;
+    private static int firstVisibleItem = 0;
 
     @Override
     public void onAttach(Context context) {
@@ -86,6 +88,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
                              Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.frag_top_category, null);
         listView = (ListView) view.findViewById(R.id.listTopCategory);
+        listView.setOnScrollListener(this);
         text_empty_text_topcategory = (TextView) view.findViewById(R.id.text_empty_text_topcategory);
 
         fragmentManager = getFragmentManager();
@@ -112,6 +115,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);
+        listView.setSelection(firstVisibleItem); //mechanism save and restore state of list view
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
 
@@ -183,8 +187,16 @@ public class FragTopCategory extends Fragment implements StaticFields,
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity.saveListState(TAG_CATEGORY, firstVisibleItem); //save list view state
+        Log.d("TG", "TopCategoryFragment onPause");
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        firstVisibleItem = MainActivity.restoreListState(TAG_CATEGORY); //restore list view state
         showAllCategory();
         MainActivity.showFloatButtonTopCategory();
         MainActivity.overrideActionBar(null, null);
@@ -229,7 +241,6 @@ public class FragTopCategory extends Fragment implements StaticFields,
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-
         if (item.getItemId() == ID_POPUP_ITEM_REN) {
             showDialog(DIALOG_REN_CATEGORY, nameForAction);
         } else if (item.getItemId() == ID_POPUP_ITEM_DEL) {
@@ -345,4 +356,13 @@ public class FragTopCategory extends Fragment implements StaticFields,
     }
 
 
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        FragTopCategory.firstVisibleItem = firstVisibleItem;
+    }
 }

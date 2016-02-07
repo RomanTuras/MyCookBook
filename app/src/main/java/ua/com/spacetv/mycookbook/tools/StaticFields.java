@@ -17,7 +17,8 @@
 package ua.com.spacetv.mycookbook.tools;
 
 /**
- * Created by salden on 02/01/2016.
+ * Created by salden on 02/01/2016
+ * stored used const's
  */
 public interface StaticFields {
 
@@ -28,7 +29,6 @@ public interface StaticFields {
     String TAG_TEXT_RECIPE = "ID_TEXT_RECIPE";
     String TAG_DIALOG = "TAG_DIALOG";
     String TAG_FILE_DIALOG = "TAG_FILE_DIALOG";
-    String TAG_PICK_IMG_DIALOG = "TAG_PICK_IMG_DIALOG";
 
     /* id of Dialogs */
     String ID_DIALOG = "ID_DIALOG";
@@ -64,11 +64,15 @@ public interface StaticFields {
     int DIALOG_FILE_SAVE = 0;
     int DIALOG_FILE_RESTORE = 1;
 
-
     /* Path and Filenames*/
     String FILENAME_WORKING_DB = "db_cook.db";
     String BACKUP_FILENAME = "cook.db";
     String FOLDER_NAME = "myCookBook";
+
+    /* State of list views */
+    String FIRST_VISIBLE_ITEM_TOPCATEGORY = "FIRST_VISIBLE_ITEM_TOPCATEGORY";
+    String FIRST_VISIBLE_ITEM_SUBCATEGORY = "FIRST_VISIBLE_ITEM_SUBCATEGORY";
+    String FIRST_VISIBLE_ITEM_LISTRECIPE = "FIRST_VISIBLE_ITEM_LISTRECIPE";
 
     /* Names of a Tables*/
     String TABLE_TOP_CATEGORY = "tableMain";
@@ -105,11 +109,6 @@ public interface StaticFields {
     byte ID_IMG_RECIPE = 1;
     byte ID_IMG_LIKE = 1;
     byte ID_IMG_LIKE_OFF = 0;
-
-    /*Data Base Helper*/
-
-    String DB_FILE = "db_cook.db";
-    String DB_FOLDER = "myCookBook";
 
     /* Default value of columns 'category_id' and 'sub_category_id'*/
     int DEFAULT_VALUE_COLUMN = -1;
