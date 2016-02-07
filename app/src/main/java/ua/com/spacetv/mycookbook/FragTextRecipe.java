@@ -54,7 +54,8 @@ import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
- * Created by Roman Turas on 07/01/2016.
+ * Created by Roman Turas on 07/01/2016
+ *
  */
 public class FragTextRecipe extends Fragment implements StaticFields {
 
@@ -104,7 +105,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void loadAds() {
-        ads = new Ads(context);
+        if(ads.getInterstitialAd() == null)
         ads.initAds(); // init and preload Ads
     }
 
@@ -116,6 +117,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         textTextRecipe = (TextView) view.findViewById(R.id.textTextRecipe);
         imageView = (ImageView) view.findViewById(R.id.imageRecipe);
 
+        ads = new Ads(context);
         getDisplayMetrics();
 
         database = dataBaseHelper.getWritableDatabase();

@@ -31,7 +31,7 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 public class Ads extends AdListener implements StaticFields {
 
-    private InterstitialAd interstitialAd;
+    private InterstitialAd interstitialAd = null;
     private Context context;
     private boolean isAdLoaded;
 
@@ -61,6 +61,10 @@ public class Ads extends AdListener implements StaticFields {
         if (interstitialAd != null && interstitialAd.isLoaded()) {
             this.isAdLoaded = true;
         }
+    }
+
+    public InterstitialAd getInterstitialAd(){
+        return interstitialAd;
     }
 
     public void showAd(){
