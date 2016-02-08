@@ -69,11 +69,6 @@ public interface StaticFields {
     String BACKUP_FILENAME = "cook.db";
     String FOLDER_NAME = "myCookBook";
 
-    /* State of list views */
-    String FIRST_VISIBLE_ITEM_TOPCATEGORY = "FIRST_VISIBLE_ITEM_TOPCATEGORY";
-    String FIRST_VISIBLE_ITEM_SUBCATEGORY = "FIRST_VISIBLE_ITEM_SUBCATEGORY";
-    String FIRST_VISIBLE_ITEM_LISTRECIPE = "FIRST_VISIBLE_ITEM_LISTRECIPE";
-
     /* Names of a Tables*/
     String TABLE_TOP_CATEGORY = "tableMain";
     String TABLE_SUB_CATEGORY = "tableSubCat";

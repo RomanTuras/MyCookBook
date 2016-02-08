@@ -48,7 +48,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.SaveRestoreDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
@@ -66,9 +65,7 @@ public class MainActivity extends AppCompatActivity
             fabAddRecipeSubCategory, fabAddFolderSubCategory;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
-    private static HashMap<String, Integer> mapState = new HashMap<>();
-    private static Ads ads;
-    public static String path_to_image = null;
+    private static HashMap<String, Integer> mapState = new HashMap<>(3);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,11 +73,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         fragmentManager = getSupportFragmentManager();
-        path_to_image = null;
-
         context = getBaseContext();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         initFloatAction();
@@ -96,7 +91,6 @@ public class MainActivity extends AppCompatActivity
 
         setTopCategoryFragment();
         Log.d("TG", "main activity onCreate");
-
     }
 
     public static void overrideActionBar(String title, String subtitle) {

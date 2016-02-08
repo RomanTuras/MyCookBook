@@ -105,8 +105,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void loadAds() {
-        if(ads.getInterstitialAd() == null)
-        ads.initAds(); // init and preload Ads
+        if(ads.getInterstitialAd() == null) ads.initAds(); // init and preload Ads
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
@@ -248,21 +247,25 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             switch (requestCode) {
                 case CHOOSE_IMAGE:
                     Bitmap bitmap;
-                    if(data!=null) {
+                    if(data!=null) { // ** Gallery **
                         selectedImagePath = getDataColumn(data.getData());
                         bitmap = ImageGetter.decodeBitmapFromPath(selectedImagePath,
                                 (displayWidth*90)/100); //width of display - 10%
                         if(bitmap != null) setImage(bitmap);
                         Log.d("TG", "data!=null; getPath = " + selectedImagePath);
-                    }else{
+                        new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Gallery");
+                    }else{ // ** Camera **
                         selectedImagePath = ImageGetter.getImageFromResult(resultCode, data);
+                        ImageGetter.addImageToGallery(selectedImagePath);
                         bitmap = ImageGetter.decodeBitmapFromPath(selectedImagePath,
                                 (displayWidth*90)/100); //width of display - 10%
                         if(bitmap != null) setImage(bitmap);
                         Log.d("TG", "data==null; getPath = " + selectedImagePath);
+                        new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Camera");
                     }
                     break;
             }
+
         }
     }
 

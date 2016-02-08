@@ -75,13 +75,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         super.onAttach(context);
         this.contentValues = new ContentValues();
         FragTopCategory.context = context;
-
-        try {
-            onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement OnFragmentEventsListener");
-        }
+        onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
@@ -118,7 +112,6 @@ public class FragTopCategory extends Fragment implements StaticFields,
         listView.setSelection(firstVisibleItem); //mechanism save and restore state of list view
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
-
     }
 
     private void categoryInList() {

@@ -17,6 +17,7 @@
 package ua.com.spacetv.mycookbook.helpers;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -40,7 +41,7 @@ import ua.com.spacetv.mycookbook.R;
 /**
  * Created by Roman Turas on 07/02/2016
  * It creates options to pick images from different sources, like camera, gallery, photos e.t.c.
- * */
+ */
 
 public class ImageGetter {
     private static final String TAG = "TG";
@@ -48,9 +49,11 @@ public class ImageGetter {
     private static final String JPEG_FILE_SUFFIX = ".jpg";
     private static String imagePath = null;
     private static File tempFile = null;
+    private static Context context;
 
     public static Intent getPickImageIntent(Context context) {
         Intent chooserIntent = null;
+        ImageGetter.context = context;
 
         List<Intent> intentList = new ArrayList<>();
 
@@ -59,7 +62,7 @@ public class ImageGetter {
         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         takePhotoIntent.putExtra("return-data", true);
         tempFile = getTempFile();
-        if(tempFile != null) {
+        if (tempFile != null) {
             takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tempFile));
             intentList = addIntentsToList(context, intentList, takePhotoIntent);
         }
@@ -86,12 +89,11 @@ public class ImageGetter {
         return list;
     }
 
-    public static String getImageFromResult(int resultCode,
-                                            Intent imageReturnedIntent) {
+    public static String getImageFromResult(int resultCode, Intent imageReturnedIntent) {
         Log.d(TAG, "getImageFromResult, resultCode: " + resultCode);
         if (resultCode == Activity.RESULT_OK) {
             boolean isCamera = (imageReturnedIntent == null ||
-                    imageReturnedIntent.getData() == null  ||
+                    imageReturnedIntent.getData() == null ||
                     imageReturnedIntent.getData().equals(Uri.fromFile(tempFile)));
             if (isCamera) {     /** CAMERA **/
                 imagePath = tempFile.getPath();
@@ -99,9 +101,21 @@ public class ImageGetter {
                 return imagePath;
             } else {            /** ALBUM **/
                 imagePath = imageReturnedIntent.getData().getPath();
-                Log.d(TAG, "** ALBUM ** -> imagePath: " + imagePath);}
+                Log.d(TAG, "** ALBUM ** -> imagePath: " + imagePath);
+            }
         }
         return imagePath;
+    }
+
+    /**
+     * Register image to gallery
+     */
+    public static void addImageToGallery(String filePath) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.MediaColumns.DATA, filePath);
+        context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 
     private static File getTempFile() {
@@ -113,7 +127,7 @@ public class ImageGetter {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }else {
+        } else {
             Log.d("TG", "ImageGetter -> SD card not found or was unmounted ");
         }
         return fileBitmap;
@@ -147,16 +161,16 @@ public class ImageGetter {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         Bitmap bitmap = BitmapFactory.decodeFile(path);
-        if(bitmap == null) return null; // image was deleted from SD
+        if (bitmap == null) return null; // image was deleted from SD
         float wBmp = bitmap.getWidth();
         float hBmp = bitmap.getHeight();
-        float scale = wBmp/reqWidth;
-        if(scale > 1){
-            wBmp = wBmp/scale;
-            hBmp = hBmp/scale;
+        float scale = wBmp / reqWidth;
+        if (scale > 1) {
+            wBmp = wBmp / scale;
+            hBmp = hBmp / scale;
         }
         options.inJustDecodeBounds = false;
-        bitmap = Bitmap.createScaledBitmap(bitmap, (int)wBmp, (int)hBmp, false);
+        bitmap = Bitmap.createScaledBitmap(bitmap, (int) wBmp, (int) hBmp, false);
         return bitmap;
     }
 
