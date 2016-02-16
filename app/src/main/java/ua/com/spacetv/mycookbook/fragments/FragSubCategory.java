@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ua.com.spacetv.mycookbook;
+package ua.com.spacetv.mycookbook.fragments;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -39,9 +39,11 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import ua.com.spacetv.mycookbook.MainActivity;
+import ua.com.spacetv.mycookbook.R;
+import ua.com.spacetv.mycookbook.dialogs.FragDialog;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
-import ua.com.spacetv.mycookbook.helpers.FragDialog;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
@@ -49,6 +51,7 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
  * Created by salden on 02/01/2016.
+ *
  */
 public class FragSubCategory extends Fragment implements StaticFields,
         AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener{
@@ -181,13 +184,21 @@ public class FragSubCategory extends Fragment implements StaticFields,
     @Override
     public void onPause() {
         super.onPause();
+        Log.d("TG", "onPause FragSubCategory : ");
         MainActivity.saveListState(TAG_SUBCATEGORY, firstVisibleItem); //save list view state
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        setHasOptionsMenu(true);
     }
+
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        menu.clear();
+//        inflater.inflate(R.menu.main, menu);
+//    }
 
     @Override
     public void onResume(){
@@ -204,8 +215,8 @@ public class FragSubCategory extends Fragment implements StaticFields,
     @Override
     public void onDetach() {
         super.onDetach();
+        Log.d("TG", "onDetach FragSubCategory : ");
         MainActivity.saveListState(TAG_SUBCATEGORY, 0); //reset list view state
-        Log.d("TG", "onDetach SUB : ");
         database.close();
         dataBaseHelper.close();
     }

@@ -14,15 +14,16 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+
             <ImageView
+                android:id="@+id/imageRecipe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/imageRecipe"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="7dp"
-                android:layout_marginRight="7dp" />
+                android:layout_marginRight="7dp"
+                android:layout_marginTop="10dp" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
@@ -52,10 +53,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:text="@string/text_recipe_edit"
-                android:visibility="gone"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/colorPrimaryDark"
-                android:textStyle="bold|italic" />
+                android:textStyle="bold|italic"
+                android:visibility="gone" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
@@ -66,8 +67,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="5dp"
-                    android:hint="@string/text_recipe_edit"
                     android:focusableInTouchMode="false"
+                    android:hint="@string/text_recipe_edit"
                     android:inputType="textMultiLine"
                     android:overScrollMode="always"
                     android:padding="5dp"

@@ -48,8 +48,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
+import ua.com.spacetv.mycookbook.dialogs.SaveRestoreDialog;
+import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
+import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
+import ua.com.spacetv.mycookbook.fragments.FragTextRecipe;
+import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
-import ua.com.spacetv.mycookbook.helpers.SaveRestoreDialog;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
@@ -75,6 +79,7 @@ public class MainActivity extends AppCompatActivity
         fragmentManager = getSupportFragmentManager();
         context = getBaseContext();
 
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
@@ -89,17 +94,99 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        setTopCategoryFragment();
-        Log.d("TG", "main activity onCreate");
+//        setTopCategoryFragment();
+        attachFragment(INDEX_TOP_CATEGORY, 0, 0, null, 0);
+    }
+
+    public void attachFragment(int index, int idItem, int startMode, String searchRequest, int typeFolder) {
+        Bundle bundle = new Bundle();
+        Fragment fragment;
+        String tag;
+        switch (index) {
+            default:
+            case INDEX_TOP_CATEGORY:
+                tag = FragTopCategory.class.getSimpleName();
+                fragment = getSupportFragmentManager().findFragmentByTag(tag);
+                if (fragment == null) {
+                    fragment = new FragTopCategory();
+                    Log.d("TG", "fragment == null" + fragment.toString());
+                } else Log.d("TG", "fragment != null" + fragment.toString());
+
+                break;
+            case INDEX_SUB_CATEGORY:
+                tag = FragSubCategory.class.getSimpleName();
+                fragment = getSupportFragmentManager().findFragmentByTag(tag);
+                bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+                if (fragment == null) {
+                    fragment = new FragSubCategory();
+                    fragment.setArguments(bundle);
+                }
+                Log.d("TG", "attachFragment, fragment = " + fragment.toString());
+                break;
+            case INDEX_LIST_RECIPE:
+                tag = FragListRecipe.class.getSimpleName();
+                if (startMode == MODE_FAVORITE_RECIPE) tag += "Favorite";
+                else if (startMode == MODE_SEARCH_RESULT) tag += "Search";
+                fragment = getSupportFragmentManager().findFragmentByTag(tag);
+                bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+                bundle.putInt(TAG_MODE, startMode);
+                bundle.putString(TAG_SEARCH_STRING, searchRequest);
+                if (fragment == null) {
+                    fragment = new FragListRecipe();
+                    fragment.setArguments(bundle);
+                }
+                Log.d("TG", "attachFragment, fragment = " + tag);
+                break;
+            case INDEX_TEXT_RECIPE:
+                tag = FragTextRecipe.class.getSimpleName();
+                fragment = getSupportFragmentManager().findFragmentByTag(tag);
+                if (typeFolder == PARENT) {
+                    bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.idParentItem);//get id TOP category
+                } else if (typeFolder == CHILD) {
+                    bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.idParentItem);//get id SUB category
+                }
+                bundle.putInt(TAG_ID_RECIPE, idItem);
+                bundle.putInt(TAG_MODE, startMode);
+                bundle.putInt(TAG_TYPE_FOLDER, typeFolder);
+                if (fragment == null) {
+                    fragment = new FragTextRecipe();
+                    fragment.setArguments(bundle);
+                }
+                Log.d("TG", "attachFragment, fragment = " + fragment.toString());
+                break;
+        }
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment, tag)
+                .addToBackStack(tag)
+                .commit();
+
+    }
+
+
+    private int countBackStackFragment() {
+        int i = fragmentManager.getBackStackEntryCount();
+        Log.d("TG", "countBackStackFragment i = " + i);
+        return i;
+    }
+
+    /**
+     * Clear all back stack of fragments, except FragTopCategory
+     */
+    private void clearBackStackOfFragments() {
+        for (int i = 0; i < fragmentManager.getBackStackEntryCount() - 1; i++) {
+            fragmentManager.popBackStack();
+        }
     }
 
     public static void overrideActionBar(String title, String subtitle) {
         if (actionBar != null) {
-            if(title == null) actionBar.setTitle(R.string.app_name);
+            if (title == null) actionBar.setTitle(R.string.app_name);
             else actionBar.setTitle(title);
 
-            if(subtitle == null) actionBar.setSubtitle("");
+            if (subtitle == null) actionBar.setSubtitle("");
             else actionBar.setSubtitle(subtitle);
+
+
         }
     }
 
@@ -148,6 +235,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+        if (countBackStackFragment() == 0) this.finish();
     }
 
     @Override
@@ -160,16 +248,22 @@ public class MainActivity extends AppCompatActivity
             public boolean onQueryTextSubmit(String query) {
                 Log.d("TG", "onQueryTextSubmit = " + query);
                 if (query.length() > 1) {
-                    fragListRecipe = new FragListRecipe();
-                    if (!fragListRecipe.isAdded()) {
-                        startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
-                    }else {
+//                    fragListRecipe = new FragListRecipe();
+//                    if (!fragListRecipe.isAdded()) {
+                    String tag = FragListRecipe.class.getSimpleName();
+                    tag += "Search";
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
+                    if (fragment == null) {
+//                        startListRecipeFragment(0, MODE_SEARCH_RESULT, query);
+                        attachFragment(INDEX_LIST_RECIPE, 0, MODE_SEARCH_RESULT, query, 0);
+                        Log.d("TG", "onQueryTextSubmit fragListRecipe is not Added");
+                    } else {
                         FragListRecipe.setParams(0, MODE_SEARCH_RESULT, query);
                         new FragListRecipe().showListRecipe();
+                        Log.d("TG", "onQueryTextSubmit fragListRecipe is Added");
                     }
 
-                }
-                else Snackbar.make(searchView, R.string.text_empty_request,
+                } else Snackbar.make(searchView, R.string.text_empty_request,
                         Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return false;
             }
@@ -199,25 +293,32 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.drawer_home) {
-            clearBackStackFragment();
-            setTopCategoryFragment();
+            clearBackStackOfFragments();
+//            setTopCategoryFragment();
         } else if (id == R.id.drawer_favorite) {
-            fragListRecipe = new FragListRecipe();
-            if (!fragListRecipe.isAdded()) {
-                startListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
-            }else {
+//            fragListRecipe = new FragListRecipe();
+            String tag = FragListRecipe.class.getSimpleName();
+            tag += "Favorite";
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
+//            if (!fragListRecipe.isAdded()) {
+            if (fragment == null) {
+//                startListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
+                Log.d("TG", "fragListRecipe is not Added");
+                attachFragment(INDEX_LIST_RECIPE, 0, MODE_FAVORITE_RECIPE, null, 0);
+            } else {
                 FragListRecipe.setParams(0, MODE_FAVORITE_RECIPE, null);
                 new FragListRecipe().showListRecipe();
+                Log.d("TG", "fragListRecipe is Added");
             }
 
         } else if (id == R.id.drawer_export_db) {
             showSaveRestoreDialog(DIALOG_FILE_SAVE);
-            new Analytics(context).sendAnalytics("myCookBook","Main Activity","Save db", "nop");
+            new Analytics(context).sendAnalytics("myCookBook", "Main Activity", "Save db", "nop");
 
 
         } else if (id == R.id.drawer_import_db) {
             showSaveRestoreDialog(DIALOG_FILE_RESTORE);
-            new Analytics(context).sendAnalytics("myCookBook","Main Activity","Restore db", "nop");
+            new Analytics(context).sendAnalytics("myCookBook", "Main Activity", "Restore db", "nop");
 
         } else if (id == R.id.drawer_send_question) {
             sendMailToDevelopers();
@@ -289,47 +390,41 @@ public class MainActivity extends AppCompatActivity
         makeSnackbar(context.getResources().getString(R.string.success_saved));
     }
 
-    private void clearBackStackFragment() {
-        for (int i = 0; i < fragmentManager.getBackStackEntryCount(); ++i) {
-            fragmentManager.popBackStack();
-        }
-    }
-
     @Override
     public void onListItemClick(int idActionFrom, int idItem) {
         switch (idActionFrom) {
             case ID_ACTION_TOP_CATEGORY:
-                startSubCategoryFragment(idItem);
+//                startSubCategoryFragment(idItem);
+                attachFragment(INDEX_SUB_CATEGORY, idItem, 0, null, 0);
                 break;
             case ID_ACTION_SUB_CATEGORY_CATEGORY:
-                startListRecipeFragment(idItem, MODE_RECIPE_FROM_CATEGORY, null);
+//                startListRecipeFragment(idItem, MODE_RECIPE_FROM_CATEGORY, null);
+                attachFragment(INDEX_LIST_RECIPE, idItem, MODE_RECIPE_FROM_CATEGORY, null, 0);
                 break;
             case ID_ACTION_SUB_CATEGORY_RECIPE:
-                Log.d("TG", "onListItemClick idItem = " + idItem);
-                startTextRecipeFragment(idItem, PARENT, MODE_REVIEW_RECIPE);
+//                startTextRecipeFragment(idItem, PARENT, MODE_REVIEW_RECIPE);
+                attachFragment(INDEX_TEXT_RECIPE, idItem, MODE_REVIEW_RECIPE, null, PARENT);
                 break;
             case ID_ACTION_LIST_RECIPE:
-                startTextRecipeFragment(idItem, CHILD, MODE_REVIEW_RECIPE);
+//                startTextRecipeFragment(idItem, CHILD, MODE_REVIEW_RECIPE);
+                attachFragment(INDEX_TEXT_RECIPE, idItem, MODE_REVIEW_RECIPE, null, CHILD);
                 break;
         }
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
-        Log.d("TG", "activity onPause");
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-        Log.d("TG", "activity onResume");
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         super.onStop();
-        Log.d("TG", "activity onStop");
     }
 
     private void setTopCategoryFragment() {
@@ -338,6 +433,38 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction = fragmentManager.beginTransaction()
                     .replace(R.id.container, fragTopCategory, TAG_CATEGORY);
             fragmentTransaction.commit();
+        }
+    }
+
+    private void startSubCategoryFragment(int idItem) {
+        Bundle bundle = new Bundle();
+        fragSubCategory = new FragSubCategory();
+        if (!fragSubCategory.isAdded()) {
+            bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+            fragSubCategory.setArguments(bundle);
+            fragmentTransaction = fragmentManager
+                    .beginTransaction();
+            fragmentTransaction.replace(R.id.container, fragSubCategory)
+                    .addToBackStack(TAG_SUBCATEGORY)
+                    .commit();
+        }
+    }
+
+    private void startListRecipeFragment(int idItem, int startMode, String searchRequest) {
+        Log.d("TG", "startListRecipeFragment:" +
+                "idItem= " + idItem + "  startMode= " + startMode + "  searchRequest= " + searchRequest);
+        Bundle bundle = new Bundle();
+        fragListRecipe = new FragListRecipe();
+        if (!fragListRecipe.isAdded()) {
+            bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
+            bundle.putInt(TAG_MODE, startMode);
+            bundle.putString(TAG_SEARCH_STRING, searchRequest);
+            fragListRecipe.setArguments(bundle);
+            fragmentTransaction = fragmentManager
+                    .beginTransaction();
+            fragmentTransaction.replace(R.id.container, fragListRecipe)
+                    .addToBackStack(TAG_LIST_RECIPE)
+                    .commit();
         }
     }
 
@@ -363,37 +490,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void startListRecipeFragment(int idItem, int startMode, String searchRequest) {
-        Log.d("TG", "startListRecipeFragment:"+
-        "idItem= "+idItem+"  startMode= "+startMode+"  searchRequest= "+searchRequest);
-        Bundle bundle = new Bundle();
-        fragListRecipe = new FragListRecipe();
-        if (!fragListRecipe.isAdded()) {
-            bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
-            bundle.putInt(TAG_MODE, startMode);
-            bundle.putString(TAG_SEARCH_STRING, searchRequest);
-            fragListRecipe.setArguments(bundle);
-            fragmentTransaction = fragmentManager
-                    .beginTransaction();
-            fragmentTransaction.replace(R.id.container, fragListRecipe)
-                    .addToBackStack(TAG_LIST_RECIPE)
-                    .commit();
-        }
-    }
-
-    private void startSubCategoryFragment(int idItem) {
-        Bundle bundle = new Bundle();
-        fragSubCategory = new FragSubCategory();
-        if (!fragSubCategory.isAdded()) {
-            bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
-            fragSubCategory.setArguments(bundle);
-            fragmentTransaction = fragmentManager
-                    .beginTransaction();
-            fragmentTransaction.replace(R.id.container, fragSubCategory)
-                    .addToBackStack(TAG_SUBCATEGORY)
-                    .commit();
-        }
-    }
 
     public void showSaveRestoreDialog(int idDialog) {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -420,8 +516,8 @@ public class MainActivity extends AppCompatActivity
             FragTopCategory.showDialog(DIALOG_ADD_CATEGORY, null);
             /** add recipe in TOP folder */
         } else if (view.getId() == R.id.fabAddRecipeSubCategory) {
-            startTextRecipeFragment(DEFAULT_VALUE_COLUMN,
-                    PARENT, MODE_NEW_RECIPE);
+//            startTextRecipeFragment(DEFAULT_VALUE_COLUMN, PARENT, MODE_NEW_RECIPE);
+            attachFragment(INDEX_TEXT_RECIPE, DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, null, PARENT);
             fabSubCategory.close(true);
             /** add folder in TOP folder */
         } else if (view.getId() == R.id.fabAddFolderSubCategory) {
@@ -430,7 +526,8 @@ public class MainActivity extends AppCompatActivity
             /** add recipe in SUB folder */
         } else if (view.getId() == R.id.fabAddRecipeListRecipe) {
             Log.d("TG", "fabAddRecipeListRecipe idItem = " + FragSubCategory.idItem);
-            startTextRecipeFragment(DEFAULT_VALUE_COLUMN, CHILD, MODE_NEW_RECIPE);
+//            startTextRecipeFragment(DEFAULT_VALUE_COLUMN, CHILD, MODE_NEW_RECIPE);
+            attachFragment(INDEX_TEXT_RECIPE, DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, null, CHILD);
             fabSubCategory.close(true);
         }
 
@@ -440,9 +537,9 @@ public class MainActivity extends AppCompatActivity
         Snackbar.make(fabSubCategory, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 
-    public static void saveListState(String idFragment, int firstVisibleItem){
+    public static void saveListState(String idFragment, int firstVisibleItem) {
         mapState.put(idFragment, firstVisibleItem);
-        Log.d("TG", "saveListState : "+idFragment+" - "+firstVisibleItem);
+        Log.d("TG", "MainActivity saveListState : " + idFragment + " - " + firstVisibleItem);
     }
 
     public static int restoreListState(String idFragment) {

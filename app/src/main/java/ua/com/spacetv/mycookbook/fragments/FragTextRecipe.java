@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package ua.com.spacetv.mycookbook;
+package ua.com.spacetv.mycookbook.fragments;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
@@ -46,6 +47,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import ua.com.spacetv.mycookbook.MainActivity;
+import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
@@ -55,7 +58,6 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
  * Created by Roman Turas on 07/01/2016
- *
  */
 public class FragTextRecipe extends Fragment implements StaticFields {
 
@@ -69,19 +71,20 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private static View view;
     private EditText editTitleRecipe, editTextRecipe;
     private TextView textTextRecipe;
-    private String titleRecipeFromDatabase = null;
-    private String textRecipeFromDatabase = null;
+    private static Intent chooseImageIntent;
+    private static ImageView imageView;
+    public static final int INDEX = INDEX_TEXT_RECIPE;
     private static int idReceivedFolderItem = 0; // id of folder where was or will TEXT of RECIPE
     private static int idRecipe = 0; // id Received (mode REVIEW) or Just Created recipe (mode NEW)
     private static int typeReceivedFolder = 0; // Is two types of folders: PARENT=0 (top) & CHILD=1 (subFolder)
     private static int topFolder_id = 0; //id top folder received from database
     private static int subFolder_id = 0; //id sub folder received from database
     private static int startupMode = MODE_REVIEW_RECIPE;
-    private final int CHOOSE_IMAGE = 1;
-    private static ImageView imageView;
-    private String selectedImagePath;
-    private static Intent chooseImageIntent;
     private static int displayWidth;
+    private final int CHOOSE_IMAGE = 1;
+    private String selectedImagePath;
+    private String titleRecipeFromDatabase = null;
+    private String textRecipeFromDatabase = null;
     private static String databaseImagePath;
 
     @Override
@@ -102,10 +105,11 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         selectedImagePath = null;
         databaseImagePath = null;
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
+        Log.d("TG", "** FragTextRecipe onCreate **");
     }
 
     private void loadAds() {
-        if(ads.getInterstitialAd() == null) ads.initAds(); // init and preload Ads
+        if (ads.getInterstitialAd() == null) ads.initAds(); // init and preload Ads
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
@@ -116,12 +120,12 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         textTextRecipe = (TextView) view.findViewById(R.id.textTextRecipe);
         imageView = (ImageView) view.findViewById(R.id.imageRecipe);
 
-        ads = new Ads(context);
         getDisplayMetrics();
+
+        ads = new Ads(context);
 
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
-//        FragTextRecipe.view = view;
 
         if (startupMode == MODE_EDIT_RECIPE) modeEdit();
         else if (startupMode == MODE_REVIEW_RECIPE) modeReview();
@@ -136,6 +140,11 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         if (startupMode == MODE_REVIEW_RECIPE) inflater.inflate(R.menu.menu_review_recipe, menu);
         else if (startupMode == MODE_EDIT_RECIPE |
                 startupMode == MODE_NEW_RECIPE) inflater.inflate(R.menu.menu_edit_recipe, menu);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     private void modeNewRecipe() {
@@ -174,7 +183,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         setHasOptionsMenu(true);
     }
 
-    private void getDisplayMetrics(){
+    private void getDisplayMetrics() {
         Display display = getActivity().getWindowManager().getDefaultDisplay();
         android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
         display.getMetrics(metrics);
@@ -184,6 +193,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     public void setImage(Bitmap bitmap) {
         bitmap = getRoundedCornerBitmap(bitmap, 30);
         imageView.setImageBitmap(bitmap);
+        imageView.getLayoutParams().height = ActionBar.LayoutParams.WRAP_CONTENT;
 
         int picWidth = bitmap.getWidth();
         int picHeight = bitmap.getHeight();
@@ -247,25 +257,28 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             switch (requestCode) {
                 case CHOOSE_IMAGE:
                     Bitmap bitmap;
-                    if(data!=null) { // ** Gallery **
+                    if (data != null) { // ** Gallery **
                         selectedImagePath = getDataColumn(data.getData());
-                        bitmap = ImageGetter.decodeBitmapFromPath(selectedImagePath,
-                                (displayWidth*90)/100); //width of display - 10%
+                        bitmap = ImageGetter.decodeBitmapFromPath(selectedImagePath, displayWidth);
                         if(bitmap != null) setImage(bitmap);
+//                        ImageLoader.getInstance().displayImage("file://" + selectedImagePath, imageView);
+//                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
+                        Log.d("TG", "width = " + bitmap.getWidth()+"  height = "+bitmap.getHeight());
                         Log.d("TG", "data!=null; getPath = " + selectedImagePath);
                         new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Gallery");
-                    }else{ // ** Camera **
+                    } else { // ** Camera **
                         selectedImagePath = ImageGetter.getImageFromResult(resultCode, data);
                         ImageGetter.addImageToGallery(selectedImagePath);
-                        bitmap = ImageGetter.decodeBitmapFromPath(selectedImagePath,
-                                (displayWidth*90)/100); //width of display - 10%
+                        bitmap = ImageGetter.decodeBitmapFromPath(selectedImagePath, displayWidth);
                         if(bitmap != null) setImage(bitmap);
+//                        ImageLoader.getInstance().displayImage("file://" + selectedImagePath, imageView);
+//                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
+                        Log.d("TG", "width = " + bitmap.getWidth()+"  height = "+bitmap.getHeight());
                         Log.d("TG", "data==null; getPath = " + selectedImagePath);
                         new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Camera");
                     }
                     break;
             }
-
         }
     }
 
@@ -301,8 +314,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
             emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
-            if(databaseImagePath != null && databaseImagePath != "") {
-                Uri imageUri = Uri.parse("file://"+databaseImagePath);
+            if (databaseImagePath != null && databaseImagePath != "") {
+                Uri imageUri = Uri.parse("file://" + databaseImagePath);
                 emailIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
             }
 
@@ -336,12 +349,15 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                         topFolder_id = cursor.getInt(3);
                         subFolder_id = cursor.getInt(5);
                         databaseImagePath = cursor.getString(6);
-                        if(databaseImagePath != null && databaseImagePath != ""){
-                            Log.d("TG", "readRecipeFromDatabase -> databaseImagePath = "+ databaseImagePath);
+                        if (databaseImagePath != null && databaseImagePath != "") {
+                            Log.d("TG", "readRecipeFromDatabase -> databaseImagePath = " + databaseImagePath);
                             Bitmap bitmap = ImageGetter.decodeBitmapFromPath(databaseImagePath,
-                                    (displayWidth*90)/100); //width of display - 10%
+                                    displayWidth);
                             if(bitmap != null) setImage(bitmap);
                             else Log.d("TG", "Picture not found!");
+//                            ImageLoader.getInstance().displayImage("file://" + databaseImagePath, imageView);
+//                            imageLoader.loadImage("file://" + databaseImagePath, targetSize, this);
+                            Log.d("TG", "width = " + bitmap.getWidth()+"  height = "+bitmap.getHeight());
                         }
                     }
                 } while (cursor.moveToNext());
@@ -350,11 +366,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         } else {
             Log.d("TG", "Table with recipeCategory - is Empty");
         }
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -379,7 +390,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
     /* If text or image was changed -> save recipe in database*/
     private boolean isChangesFromRecipe() {
-        if(selectedImagePath != null && !selectedImagePath.equals(databaseImagePath)){
+        if (selectedImagePath != null && !selectedImagePath.equals(databaseImagePath)) {
             databaseImagePath = selectedImagePath;
             return true; // image was changed
         }
@@ -439,6 +450,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private void makeSnackbar(String text) {
         try {
             Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
-        }catch (NullPointerException npe){}
+        } catch (NullPointerException npe) {
+        }
     }
+
 }

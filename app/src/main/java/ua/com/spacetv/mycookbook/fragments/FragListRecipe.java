@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ua.com.spacetv.mycookbook;
+package ua.com.spacetv.mycookbook.fragments;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -41,8 +41,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import ua.com.spacetv.mycookbook.MainActivity;
+import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
-import ua.com.spacetv.mycookbook.helpers.FragDialog;
+import ua.com.spacetv.mycookbook.dialogs.FragDialog;
 import ua.com.spacetv.mycookbook.helpers.PrepareListRecipes;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
@@ -51,6 +53,7 @@ import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /**
  * Created by Roman Turas on 07/01/2016.
+ *
  */
 public class FragListRecipe extends Fragment implements StaticFields,
         AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
@@ -126,6 +129,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
                 } else MainActivity.overrideActionBar(null, null);
 
                 MainActivity.showFloatButtonListRecipe();
+                setHasOptionsMenu(false); // do not override menu, keep it from main activity
                 break;
 
             case MODE_FAVORITE_RECIPE:
@@ -137,6 +141,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
                     text_empty_text_list_recipe.setText(R.string.text_favorite_not_found);
                 } else text_empty_text_list_recipe.setText(null);
                 MainActivity.hideAllFloatButtons();
+                setHasOptionsMenu(true); //override menu, call 'onCreateOptionsMenu' in this class
                 break;
 
             case MODE_SEARCH_RESULT:
@@ -148,34 +153,33 @@ public class FragListRecipe extends Fragment implements StaticFields,
                     text_empty_text_list_recipe.setText(R.string.text_search_not_found);
                 } else text_empty_text_list_recipe.setText(null);
                 MainActivity.hideAllFloatButtons();
+                setHasOptionsMenu(true); //override menu, call 'onCreateOptionsMenu' in this class
                 break;
         }
-
         ListAdapter listAdapter = new ListAdapter(context, adapter);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);
         listView.setOnItemLongClickListener(this);
         listView.setOnItemClickListener(this);
         listView.setSelection(firstVisibleItem); //mechanism save and restore state of list view
-        setHasOptionsMenu(true);
-        setHasOptionsMenu(false);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        if (startupMode == MODE_RECIPE_FROM_CATEGORY) inflater.inflate(R.menu.main, menu);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        Log.d("TG", "onPause FragListRecipe : ");
         MainActivity.saveListState(TAG_LIST_RECIPE, firstVisibleItem); //save list view state
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -188,6 +192,7 @@ public class FragListRecipe extends Fragment implements StaticFields,
     @Override
     public void onDetach() {
         super.onDetach();
+        Log.d("TG", "onDetach FragListRecipe : ");
         MainActivity.saveListState(TAG_LIST_RECIPE, 0); //reset list view state
         database.close();
         dataBaseHelper.close();

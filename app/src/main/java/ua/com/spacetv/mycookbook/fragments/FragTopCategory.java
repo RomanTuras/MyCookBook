@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ua.com.spacetv.mycookbook;
+package ua.com.spacetv.mycookbook.fragments;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -39,9 +39,11 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import ua.com.spacetv.mycookbook.MainActivity;
+import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
-import ua.com.spacetv.mycookbook.helpers.FragDialog;
+import ua.com.spacetv.mycookbook.dialogs.FragDialog;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
@@ -60,13 +62,14 @@ public class FragTopCategory extends Fragment implements StaticFields,
     private static FragmentManager fragmentManager;
     private static ListView listView;
     private static ArrayList<ListData> adapter;
+    private ArrayList<Integer> arrayIdSubCategories;
     private static View view;
     private static TextView text_empty_text_topcategory;
+    private static OnFragmentEventsListener onFragmentEventsListener;
+    private ContentValues contentValues;
     private static String nameForAction;
     public static int idParentCategory;
-    private static OnFragmentEventsListener onFragmentEventsListener;
-    private ArrayList<Integer> arrayIdSubCategories;
-    private ContentValues contentValues;
+
     public static String nameOfTopCategory = null;
     private static int firstVisibleItem = 0;
 
@@ -76,6 +79,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         this.contentValues = new ContentValues();
         FragTopCategory.context = context;
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
+        Log.d("TG", "TopCategoryFragment onAttach");
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
@@ -88,19 +92,21 @@ public class FragTopCategory extends Fragment implements StaticFields,
         fragmentManager = getFragmentManager();
         dataBaseHelper = new DataBaseHelper(context);
         database = dataBaseHelper.getWritableDatabase();
-        Log.d("TG", "onCreateView: dataBaseHelper = " + dataBaseHelper.toString() + "  database =" + database.toString());
+//        Log.d("TG", "FragTopCategory onCreateView: dataBaseHelper = " + dataBaseHelper.toString() + "  database =" + database.toString());
         FragTopCategory.view = view;
+        Log.d("TG", "TopCategoryFragment onCreateView");
         return view;
     }
 
     public void showAllCategory() {
         adapter = new ArrayList<>();
+        Log.d("TG", "TopCategoryFragment showAllCategory");
 
         if(database == null | dataBaseHelper == null) {
             dataBaseHelper = new DataBaseHelper(context);
             database = dataBaseHelper.getWritableDatabase();
         }
-        Log.d("TG", "showAllCategory: dataBaseHelper = " + dataBaseHelper.toString() + "  database =" + database.toString());
+//        Log.d("TG", "FragTopCategory showAllCategory: dataBaseHelper = " + dataBaseHelper.toString() + "  database =" + database.toString());
 
         categoryInList();
         if (adapter.size() == 0) text_empty_text_topcategory
@@ -194,7 +200,6 @@ public class FragTopCategory extends Fragment implements StaticFields,
         MainActivity.showFloatButtonTopCategory();
         MainActivity.overrideActionBar(null, null);
         Log.d("TG", "TopCategoryFragment onResume");
-
     }
 
     @Override
@@ -208,6 +213,7 @@ public class FragTopCategory extends Fragment implements StaticFields,
         super.onDetach();
         dataBaseHelper.close();
         database.close();
+        Log.d("TG", "TopCategoryFragment onDetach");
     }
 
 

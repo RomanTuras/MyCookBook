@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ua.com.spacetv.mycookbook.helpers;
+package ua.com.spacetv.mycookbook.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

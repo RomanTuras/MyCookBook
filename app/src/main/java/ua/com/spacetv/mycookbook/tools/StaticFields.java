@@ -23,12 +23,19 @@ package ua.com.spacetv.mycookbook.tools;
 public interface StaticFields {
 
     /* Tags for fragments */
+    String FRAGMENT_INDEX = "FRAGMENT_INDEX";
     String TAG_CATEGORY = "ID_CATEGORY";
     String TAG_SUBCATEGORY = "ID_SUBCATEGORY";
     String TAG_LIST_RECIPE = "ID_LIST_RECIPE";
     String TAG_TEXT_RECIPE = "ID_TEXT_RECIPE";
     String TAG_DIALOG = "TAG_DIALOG";
     String TAG_FILE_DIALOG = "TAG_FILE_DIALOG";
+
+    /* ID index of fragments */
+    int INDEX_TOP_CATEGORY = 0;
+    int INDEX_SUB_CATEGORY = 1;
+    int INDEX_LIST_RECIPE = 2;
+    int INDEX_TEXT_RECIPE = 3;
 
     /* id of Dialogs */
     String ID_DIALOG = "ID_DIALOG";
@@ -111,6 +118,6 @@ public interface StaticFields {
     /* Google services */
     String TRACK_ID ="UA-64362552-1";
     String AD_UNIT_ID = "ca-app-pub-7481052517653982/5697171795";
-    boolean isDebugModeOn = true;
+    boolean isDebugModeOn = true; // !! change to 'false' before production !!
     String TEST_DEVICE = "77A1F05FE188A3F51A0FF103708EDEF9";
 }

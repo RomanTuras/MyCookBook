@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ua.com.spacetv.mycookbook.helpers;
+package ua.com.spacetv.mycookbook.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -39,10 +39,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import ua.com.spacetv.mycookbook.FragListRecipe;
-import ua.com.spacetv.mycookbook.FragSubCategory;
-import ua.com.spacetv.mycookbook.FragTopCategory;
+import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
+import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
+import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.R;
+import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
 /** Created by Roman Turas on 02/01/2016.

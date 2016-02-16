@@ -40,7 +40,7 @@ import ua.com.spacetv.mycookbook.R;
 
 /**
  * Created by Roman Turas on 07/02/2016
- * It creates options to pick images from different sources, like camera, gallery, photos e.t.c.
+ * It's creates options to pick images from different sources, like camera, gallery, photos e.t.c.
  */
 
 public class ImageGetter {
@@ -77,6 +77,9 @@ public class ImageGetter {
         return chooserIntent;
     }
 
+    /** Get the list of all activities which can work with ACTION_PICK
+     * @return List
+     * */
     private static List<Intent> addIntentsToList(Context context, List<Intent> list, Intent intent) {
         List<ResolveInfo> resInfo = context.getPackageManager().queryIntentActivities(intent, 0);
         for (ResolveInfo resolveInfo : resInfo) {
@@ -108,7 +111,7 @@ public class ImageGetter {
     }
 
     /**
-     * Register image to gallery
+     * Registered image in to gallery
      */
     public static void addImageToGallery(String filePath) {
         ContentValues values = new ContentValues();
@@ -118,6 +121,9 @@ public class ImageGetter {
         context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 
+    /** Get the temporary file to obtain possible to save picture from camera
+     * @return File
+     * */
     private static File getTempFile() {
         String sdState = Environment.getExternalStorageState();
         File fileBitmap = null;
@@ -133,6 +139,9 @@ public class ImageGetter {
         return fileBitmap;
     }
 
+    /** Get the path to DCIM directory from external storage
+     * @return File
+     * */
     private static File getPath() {
         String pathDcim = android.os.Environment.DIRECTORY_DCIM;
         String sdState = Environment.getExternalStorageState();
@@ -144,6 +153,10 @@ public class ImageGetter {
         return new File(path);
     }
 
+    /** Created a File with unique filename
+     * @return File
+     * @throws IOException
+     * */
     private static File createImageFile() throws IOException {
         String timeStamp =
                 new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -157,7 +170,35 @@ public class ImageGetter {
         return image;
     }
 
-    public static Bitmap decodeBitmapFromPath(String path, int reqWidth) {
+    /** Decoded and resize bitmap, according from display width
+     * @param path String, path to bitmap
+     * @param displayWidth int, width of display in pixels
+     * @return Bitmap
+     * */
+    public static Bitmap decodeBitmapFromPath(String path, int displayWidth) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        int bmpWidth = bitmap.getWidth();
+        options.inSampleSize = calculateRatio(bmpWidth, displayWidth);
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(path, options);
+    }
+
+    /** Calculated a ratio for image reduction
+     * @param bitmapWidth - width of loaded bitmap
+     * @param displayWidth - int, width of display in pixels
+     * @return int */
+    public static int calculateRatio(int bitmapWidth, int displayWidth) {
+        float ratio = 1;
+        if(bitmapWidth > displayWidth) {
+            ratio = Math.round((float) bitmapWidth / (float) displayWidth);
+        }
+        Log.d("TG", "ratio = " + ratio);
+        return (int) ratio;
+    }
+
+    public static Bitmap decodeScaledBitmapFromPath(String path, int reqWidth) {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         Bitmap bitmap = BitmapFactory.decodeFile(path);
