@@ -43,7 +43,7 @@ import ua.com.spacetv.mycookbook.R;
  * It's creates options to pick images from different sources, like camera, gallery, photos e.t.c.
  */
 
-public class ImageGetter {
+public class ImagePickHelper {
     private static final String TAG = "TG";
     private static final String JPEG_FILE_PREFIX = "cook";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
@@ -53,7 +53,7 @@ public class ImageGetter {
 
     public static Intent getPickImageIntent(Context context) {
         Intent chooserIntent = null;
-        ImageGetter.context = context;
+        ImagePickHelper.context = context;
 
         List<Intent> intentList = new ArrayList<>();
 
@@ -134,7 +134,7 @@ public class ImageGetter {
                 e.printStackTrace();
             }
         } else {
-            Log.d("TG", "ImageGetter -> SD card not found or was unmounted ");
+            Log.d("TG", "ImagePickHelper -> SD card not found or was unmounted ");
         }
         return fileBitmap;
     }
@@ -166,7 +166,7 @@ public class ImageGetter {
                 JPEG_FILE_SUFFIX,
                 getPath()
         );
-        Log.d("TG", "ImageGetter -> path = " + image.getAbsolutePath());
+        Log.d("TG", "ImagePickHelper -> path = " + image.getAbsolutePath());
         return image;
     }
 

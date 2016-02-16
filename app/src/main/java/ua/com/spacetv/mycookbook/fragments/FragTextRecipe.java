@@ -52,7 +52,7 @@ import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
-import ua.com.spacetv.mycookbook.helpers.ImageGetter;
+import ua.com.spacetv.mycookbook.helpers.ImagePickHelper;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.StaticFields;
 
@@ -246,7 +246,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void getPickImageIntent() {
-        chooseImageIntent = ImageGetter.getPickImageIntent(context);
+        chooseImageIntent = ImagePickHelper.getPickImageIntent(context);
         startActivityForResult(chooseImageIntent, CHOOSE_IMAGE);
     }
 
@@ -259,7 +259,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                     Bitmap bitmap;
                     if (data != null) { // ** Gallery **
                         selectedImagePath = getDataColumn(data.getData());
-                        bitmap = ImageGetter.decodeBitmapFromPath(selectedImagePath, displayWidth);
+                        bitmap = ImagePickHelper.decodeBitmapFromPath(selectedImagePath, displayWidth);
                         if(bitmap != null) setImage(bitmap);
 //                        ImageLoader.getInstance().displayImage("file://" + selectedImagePath, imageView);
 //                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
@@ -267,9 +267,9 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                         Log.d("TG", "data!=null; getPath = " + selectedImagePath);
                         new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Gallery");
                     } else { // ** Camera **
-                        selectedImagePath = ImageGetter.getImageFromResult(resultCode, data);
-                        ImageGetter.addImageToGallery(selectedImagePath);
-                        bitmap = ImageGetter.decodeBitmapFromPath(selectedImagePath, displayWidth);
+                        selectedImagePath = ImagePickHelper.getImageFromResult(resultCode, data);
+                        ImagePickHelper.addImageToGallery(selectedImagePath);
+                        bitmap = ImagePickHelper.decodeBitmapFromPath(selectedImagePath, displayWidth);
                         if(bitmap != null) setImage(bitmap);
 //                        ImageLoader.getInstance().displayImage("file://" + selectedImagePath, imageView);
 //                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
@@ -351,7 +351,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                         databaseImagePath = cursor.getString(6);
                         if (databaseImagePath != null && databaseImagePath != "") {
                             Log.d("TG", "readRecipeFromDatabase -> databaseImagePath = " + databaseImagePath);
-                            Bitmap bitmap = ImageGetter.decodeBitmapFromPath(databaseImagePath,
+                            Bitmap bitmap = ImagePickHelper.decodeBitmapFromPath(databaseImagePath,
                                     displayWidth);
                             if(bitmap != null) setImage(bitmap);
                             else Log.d("TG", "Picture not found!");
