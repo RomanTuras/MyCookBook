@@ -18,9 +18,14 @@ package ua.com.spacetv.mycookbook.fragments;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LabeledIntent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -46,6 +51,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
@@ -73,7 +81,6 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private TextView textTextRecipe;
     private static Intent chooseImageIntent;
     private static ImageView imageView;
-    public static final int INDEX = INDEX_TEXT_RECIPE;
     private static int idReceivedFolderItem = 0; // id of folder where was or will TEXT of RECIPE
     private static int idRecipe = 0; // id Received (mode REVIEW) or Just Created recipe (mode NEW)
     private static int typeReceivedFolder = 0; // Is two types of folders: PARENT=0 (top) & CHILD=1 (subFolder)
@@ -260,20 +267,20 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                     if (data != null) { // ** Gallery **
                         selectedImagePath = getDataColumn(data.getData());
                         bitmap = ImagePickHelper.decodeBitmapFromPath(selectedImagePath, displayWidth);
-                        if(bitmap != null) setImage(bitmap);
+                        if (bitmap != null) setImage(bitmap);
 //                        ImageLoader.getInstance().displayImage("file://" + selectedImagePath, imageView);
 //                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
-                        Log.d("TG", "width = " + bitmap.getWidth()+"  height = "+bitmap.getHeight());
+                        Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
                         Log.d("TG", "data!=null; getPath = " + selectedImagePath);
                         new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Gallery");
                     } else { // ** Camera **
                         selectedImagePath = ImagePickHelper.getImageFromResult(resultCode, data);
                         ImagePickHelper.addImageToGallery(selectedImagePath);
                         bitmap = ImagePickHelper.decodeBitmapFromPath(selectedImagePath, displayWidth);
-                        if(bitmap != null) setImage(bitmap);
+                        if (bitmap != null) setImage(bitmap);
 //                        ImageLoader.getInstance().displayImage("file://" + selectedImagePath, imageView);
 //                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
-                        Log.d("TG", "width = " + bitmap.getWidth()+"  height = "+bitmap.getHeight());
+                        Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
                         Log.d("TG", "data==null; getPath = " + selectedImagePath);
                         new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Camera");
                     }
@@ -311,20 +318,79 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             String title = editTitleRecipe.getText().toString();
             String text = editTextRecipe.getText().toString();
             Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
-
+            emailIntent.setType("text/plain");
+//            emailIntent.setType("image/jpeg");
             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
             emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
-            if (databaseImagePath != null && databaseImagePath != "") {
-                Uri imageUri = Uri.parse("file://" + databaseImagePath);
-                emailIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-            }
-
-//            emailIntent.setType("text/plain");
-            emailIntent.setType("image/jpeg");
-//            emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//            if (databaseImagePath != null && databaseImagePath != "") {
+//                Uri imageUri = Uri.parse("file://" + databaseImagePath);
+//                emailIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
+//            }
             startActivity(Intent.createChooser(emailIntent, context
                     .getString(R.string.text_share_recipe)));
         }
+    }
+
+    public void shareRecipe(int j) {
+        Resources resources = getResources();
+        String title = editTitleRecipe.getText().toString();
+        String text = editTextRecipe.getText().toString();
+//
+        PackageManager pm = getActivity().getPackageManager();
+
+        Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+//            emailIntent.setType("text/plain");
+        emailIntent.setType("image/jpeg");
+//        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Title1");
+//        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Text of the messages");
+
+        Uri imageUri = null;
+        if (databaseImagePath != null && databaseImagePath != "") {
+            imageUri = Uri.parse("file://" + databaseImagePath);
+        }
+//        emailIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
+
+        Intent openInChooser = Intent.createChooser(emailIntent, resources.getString(R.string.text_share_recipe));
+        List<ResolveInfo> resInfo = pm.queryIntentActivities(emailIntent, PackageManager.MATCH_DEFAULT_ONLY);
+        Log.d("TG", "resInfo.size = " + resInfo.size());
+        List<LabeledIntent> intentList = new ArrayList<LabeledIntent>();
+        for (int i = 0; i < resInfo.size(); i++) {
+            // Extract the label, append it, and repackage it in a LabeledIntent
+            ResolveInfo ri = resInfo.get(i);
+
+            String packageName = ri.activityInfo.packageName;
+
+            if (packageName.toLowerCase().contains("com.viber.voip")) {
+                Log.d("TG", "packageName.contains = "+packageName.toString());
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName(packageName, ri.activityInfo.name));
+                intent.putExtra(android.content.Intent.EXTRA_TEXT, text);
+                intent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
+                intent.setType("text/plain");
+                intentList.add(new LabeledIntent(intent, packageName, ri.loadLabel(pm), ri.icon));
+            } else if (packageName.toLowerCase().contains("com.whatsapp") ||
+                    packageName.contains("com.twitter.android") ||
+                    packageName.contains("com.facebook.lite") ||
+                    packageName.contains("com.facebook.katana") ||
+                    packageName.contains("com.google.android.apps.plus") ||
+                    packageName.contains("com.google.android.gm")) {
+                Log.d("TG", "packageName.contains others = "+packageName.toString());
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName(packageName, ri.activityInfo.name));
+                intent.putExtra(android.content.Intent.EXTRA_TEXT, text);
+                intent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
+                intent.putExtra(android.content.Intent.EXTRA_STREAM, imageUri);
+                intent.setType("image/jpeg");
+                intentList.add(new LabeledIntent(intent, packageName, ri.loadLabel(pm), ri.icon));
+            }
+        }
+
+// convert intentList to array
+        LabeledIntent[] extraIntents = intentList.toArray(new LabeledIntent[intentList.size()]);
+        Log.d("TG", "intentList.size() = " + intentList.size());
+
+        openInChooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, extraIntents);
+        startActivity(openInChooser);
     }
 
     private void readRecipeFromDatabase() {
@@ -353,11 +419,11 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                             Log.d("TG", "readRecipeFromDatabase -> databaseImagePath = " + databaseImagePath);
                             Bitmap bitmap = ImagePickHelper.decodeBitmapFromPath(databaseImagePath,
                                     displayWidth);
-                            if(bitmap != null) setImage(bitmap);
+                            if (bitmap != null) setImage(bitmap);
                             else Log.d("TG", "Picture not found!");
 //                            ImageLoader.getInstance().displayImage("file://" + databaseImagePath, imageView);
 //                            imageLoader.loadImage("file://" + databaseImagePath, targetSize, this);
-                            Log.d("TG", "width = " + bitmap.getWidth()+"  height = "+bitmap.getHeight());
+                            Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
                         }
                     }
                 } while (cursor.moveToNext());

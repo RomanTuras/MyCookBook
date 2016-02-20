@@ -17,8 +17,8 @@
 package ua.com.spacetv.mycookbook.tools;
 
 /**
- * Created by salden on 02/01/2016
- * stored used const's
+ * Created by Roman Turas on 02/01/2016
+ * used constants
  */
 public interface StaticFields {
 
@@ -30,12 +30,6 @@ public interface StaticFields {
     String TAG_TEXT_RECIPE = "ID_TEXT_RECIPE";
     String TAG_DIALOG = "TAG_DIALOG";
     String TAG_FILE_DIALOG = "TAG_FILE_DIALOG";
-
-    /* ID index of fragments */
-    int INDEX_TOP_CATEGORY = 0;
-    int INDEX_SUB_CATEGORY = 1;
-    int INDEX_LIST_RECIPE = 2;
-    int INDEX_TEXT_RECIPE = 3;
 
     /* id of Dialogs */
     String ID_DIALOG = "ID_DIALOG";
@@ -118,6 +112,6 @@ public interface StaticFields {
     /* Google services */
     String TRACK_ID ="UA-64362552-1";
     String AD_UNIT_ID = "ca-app-pub-7481052517653982/5697171795";
-    boolean isDebugModeOn = true; // !! change to 'false' before production !!
+    boolean isDebugModeOn = false; // !! change to 'false' before production !!
     String TEST_DEVICE = "77A1F05FE188A3F51A0FF103708EDEF9";
 }

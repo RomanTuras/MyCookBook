@@ -22,10 +22,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -48,7 +46,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import ua.com.spacetv.mycookbook.dialogs.SaveRestoreDialog;
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
@@ -64,8 +61,8 @@ public class MainActivity extends AppCompatActivity
     private static FragmentHelper fragmentHelper;
     private static Context context;
     private static FragmentManager fragmentManager;
-    private static FloatingActionButton fabAddTopCategory, fabAddRecipeListRecipe,
-            fabAddRecipeSubCategory, fabAddFolderSubCategory;
+    private static FloatingActionButton fabAddTopCategory;
+    private static FloatingActionButton fabAddRecipeListRecipe;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
     private static HashMap<String, Integer> mapState = new HashMap<>(3);
@@ -130,8 +127,10 @@ public class MainActivity extends AppCompatActivity
         fabSubCategory = (FloatingActionMenu) findViewById(R.id.fabMenuSubCategory);
         fabAddRecipeListRecipe = (FloatingActionButton) findViewById(R.id.fabAddRecipeListRecipe);
         fabAddRecipeListRecipe.setOnClickListener(this);
-        fabAddRecipeSubCategory = (FloatingActionButton) findViewById(R.id.fabAddRecipeSubCategory);
-        fabAddFolderSubCategory = (FloatingActionButton) findViewById(R.id.fabAddFolderSubCategory);
+        FloatingActionButton fabAddRecipeSubCategory =
+                (FloatingActionButton) findViewById(R.id.fabAddRecipeSubCategory);
+        FloatingActionButton fabAddFolderSubCategory =
+                (FloatingActionButton) findViewById(R.id.fabAddFolderSubCategory);
         fabAddRecipeSubCategory.setOnClickListener(this);
         fabAddFolderSubCategory.setOnClickListener(this);
         showFloatButtonTopCategory();
@@ -238,12 +237,12 @@ public class MainActivity extends AppCompatActivity
             }
 
         } else if (id == R.id.drawer_export_db) {
-            showSaveRestoreDialog(DIALOG_FILE_SAVE);
+            fragmentHelper.showSaveRestoreDialog(DIALOG_FILE_SAVE);
             new Analytics(context).sendAnalytics("myCookBook", "Main Activity", "Save db", "nop");
 
 
         } else if (id == R.id.drawer_import_db) {
-            showSaveRestoreDialog(DIALOG_FILE_RESTORE);
+            fragmentHelper.showSaveRestoreDialog(DIALOG_FILE_RESTORE);
             new Analytics(context).sendAnalytics("myCookBook", "Main Activity", "Restore db", "nop");
 
         } else if (id == R.id.drawer_send_question) {
@@ -285,6 +284,7 @@ public class MainActivity extends AppCompatActivity
 
         makeSnackbar(context.getResources().getString(R.string.dlg_success_loaded));
 
+        clearBackStackOfFragments();
         new FragTopCategory().showAllCategory();
     }
 
@@ -347,23 +347,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onStop() {
         super.onStop();
-    }
-
-
-    public void showSaveRestoreDialog(int idDialog) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Bundle bundle = new Bundle();
-        bundle.putInt(ID_DIALOG, idDialog);
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        Fragment fragment = fragmentManager.findFragmentByTag(TAG_FILE_DIALOG);
-        if (fragment != null) {
-            ft.remove(fragment);
-        }
-        ft.addToBackStack(null);
-
-        DialogFragment dialogFragment = new SaveRestoreDialog();
-        dialogFragment.setArguments(bundle);
-        dialogFragment.show(fragmentManager, TAG_FILE_DIALOG);
     }
 
     /**
