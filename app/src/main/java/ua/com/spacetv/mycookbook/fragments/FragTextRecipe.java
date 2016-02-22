@@ -419,11 +419,13 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                             Log.d("TG", "readRecipeFromDatabase -> databaseImagePath = " + databaseImagePath);
                             Bitmap bitmap = ImagePickHelper.decodeBitmapFromPath(databaseImagePath,
                                     displayWidth);
-                            if (bitmap != null) setImage(bitmap);
+                            if (bitmap != null) {
+                                setImage(bitmap);
+                                Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
+                            }
                             else Log.d("TG", "Picture not found!");
 //                            ImageLoader.getInstance().displayImage("file://" + databaseImagePath, imageView);
 //                            imageLoader.loadImage("file://" + databaseImagePath, targetSize, this);
-                            Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
                         }
                     }
                 } while (cursor.moveToNext());

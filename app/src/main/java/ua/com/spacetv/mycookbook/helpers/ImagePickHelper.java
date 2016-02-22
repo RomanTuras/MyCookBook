@@ -176,6 +176,9 @@ public class ImagePickHelper {
      * @return Bitmap
      * */
     public static Bitmap decodeBitmapFromPath(String path, int displayWidth) {
+        File tempFile = new File(path);
+        if(!tempFile.exists()) return null; // if file not found (was deleted or SD unmount)
+
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         Bitmap bitmap = BitmapFactory.decodeFile(path);

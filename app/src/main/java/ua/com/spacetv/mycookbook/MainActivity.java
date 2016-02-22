@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity
             FragTopCategory.showDialog(DIALOG_ADD_CATEGORY, null);
             /** add recipe in TOP folder */
         } else if (view.getId() == R.id.fabAddRecipeSubCategory) {
-            fragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_REVIEW_RECIPE, PARENT);
+            fragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, PARENT);
             fabSubCategory.close(true);
             /** add folder in TOP folder */
         } else if (view.getId() == R.id.fabAddFolderSubCategory) {
@@ -367,7 +367,7 @@ public class MainActivity extends AppCompatActivity
             /** add recipe in SUB folder */
         } else if (view.getId() == R.id.fabAddRecipeListRecipe) {
             Log.d("TG", "fabAddRecipeListRecipe idItem = " + FragSubCategory.idItem);
-            fragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_REVIEW_RECIPE, CHILD);
+            fragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, CHILD);
             fabSubCategory.close(true);
         }
     }
