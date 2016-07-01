@@ -5,12 +5,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
 
 /**
  * Created by salden on 14/12/2015.
  */
-public class DataBaseHelper extends SQLiteOpenHelper implements StaticFields {
+public class DataBaseHelper extends SQLiteOpenHelper implements Constants {
     private static int versDb = 2;
 
     public DataBaseHelper(Context context) {

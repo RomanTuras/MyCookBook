@@ -16,6 +16,7 @@
 
 package ua.com.spacetv.mycookbook.fragments;
 
+import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -36,10 +37,13 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -62,14 +66,18 @@ import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.ImagePickHelper;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.tools.Utilities;
 
 /**
  * Created by Roman Turas on 07/01/2016
  */
-public class FragTextRecipe extends Fragment implements StaticFields {
+public class FragTextRecipe extends Fragment implements Constants,
+        OnRequestPermissionsResultCallback {
 
-    private static Context context;
+    private static final int PERMISSION_REQUEST_CODE = 2;
+    private static final int REQUEST_INTERNET = 1;
+    private static Context mContext;
     private static FragmentManager fragmentManager;
     private static OnFragmentEventsListener onFragmentEventsListener;
     public static DataBaseHelper dataBaseHelper;
@@ -93,13 +101,15 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     private String titleRecipeFromDatabase = null;
     private String textRecipeFromDatabase = null;
     private static String databaseImagePath;
+    private static Fragment mFragmentTextRecipe;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        FragTextRecipe.context = context;
+        FragTextRecipe.mContext = context;
         FragTextRecipe.dataBaseHelper = new DataBaseHelper(context);
         this.contentValues = new ContentValues();
+        mFragmentTextRecipe = new FragTextRecipe();
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
@@ -129,7 +139,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
         getDisplayMetrics();
 
-        ads = new Ads(context);
+        ads = new Ads(mContext);
 
         database = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
@@ -177,7 +187,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     private void modeReview() {
-        new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
+        new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
 
         Log.d("TG", "modeReview *** ");
         editTitleRecipe.setFocusableInTouchMode(false);
@@ -233,6 +243,12 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         return output;
     }
 
+    /**
+     * Getting action from menu
+     *
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -246,16 +262,60 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                 shareRecipe();
                 break;
             case R.id.action_photo:
-                getPickImageIntent();
+                //get permissions to access camera or gallery
+                checkPermissions();
+//                getPickImageIntent();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void getPickImageIntent() {
-        chooseImageIntent = ImagePickHelper.getPickImageIntent(context);
+    /**
+     * Checks the permissions for android 6
+     * And shows the proper screen if there's no permissions
+     */
+    private void checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                //Asks user to add the permission
+                Log.d("TG", "Asks user to add the permission");
+                requestMultiplePermissions();
+            } else {
+                Log.d("TG", "checkPermissions = PERMISSION_GRANTED");
+                getPickImageIntent();
+            }
+        } else {
+            Log.d("TG", "checkPermissions = VERSION < M");
+            getPickImageIntent();
+        }
+    }
+
+    /**
+     * Request permissions
+     */
+    public void requestMultiplePermissions() {
+        requestPermissions(
+                new String[]{
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.CAMERA
+                },
+                PERMISSION_REQUEST_CODE);
+    }
+
+    public void getPickImageIntent() {
+        chooseImageIntent = ImagePickHelper.getPickImageIntent(mContext);
         startActivityForResult(chooseImageIntent, CHOOSE_IMAGE);
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -272,7 +332,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 //                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
                         Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
                         Log.d("TG", "data!=null; getPath = " + selectedImagePath);
-                        new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Gallery");
+                        new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Add Image", "Gallery");
                     } else { // ** Camera **
                         selectedImagePath = ImagePickHelper.getImageFromResult(resultCode, data);
                         ImagePickHelper.addImageToGallery(selectedImagePath);
@@ -282,7 +342,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 //                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
                         Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
                         Log.d("TG", "data==null; getPath = " + selectedImagePath);
-                        new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Add Image", "Camera");
+                        new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Add Image", "Camera");
                     }
                     break;
             }
@@ -290,7 +350,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     }
 
     /**
-     * Get the value of the data column for this Uri. This is useful for
+     * Getting the value of the data column for this Uri. This is useful for
      * MediaStore Uris, and other file-based ContentProviders.
      *
      * @param uri The Uri to query.
@@ -301,7 +361,8 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         final String column = "_data";
         final String[] projection = {column};
         try {
-            cursor = context.getContentResolver().query(uri, projection, null, null, null);
+            Log.d("TG", "mContext = " + mContext);
+            cursor = mContext.getContentResolver().query(uri, projection, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 final int index = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(index);
@@ -326,7 +387,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 //                Uri imageUri = Uri.parse("file://" + databaseImagePath);
 //                emailIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
 //            }
-            startActivity(Intent.createChooser(emailIntent, context
+            startActivity(Intent.createChooser(emailIntent, mContext
                     .getString(R.string.text_share_recipe)));
         }
     }
@@ -361,7 +422,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             String packageName = ri.activityInfo.packageName;
 
             if (packageName.toLowerCase().contains("com.viber.voip")) {
-                Log.d("TG", "packageName.contains = "+packageName.toString());
+                Log.d("TG", "packageName.contains = " + packageName.toString());
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName(packageName, ri.activityInfo.name));
                 intent.putExtra(android.content.Intent.EXTRA_TEXT, text);
@@ -374,7 +435,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                     packageName.contains("com.facebook.katana") ||
                     packageName.contains("com.google.android.apps.plus") ||
                     packageName.contains("com.google.android.gm")) {
-                Log.d("TG", "packageName.contains others = "+packageName.toString());
+                Log.d("TG", "packageName.contains others = " + packageName.toString());
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName(packageName, ri.activityInfo.name));
                 intent.putExtra(android.content.Intent.EXTRA_TEXT, text);
@@ -422,8 +483,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
                             if (bitmap != null) {
                                 setImage(bitmap);
                                 Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
-                            }
-                            else Log.d("TG", "Picture not found!");
+                            } else Log.d("TG", "Picture not found!");
 //                            ImageLoader.getInstance().displayImage("file://" + databaseImagePath, imageView);
 //                            imageLoader.loadImage("file://" + databaseImagePath, targetSize, this);
                         }
@@ -439,7 +499,7 @@ public class FragTextRecipe extends Fragment implements StaticFields {
     @Override
     public void onResume() {
         super.onResume();
-        MainActivity.overrideActionBar(context.getString(R.string.text_recipe), null);
+        MainActivity.overrideActionBar(mContext.getString(R.string.text_recipe), null);
         MainActivity.hideAllFloatButtons();
         loadAds();
     }
@@ -468,12 +528,12 @@ public class FragTextRecipe extends Fragment implements StaticFields {
 
             if (tempTitle.equals(titleRecipeFromDatabase) &
                     tempText.equals(textRecipeFromDatabase)) {
-                makeSnackbar(context.getString(R.string.there_is_no_change));
+                makeSnackbar(mContext.getString(R.string.there_is_no_change));
                 return false;
             }
         } else if (editTitleRecipe.getText().length() == 0 & editTextRecipe.getText().length() == 0) {
             Log.d("TG", "editText's == 0");
-            makeSnackbar(context.getString(R.string.nothing_was_entered));
+            makeSnackbar(mContext.getString(R.string.nothing_was_entered));
             return false;
         }
         return true;
@@ -511,9 +571,10 @@ public class FragTextRecipe extends Fragment implements StaticFields {
             rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idRecipe, null);
         }
         modeReview();
-        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
-        new Analytics(context).sendAnalytics("myCookBook", "Text Category", "Save recipe", titleRecipe);
+        if (rowId >= 0) makeSnackbar(mContext.getString(R.string.success));
+        new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Save recipe", titleRecipe);
     }
+
 
     private void makeSnackbar(String text) {
         try {
@@ -522,4 +583,33 @@ public class FragTextRecipe extends Fragment implements StaticFields {
         }
     }
 
+    /**
+     * Invokes when user selected the permissions
+     * This is format for use from fragment
+     *
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
+            if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
+                if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||
+                        grantResults[1] != PackageManager.PERMISSION_GRANTED ||
+                        grantResults[2] != PackageManager.PERMISSION_GRANTED) {
+                    Utilities.showOkDialog(mContext,
+                            getResources().getString(R.string.permissions_error),
+                            new Utilities.IYesNoCallback() {
+                                @Override
+                                public void onYes() {
+                                }
+                            });
+                } else {
+                    getPickImageIntent();
+                }
+            }
+        }
+    }
 }

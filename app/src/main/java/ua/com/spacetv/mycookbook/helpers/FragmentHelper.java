@@ -17,25 +17,22 @@
 package ua.com.spacetv.mycookbook.helpers;
 
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
 import ua.com.spacetv.mycookbook.R;
-import ua.com.spacetv.mycookbook.dialogs.SaveRestoreDialog;
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTextRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
 
 /**
  * Created by Roman Turas on 16/02/2016.
  *
  */
-public class FragmentHelper implements StaticFields{
+public class FragmentHelper implements Constants {
     private FragmentManager fragmentManager;
     private Bundle bundle;
     private Fragment fragment;
@@ -108,23 +105,6 @@ public class FragmentHelper implements StaticFields{
         }
         Log.d("TG", "attachFragment, fragment = " + fragment.toString());
         doTransaction();
-    }
-
-    /** Attach SaveRestoreDialog */
-    public void showSaveRestoreDialog(int idDialog) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(ID_DIALOG, idDialog);
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        Fragment fragment = fragmentManager.findFragmentByTag(TAG_FILE_DIALOG);
-        if (fragment != null) {
-            ft.remove(fragment);
-        }
-        ft.addToBackStack(null);
-        ft.commit();
-
-        DialogFragment dialogFragment = new SaveRestoreDialog();
-        dialogFragment.setArguments(bundle);
-        dialogFragment.show(fragmentManager, TAG_FILE_DIALOG);
     }
 
     /** Confirm transaction with fragment */

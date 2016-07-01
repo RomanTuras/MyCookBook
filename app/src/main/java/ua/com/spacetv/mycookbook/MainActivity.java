@@ -16,14 +16,19 @@
 
 package ua.com.spacetv.mycookbook;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -49,33 +54,37 @@ import java.util.HashMap;
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
-import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.FragmentHelper;
+import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.tools.RestoreDatabaseRecipes;
+import ua.com.spacetv.mycookbook.tools.SaveDatabaseRecipes;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Utilities;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, StaticFields,
+        implements NavigationView.OnNavigationItemSelectedListener, Constants,
         OnFragmentEventsListener, View.OnClickListener {
 
-    private static FragmentHelper fragmentHelper;
-    private static Context context;
-    private static FragmentManager fragmentManager;
+    private static final int PERMISSION_REQUEST_CODE = 2;
+    private static FragmentHelper mFragmentHelper;
+    private static Context mContext;
+    private static FragmentManager mFragmentManager;
     private static FloatingActionButton fabAddTopCategory;
     private static FloatingActionButton fabAddRecipeListRecipe;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
     private static HashMap<String, Integer> mapState = new HashMap<>(3);
+    private static int mAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fragmentManager = getSupportFragmentManager();
-        context = getBaseContext();
+        mFragmentManager = getSupportFragmentManager();
+        mContext = getBaseContext();
 
-        fragmentHelper = new FragmentHelper(fragmentManager);
+        mFragmentHelper = new FragmentHelper(mFragmentManager);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -91,11 +100,11 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        fragmentHelper.attachTopCategoryFragment();
+        mFragmentHelper.attachTopCategoryFragment();
     }
 
     private int countBackStackFragment() {
-        int i = fragmentManager.getBackStackEntryCount();
+        int i = mFragmentManager.getBackStackEntryCount();
         Log.d("TG", "countBackStackFragment i = " + i);
         return i;
     }
@@ -104,8 +113,8 @@ public class MainActivity extends AppCompatActivity
      * Clear all back stack of fragments, except FragTopCategory
      */
     private void clearBackStackOfFragments() {
-        for (int i = 0; i < fragmentManager.getBackStackEntryCount() - 1; i++) {
-            fragmentManager.popBackStack();
+        for (int i = 0; i < mFragmentManager.getBackStackEntryCount() - 1; i++) {
+            mFragmentManager.popBackStack();
         }
     }
 
@@ -116,8 +125,6 @@ public class MainActivity extends AppCompatActivity
 
             if (subtitle == null) actionBar.setSubtitle("");
             else actionBar.setSubtitle(subtitle);
-
-
         }
     }
 
@@ -185,7 +192,7 @@ public class MainActivity extends AppCompatActivity
                     tag += "Search";
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
                     if (fragment == null) {
-                        fragmentHelper.attachListRecipeFragment(0, MODE_SEARCH_RESULT, query);
+                        mFragmentHelper.attachListRecipeFragment(0, MODE_SEARCH_RESULT, query);
                         Log.d("TG", "onQueryTextSubmit fragListRecipe is not Added");
                     } else {
                         FragListRecipe.setParams(0, MODE_SEARCH_RESULT, query);
@@ -229,7 +236,7 @@ public class MainActivity extends AppCompatActivity
             tag += "Favorite";
             Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
             if (fragment == null) {
-                fragmentHelper.attachListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
+                mFragmentHelper.attachListRecipeFragment(0, MODE_FAVORITE_RECIPE, null);
             } else {
                 FragListRecipe.setParams(0, MODE_FAVORITE_RECIPE, null);
                 new FragListRecipe().showListRecipe();
@@ -237,13 +244,12 @@ public class MainActivity extends AppCompatActivity
             }
 
         } else if (id == R.id.drawer_export_db) {
-            fragmentHelper.showSaveRestoreDialog(DIALOG_FILE_SAVE);
-            new Analytics(context).sendAnalytics("myCookBook", "Main Activity", "Save db", "nop");
-
+            // check permissions before call to dialog
+            checkPermissions(DIALOG_FILE_SAVE);
 
         } else if (id == R.id.drawer_import_db) {
-            fragmentHelper.showSaveRestoreDialog(DIALOG_FILE_RESTORE);
-            new Analytics(context).sendAnalytics("myCookBook", "Main Activity", "Restore db", "nop");
+            // check permissions before call to dialog
+            checkPermissions(DIALOG_FILE_RESTORE);
 
         } else if (id == R.id.drawer_send_question) {
             sendMailToDevelopers();
@@ -254,9 +260,69 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Checks the permissions for android 6
+     * And shows the proper screen if there's no permissions
+     * @param action - what action will be called after request permissions
+     */
+    private void checkPermissions(int action) {
+        //mAction - save selected type of dialog witch will
+        // be called after permission is granted
+        mAction = action;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                //Asks user to add the permission
+                requestMultiplePermissions();
+            } else {
+                //permissions granted
+                callSaveRestoreDialog(action);
+            }
+        } else {
+            // VERSION < M
+            callSaveRestoreDialog(action);
+        }
+    }
+
+    /**
+     * Request permissions
+     */
+    private void requestMultiplePermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.CAMERA
+                },
+                PERMISSION_REQUEST_CODE);
+    }
+
+    /**
+     * Calling dialog to save or restore database of recipes, depends of selected mode
+     *
+     * @param mode - DIALOG_FILE_SAVE / DIALOG_FILE_RESTORE
+     */
+    private void callSaveRestoreDialog(int mode){
+        switch (mode){
+            case DIALOG_FILE_SAVE:
+                SaveDatabaseRecipes.dialogSaveDatabase(this);
+                break;
+            case DIALOG_FILE_RESTORE:
+                RestoreDatabaseRecipes.dialogRestoreDatabase(this);
+                break;
+        }
+    }
+
     private void sendMailToDevelopers() {
-        String title = context.getResources().getString(R.string.email_theme);
-        String email = context.getResources().getString(R.string.email);
+        String title = mContext.getResources().getString(R.string.email_theme);
+        String email = mContext.getResources().getString(R.string.email);
         Intent emailIntent = new Intent(android.content.Intent.ACTION_SENDTO);
         emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
         emailIntent.setType("text/plain");
@@ -269,7 +335,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void restoreDatabase(String pathFolder) throws IOException {
-        File workDatabase = context.getDatabasePath(FILENAME_WORKING_DB);
+        File workDatabase = mContext.getDatabasePath(FILENAME_WORKING_DB);
         File backupOfDatabase = new File(pathFolder, BACKUP_FILENAME);
         OutputStream receiverStream = new FileOutputStream(workDatabase);
         InputStream sourceStream = new FileInputStream(backupOfDatabase);
@@ -282,7 +348,7 @@ public class MainActivity extends AppCompatActivity
         receiverStream.close();
         sourceStream.close();
 
-        makeSnackbar(context.getResources().getString(R.string.dlg_success_loaded));
+        makeSnackbar(mContext.getResources().getString(R.string.dlg_success_loaded));
 
         clearBackStackOfFragments();
         new FragTopCategory().showAllCategory();
@@ -290,7 +356,7 @@ public class MainActivity extends AppCompatActivity
 
     public void saveDatabaseFile(String pathFolder) throws IOException {
         boolean success;
-        File workDatabase = context.getDatabasePath(FILENAME_WORKING_DB);
+        File workDatabase = mContext.getDatabasePath(FILENAME_WORKING_DB);
         File newFolder = new File(pathFolder);
         if (!newFolder.exists()) success = newFolder.mkdirs();
         else success = true;
@@ -310,26 +376,26 @@ public class MainActivity extends AppCompatActivity
                 receiverStream.flush();
                 receiverStream.close();
                 sourceStream.close();
-            } else makeSnackbar(context.getResources().getString(R.string.dlg_error_save_file));
+            } else makeSnackbar(mContext.getResources().getString(R.string.dlg_error_save_file));
 
-        } else makeSnackbar(context.getResources().getString(R.string.dlg_error_save_file));
-        makeSnackbar(context.getResources().getString(R.string.success_saved));
+        } else makeSnackbar(mContext.getResources().getString(R.string.dlg_error_save_file));
+        makeSnackbar(mContext.getResources().getString(R.string.success_saved));
     }
 
     @Override
     public void onListItemClick(int idActionFrom, int idItem) {
         switch (idActionFrom) {
             case ID_ACTION_TOP_CATEGORY:
-                fragmentHelper.attachSubCategoryFragment(idItem);
+                mFragmentHelper.attachSubCategoryFragment(idItem);
                 break;
             case ID_ACTION_SUB_CATEGORY_CATEGORY:
-                fragmentHelper.attachListRecipeFragment(idItem, MODE_RECIPE_FROM_CATEGORY, null);
+                mFragmentHelper.attachListRecipeFragment(idItem, MODE_RECIPE_FROM_CATEGORY, null);
                 break;
             case ID_ACTION_SUB_CATEGORY_RECIPE:
-                fragmentHelper.attachTextRecipeFragment(idItem, MODE_REVIEW_RECIPE, PARENT);
+                mFragmentHelper.attachTextRecipeFragment(idItem, MODE_REVIEW_RECIPE, PARENT);
                 break;
             case ID_ACTION_LIST_RECIPE:
-                fragmentHelper.attachTextRecipeFragment(idItem, MODE_REVIEW_RECIPE, CHILD);
+                mFragmentHelper.attachTextRecipeFragment(idItem, MODE_REVIEW_RECIPE, CHILD);
                 break;
         }
     }
@@ -358,7 +424,7 @@ public class MainActivity extends AppCompatActivity
             FragTopCategory.showDialog(DIALOG_ADD_CATEGORY, null);
             /** add recipe in TOP folder */
         } else if (view.getId() == R.id.fabAddRecipeSubCategory) {
-            fragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, PARENT);
+            mFragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, PARENT);
             fabSubCategory.close(true);
             /** add folder in TOP folder */
         } else if (view.getId() == R.id.fabAddFolderSubCategory) {
@@ -367,7 +433,7 @@ public class MainActivity extends AppCompatActivity
             /** add recipe in SUB folder */
         } else if (view.getId() == R.id.fabAddRecipeListRecipe) {
             Log.d("TG", "fabAddRecipeListRecipe idItem = " + FragSubCategory.idItem);
-            fragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, CHILD);
+            mFragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, CHILD);
             fabSubCategory.close(true);
         }
     }
@@ -386,4 +452,41 @@ public class MainActivity extends AppCompatActivity
             return mapState.get(idFragment);
         else return 0;
     }
+
+    /**
+     * Invokes when user selected the permissions
+     * This is format for use from activity
+     *
+     * mAction - type of mode: save (DIALOG_FILE_SAVE) or
+     * restore (DIALOG_FILE_RESTORE) database of recipes
+     *
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
+            if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
+                if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||
+                        grantResults[1] != PackageManager.PERMISSION_GRANTED ||
+                        grantResults[2] != PackageManager.PERMISSION_GRANTED) {
+                    Utilities.showOkDialog(this,
+                            getResources().getString(R.string.permissions_error),
+                            new Utilities.IYesNoCallback() {
+                                @Override
+                                public void onYes() {
+                                }
+                            });
+                } else {
+                    callSaveRestoreDialog(mAction);
+                }
+            }
+        }
+    }
+
+
+
+
 }

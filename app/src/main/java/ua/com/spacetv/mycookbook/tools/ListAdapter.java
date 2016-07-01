@@ -34,7 +34,7 @@ import ua.com.spacetv.mycookbook.R;
  * Class CardsAdapter for adding content to Main Activity
  * It working with CardView
  */
-public class ListAdapter extends BaseAdapter implements StaticFields {
+public class ListAdapter extends BaseAdapter implements Constants {
     Context context;
     ArrayList<ListData> arrayData;
     LayoutInflater lInflater;

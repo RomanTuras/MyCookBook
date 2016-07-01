@@ -101,5 +101,10 @@
 
     <string name="email">mailto:salden.com@gmail.com</string>
     <string name="email_theme">Вопрос по приложению \'Моя Книга Рецептов\'</string>
+    <string name="item_get_picture">Вставить фото</string>
+    <string name="common_dialog_ok">Ok</string>
+    <string name="common_progress_message">Please wait...</string>
+    <string name="common_server_error">Server error!</string>
+    <string name="permissions_error">Без этих разрешений приложение будет работать некорректно!</string>
 
 </resources>

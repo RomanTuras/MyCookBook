@@ -4,7 +4,7 @@
 
     <item android:id="@+id/action_photo"
         android:icon="@android:drawable/ic_menu_camera"
-        android:title="@string/item_edit_recipe"
+        android:title="@string/item_get_picture"
         app:showAsAction="ifRoom"
         android:orderInCategory="0" />
     <item android:id="@+id/action_save"

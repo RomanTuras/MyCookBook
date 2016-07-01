@@ -47,13 +47,13 @@ import ua.com.spacetv.mycookbook.dialogs.FragDialog;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
 
 /**
  * Created by salden on 02/01/2016.
  * Class is responsible for list top category
  */
-public class FragTopCategory extends Fragment implements StaticFields,
+public class FragTopCategory extends Fragment implements Constants,
         AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
 
     private DataBaseHelper dataBaseHelper;

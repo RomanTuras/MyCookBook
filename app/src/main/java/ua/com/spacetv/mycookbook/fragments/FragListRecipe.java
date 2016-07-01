@@ -49,13 +49,13 @@ import ua.com.spacetv.mycookbook.helpers.PrepareListRecipes;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
 
 /**
  * Created by Roman Turas on 07/01/2016.
  *
  */
-public class FragListRecipe extends Fragment implements StaticFields,
+public class FragListRecipe extends Fragment implements Constants,
         AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
 
     private static Context context;

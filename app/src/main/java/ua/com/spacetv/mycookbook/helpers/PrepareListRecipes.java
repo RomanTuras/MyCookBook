@@ -26,13 +26,13 @@ import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 
 import ua.com.spacetv.mycookbook.tools.ListData;
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
 
 /**
  * Created by Roman Turas on 09/01/2016.
  * Only for the CHILD FOLDERS!!!
  */
-public class PrepareListRecipes implements StaticFields {
+public class PrepareListRecipes implements Constants {
     private static ArrayList<ListData> adapter;
     private SQLiteDatabase database;
     private DataBaseHelper dataBaseHelper;

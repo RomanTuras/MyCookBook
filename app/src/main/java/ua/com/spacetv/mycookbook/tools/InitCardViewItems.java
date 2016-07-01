@@ -31,7 +31,7 @@ import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
  * Created by Roman Turas on 10/12/2015.
  * Fill arrayList with data required to Cards from Main Screen
  */
-public class InitCardViewItems implements StaticFields{
+public class InitCardViewItems implements Constants {
     private Context context;
     private DataBaseHelper dataBaseHelper;
     private SQLiteDatabase database;

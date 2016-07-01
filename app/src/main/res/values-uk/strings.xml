@@ -99,5 +99,10 @@
     <string name="dlg_pick_image_camera">Камера</string>
     <string name="dlg_pick_image_gallery">Галерея</string>
     <string name="dlg_pick_image_title">Виберіть джерело:</string>
+    <string name="item_get_picture">Вставити фото</string>
+    <string name="common_dialog_ok">Ok</string>
+    <string name="common_progress_message">Please wait...</string>
+    <string name="common_server_error">Server error!</string>
+    <string name="permissions_error">Без цих дозволів додаток буде працювати некоректно!</string>
 
 </resources>

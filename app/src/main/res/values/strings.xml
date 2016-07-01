@@ -24,6 +24,7 @@
     <string name="item_favorite">I liked :)</string>
     <!--Main Menu Items-->
     <string name="item_edit_recipe">Edit</string>
+    <string name="item_get_picture">Get Picture</string>
     <string name="item_share_recipe">Share</string>
     <string name="item_save_recipe">Save</string>
 
@@ -101,5 +102,9 @@
     <string name="dlg_pick_image_camera">Camera</string>
     <string name="dlg_pick_image_gallery">Gallery</string>
     <string name="dlg_pick_image_title">Pick image from:</string>
+    <string name="common_dialog_ok">Ok</string>
+    <string name="common_progress_message">Please wait...</string>
+    <string name="common_server_error">Server error!</string>
+    <string name="permissions_error">This app needs this permission to work correctly!</string>
 
 </resources>

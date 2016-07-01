@@ -22,14 +22,14 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
 
 /**
  * Created by salden on 14/12/2015.
  * Load and showing ADS block in any place
  */
 
-public class Ads extends AdListener implements StaticFields {
+public class Ads extends AdListener implements Constants {
 
     private InterstitialAd interstitialAd = null;
     private Context context;

@@ -44,14 +44,14 @@ import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
 
 /** Created by Roman Turas on 02/01/2016.
  * Create dialog with different views, depends from input params
  * Input params: ID_DIALOG (what dialog was do) and string NAME_FOR_ACTION
  * Output: ID_DIALOG, String param, int typeFolder (parent or child), int idCategory*/
 
-public class FragDialog extends DialogFragment implements StaticFields,
+public class FragDialog extends DialogFragment implements Constants,
         DialogInterface.OnClickListener, AdapterView.OnItemClickListener {
     private EditText input;
     private ListView listView;

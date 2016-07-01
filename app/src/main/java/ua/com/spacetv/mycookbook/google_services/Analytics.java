@@ -22,13 +22,13 @@ import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
-import ua.com.spacetv.mycookbook.tools.StaticFields;
+import ua.com.spacetv.mycookbook.tools.Constants;
 
 /**
  * Created by salden on 29/12/2015.
  * Google analytics service
  */
-public class Analytics implements StaticFields {
+public class Analytics implements Constants {
     private Context context;
 
     public Analytics(Context context){

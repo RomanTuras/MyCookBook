@@ -20,7 +20,7 @@ package ua.com.spacetv.mycookbook.tools;
  * Created by Roman Turas on 02/01/2016
  * used constants
  */
-public interface StaticFields {
+public interface Constants {
 
     /* Tags for fragments */
     String FRAGMENT_INDEX = "FRAGMENT_INDEX";
