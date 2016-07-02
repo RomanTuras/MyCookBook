@@ -19,62 +19,66 @@ package ua.com.spacetv.mycookbook.helpers;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTextRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
-import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
- * Created by Roman Turas on 16/02/2016.
+ * Helper for fragments transaction, with arguments or without
  *
+ * {@link ua.com.spacetv.mycookbook.MainActivity}
  */
 public class FragmentHelper implements Constants {
-    private FragmentManager fragmentManager;
-    private Bundle bundle;
-    private Fragment fragment;
-    private String tag;
+    private FragmentManager mFrManager;
 
     public FragmentHelper(FragmentManager fragmentManager) {
-        this.fragmentManager = fragmentManager;
+        mFrManager = fragmentManager;
     }
 
-    /** Attach FragTopCategory */
+    /**
+     * Attaching FragTopCategory
+     */
     public void attachTopCategoryFragment(){
-        bundle = new Bundle();
-        tag = FragTopCategory.class.getSimpleName();
-        fragment = fragmentManager.findFragmentByTag(tag);
+        String tag = FragTopCategory.class.getSimpleName();
+        Fragment fragment = mFrManager.findFragmentByTag(tag);
         if (fragment == null) {
             fragment = new FragTopCategory();
-            Log.d("TG", "fragment == null" + fragment.toString());
-        } else Log.d("TG", "fragment != null" + fragment.toString());
-        doTransaction();
+        }
+        doTransaction(fragment, tag);
     }
 
-    /** Attach FragSubCategory */
+    /**
+     * Attaching FragSubCategory
+     * @param idItem - id of parent category
+     */
     public void attachSubCategoryFragment(int idItem) {
-        bundle = new Bundle();
-        tag = FragSubCategory.class.getSimpleName();
-        fragment = fragmentManager.findFragmentByTag(tag);
+        Bundle bundle = new Bundle();
+        String tag = FragSubCategory.class.getSimpleName();
+        Fragment fragment = mFrManager.findFragmentByTag(tag);
         bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
         if (fragment == null) {
             fragment = new FragSubCategory();
             fragment.setArguments(bundle);
         }
-        Log.d("TG", "attachFragment, fragment = " + fragment.toString());
-        doTransaction();
+        doTransaction(fragment, tag);
     }
 
-    /** Attach FragListRecipe */
+    /**
+     * Attaching FragListRecipe
+     * @param idItem - id of parent category
+     * @param startMode - MODE_EDIT_RECIPE, MODE_REVIEW_RECIPE or MODE_NEW_RECIPE
+     * @param searchRequest - search query
+     */
     public void attachListRecipeFragment(int idItem, int startMode, String searchRequest) {
-        bundle = new Bundle();
-        tag = FragListRecipe.class.getSimpleName();
+        Bundle bundle = new Bundle();
+        String tag = FragListRecipe.class.getSimpleName();
         if (startMode == MODE_FAVORITE_RECIPE) tag += "Favorite";
         else if (startMode == MODE_SEARCH_RESULT) tag += "Search";
-        fragment = fragmentManager.findFragmentByTag(tag);
+        Fragment fragment = mFrManager.findFragmentByTag(tag);
         bundle.putInt(TAG_PARENT_ITEM_ID, idItem);
         bundle.putInt(TAG_MODE, startMode);
         bundle.putString(TAG_SEARCH_STRING, searchRequest);
@@ -82,19 +86,18 @@ public class FragmentHelper implements Constants {
             fragment = new FragListRecipe();
             fragment.setArguments(bundle);
         }
-        Log.d("TG", "attachFragment, fragment = " + tag);
-        doTransaction();
+        doTransaction(fragment, tag);
     }
 
     /** Attach FragTextRecipe */
     public void attachTextRecipeFragment(int idItem, int startMode, int typeFolder) {
-        bundle = new Bundle();
-        tag = FragTextRecipe.class.getSimpleName();
-        fragment = fragmentManager.findFragmentByTag(tag);
+        Bundle bundle = new Bundle();
+        String tag = FragTextRecipe.class.getSimpleName();
+        Fragment fragment = mFrManager.findFragmentByTag(tag);
         if (typeFolder == PARENT) {
             bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.idParentItem);//get id TOP category
         } else if (typeFolder == CHILD) {
-            bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.idParentItem);//get id SUB category
+            bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.mIdParentItem);//get id SUB category
         }
         bundle.putInt(TAG_ID_RECIPE, idItem);
         bundle.putInt(TAG_MODE, startMode);
@@ -103,13 +106,16 @@ public class FragmentHelper implements Constants {
             fragment = new FragTextRecipe();
             fragment.setArguments(bundle);
         }
-        Log.d("TG", "attachFragment, fragment = " + fragment.toString());
-        doTransaction();
+        doTransaction(fragment, tag);
     }
 
-    /** Confirm transaction with fragment */
-    private void doTransaction() {
-        fragmentManager.beginTransaction().replace(R.id.container, fragment, tag)
+    /**
+     * Confirm transaction with mFragment
+     * @param fragment
+     * @param tag
+     */
+    private void doTransaction(Fragment fragment, String tag) {
+        mFrManager.beginTransaction().replace(R.id.container, fragment, tag)
                 .addToBackStack(tag)
                 .commit();
     }

@@ -46,8 +46,8 @@ import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
-import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
-import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Created by salden on 02/01/2016.
@@ -80,6 +80,7 @@ public class FragSubCategory extends Fragment implements Constants,
         FragSubCategory.context = context;
         dataBaseHelper = new DataBaseHelper(context);
         this.contentValues = new ContentValues();
+        setRetainInstance(true);
 
         Bundle bundle = this.getArguments();
         if(bundle != null) {
@@ -203,6 +204,8 @@ public class FragSubCategory extends Fragment implements Constants,
     @Override
     public void onResume(){
         super.onResume();
+        MainActivity.isNoFragmentsAttached = false; //fragment attached
+        MainActivity.listAllFragments();
         firstVisibleItem = MainActivity.restoreListState(TAG_SUBCATEGORY); //restore list view state
         Log.d("TG", "onResume SUB : "+firstVisibleItem);
         showCategoryAndRecipe();

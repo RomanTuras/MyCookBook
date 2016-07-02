@@ -26,7 +26,7 @@ import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 
 import ua.com.spacetv.mycookbook.tools.ListData;
-import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Created by Roman Turas on 09/01/2016.

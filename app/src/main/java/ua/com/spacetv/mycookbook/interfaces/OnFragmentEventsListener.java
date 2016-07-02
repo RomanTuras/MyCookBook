@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package ua.com.spacetv.mycookbook.tools;
+package ua.com.spacetv.mycookbook.interfaces;
 
 /**
- * Created by salden on 04/01/2016.
+ * Created feedback between Fragment and Activity
  *
- * Creates feedback between Popup menu and Fragments
  */
 
-public interface OnPopupMenuItemClickListener {
-
-    void onClickPopupMenuItem(int idPopupItem);
-
+public interface OnFragmentEventsListener {
+    void onListItemClick(int idTable, int idItem);
 }

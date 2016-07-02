@@ -22,7 +22,7 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 
-import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Created by salden on 14/12/2015.

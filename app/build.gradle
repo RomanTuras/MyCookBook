@@ -8,8 +8,8 @@ android {
         applicationId "ua.com.spacetv.mycookbook"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 15
-        versionName "2.38"
+        versionCode 16
+        versionName "2.39"
     }
     buildTypes {
         release {

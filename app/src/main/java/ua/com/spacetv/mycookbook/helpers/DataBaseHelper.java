@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Created by salden on 14/12/2015.

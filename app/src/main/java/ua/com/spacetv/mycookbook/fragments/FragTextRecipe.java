@@ -65,8 +65,8 @@ import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.ImagePickHelper;
-import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
-import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.tools.Utilities;
 
 /**
@@ -92,8 +92,8 @@ public class FragTextRecipe extends Fragment implements Constants,
     private static int idReceivedFolderItem = 0; // id of folder where was or will TEXT of RECIPE
     private static int idRecipe = 0; // id Received (mode REVIEW) or Just Created recipe (mode NEW)
     private static int typeReceivedFolder = 0; // Is two types of folders: PARENT=0 (top) & CHILD=1 (subFolder)
-    private static int topFolder_id = 0; //id top folder received from database
-    private static int subFolder_id = 0; //id sub folder received from database
+    private static int topFolder_id = 0; //id top folder received from mDatabase
+    private static int subFolder_id = 0; //id sub folder received from mDatabase
     private static int startupMode = MODE_REVIEW_RECIPE;
     private static int displayWidth;
     private final int CHOOSE_IMAGE = 1;
@@ -110,6 +110,7 @@ public class FragTextRecipe extends Fragment implements Constants,
         FragTextRecipe.dataBaseHelper = new DataBaseHelper(context);
         this.contentValues = new ContentValues();
         mFragmentTextRecipe = new FragTextRecipe();
+        setRetainInstance(true);
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
@@ -499,6 +500,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     @Override
     public void onResume() {
         super.onResume();
+        MainActivity.isNoFragmentsAttached = false; //fragment attached
         MainActivity.overrideActionBar(mContext.getString(R.string.text_recipe), null);
         MainActivity.hideAllFloatButtons();
         loadAds();
@@ -507,16 +509,16 @@ public class FragTextRecipe extends Fragment implements Constants,
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d("TG", "FragTextRecipe is onDetach - show ADS -  ");
+        MainActivity.listAllFragments();
         if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
         database.close();
         dataBaseHelper.close();
-        ads.showAd();
+//        ads.showAd();
     }
 
-    /* If text or image was changed -> save recipe in database*/
+    /* If text or image was changed -> save recipe in mDatabase*/
     private boolean isChangesFromRecipe() {
         if (selectedImagePath != null && !selectedImagePath.equals(databaseImagePath)) {
             databaseImagePath = selectedImagePath;

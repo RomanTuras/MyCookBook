@@ -10,6 +10,7 @@ import java.io.IOException;
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Checking if SD card is available - showing save dialog

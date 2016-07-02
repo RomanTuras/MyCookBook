@@ -19,10 +19,12 @@ package ua.com.spacetv.mycookbook;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -50,15 +52,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.helpers.FragmentHelper;
-import ua.com.spacetv.mycookbook.tools.Constants;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
+import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.RestoreDatabaseRecipes;
 import ua.com.spacetv.mycookbook.tools.SaveDatabaseRecipes;
-import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.Utilities;
 
 public class MainActivity extends AppCompatActivity
@@ -75,6 +78,7 @@ public class MainActivity extends AppCompatActivity
     private static android.support.v7.app.ActionBar actionBar;
     private static HashMap<String, Integer> mapState = new HashMap<>(3);
     private static int mAction;
+    public static boolean isNoFragmentsAttached = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,13 +104,60 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mFragmentHelper.attachTopCategoryFragment();
+//        getSettingsFromPreferences();
+
+        if(mFragmentManager.findFragmentByTag(FragTopCategory.class.getSimpleName()) == null) {
+            mFragmentHelper.attachTopCategoryFragment();
+        }
+
     }
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.d("TG", "isAttachedOneFragment = "+ isNoFragmentsAttached);
+        setSettingsToPreferences();
+    }
+
+    /**
+     * Saving preferences
+     * <p/>
+     * mFirstVisibleItem - of the list view
+     * mQuery - query if it is
+     */
+    private void setSettingsToPreferences() {
+        SharedPreferences userDetails =
+                mContext.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = userDetails.edit();
+        edit.clear();
+        edit.putBoolean(IS_NO_FRAGMENTS_ATTACHED, isNoFragmentsAttached);
+        edit.apply();
+    }
+
+    /**
+     * Getting stored preferences
+     */
+    private void getSettingsFromPreferences() {
+        SharedPreferences userDetails =
+                mContext.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        isNoFragmentsAttached = userDetails.getBoolean(IS_NO_FRAGMENTS_ATTACHED, true);
+    }
+
+    /**
+     * Returned number of all fragments in the back stack
+     *
+     * @return
+     */
     private int countBackStackFragment() {
         int i = mFragmentManager.getBackStackEntryCount();
-        Log.d("TG", "countBackStackFragment i = " + i);
         return i;
+    }
+
+    public static void listAllFragments(){
+        List<Fragment> fragmentList = mFragmentManager.getFragments();
+        for (Fragment frarment: fragmentList) {
+            Log.d("TG", "fragment" + frarment);
+        }
     }
 
     /**
@@ -186,18 +237,15 @@ public class MainActivity extends AppCompatActivity
         SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d("TG", "onQueryTextSubmit = " + query);
                 if (query.length() > 1) {
                     String tag = FragListRecipe.class.getSimpleName();
                     tag += "Search";
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
                     if (fragment == null) {
                         mFragmentHelper.attachListRecipeFragment(0, MODE_SEARCH_RESULT, query);
-                        Log.d("TG", "onQueryTextSubmit fragListRecipe is not Added");
                     } else {
                         FragListRecipe.setParams(0, MODE_SEARCH_RESULT, query);
                         new FragListRecipe().showListRecipe();
-                        Log.d("TG", "onQueryTextSubmit fragListRecipe is Added");
                     }
 
                 } else Snackbar.make(searchView, R.string.text_empty_request,
@@ -240,7 +288,6 @@ public class MainActivity extends AppCompatActivity
             } else {
                 FragListRecipe.setParams(0, MODE_FAVORITE_RECIPE, null);
                 new FragListRecipe().showListRecipe();
-                Log.d("TG", "fragListRecipe is Added");
             }
 
         } else if (id == R.id.drawer_export_db) {
@@ -263,6 +310,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Checks the permissions for android 6
      * And shows the proper screen if there's no permissions
+     *
      * @param action - what action will be called after request permissions
      */
     private void checkPermissions(int action) {
@@ -305,12 +353,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Calling dialog to save or restore database of recipes, depends of selected mode
+     * Calling dialog to save or restore mDatabase of recipes, depends of selected mode
      *
      * @param mode - DIALOG_FILE_SAVE / DIALOG_FILE_RESTORE
      */
-    private void callSaveRestoreDialog(int mode){
-        switch (mode){
+    private void callSaveRestoreDialog(int mode) {
+        switch (mode) {
             case DIALOG_FILE_SAVE:
                 SaveDatabaseRecipes.dialogSaveDatabase(this);
                 break;
@@ -326,10 +374,7 @@ public class MainActivity extends AppCompatActivity
         Intent emailIntent = new Intent(android.content.Intent.ACTION_SENDTO);
         emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
         emailIntent.setType("text/plain");
-
         emailIntent.setData(Uri.parse(email));
-        // this will make such that when user returns to your app, your app is displayed,
-        // instead of the email app.
         emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(emailIntent);
     }
@@ -400,21 +445,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
     /**
      * ADD folders or recipes
      */
@@ -432,7 +462,6 @@ public class MainActivity extends AppCompatActivity
             fabSubCategory.close(true);
             /** add recipe in SUB folder */
         } else if (view.getId() == R.id.fabAddRecipeListRecipe) {
-            Log.d("TG", "fabAddRecipeListRecipe idItem = " + FragSubCategory.idItem);
             mFragmentHelper.attachTextRecipeFragment(DEFAULT_VALUE_COLUMN, MODE_NEW_RECIPE, CHILD);
             fabSubCategory.close(true);
         }
@@ -444,7 +473,6 @@ public class MainActivity extends AppCompatActivity
 
     public static void saveListState(String idFragment, int firstVisibleItem) {
         mapState.put(idFragment, firstVisibleItem);
-        Log.d("TG", "MainActivity saveListState : " + idFragment + " - " + firstVisibleItem);
     }
 
     public static int restoreListState(String idFragment) {
@@ -456,37 +484,33 @@ public class MainActivity extends AppCompatActivity
     /**
      * Invokes when user selected the permissions
      * This is format for use from activity
-     *
+     * <p/>
      * mAction - type of mode: save (DIALOG_FILE_SAVE) or
-     * restore (DIALOG_FILE_RESTORE) database of recipes
+     * restore (DIALOG_FILE_RESTORE) mDatabase of recipes
      *
      * @param requestCode
      * @param permissions
      * @param grantResults
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
-            if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||
-                        grantResults[1] != PackageManager.PERMISSION_GRANTED ||
-                        grantResults[2] != PackageManager.PERMISSION_GRANTED) {
-                    Utilities.showOkDialog(this,
-                            getResources().getString(R.string.permissions_error),
-                            new Utilities.IYesNoCallback() {
-                                @Override
-                                public void onYes() {
-                                }
-                            });
-                } else {
-                    callSaveRestoreDialog(mAction);
-                }
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||
+                    grantResults[1] != PackageManager.PERMISSION_GRANTED ||
+                    grantResults[2] != PackageManager.PERMISSION_GRANTED) {
+                Utilities.showOkDialog(this,
+                        getResources().getString(R.string.permissions_error),
+                        new Utilities.IYesNoCallback() {
+                            @Override
+                            public void onYes() {
+                            }
+                        });
+            } else {
+                callSaveRestoreDialog(mAction);
             }
         }
     }
-
-
 
 
 }

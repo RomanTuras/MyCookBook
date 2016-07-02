@@ -14,6 +14,7 @@ import java.util.Date;
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Checking if SD card is available - showing restore dialog
@@ -55,7 +56,7 @@ public class RestoreDatabaseRecipes implements Constants {
     }
 
     /**
-     * Checking file of backup database
+     * Checking file of backup mDatabase
      *
      * @return date of last modified file if it exist, else return null
      */

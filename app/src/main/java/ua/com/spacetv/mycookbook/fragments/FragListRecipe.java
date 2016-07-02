@@ -18,6 +18,7 @@ package ua.com.spacetv.mycookbook.fragments;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -43,13 +44,13 @@ import java.util.ArrayList;
 
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
-import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.dialogs.FragDialog;
+import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.PrepareListRecipes;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
+import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
-import ua.com.spacetv.mycookbook.tools.OnFragmentEventsListener;
-import ua.com.spacetv.mycookbook.tools.Constants;
 
 /**
  * Created by Roman Turas on 07/01/2016.
@@ -58,38 +59,39 @@ import ua.com.spacetv.mycookbook.tools.Constants;
 public class FragListRecipe extends Fragment implements Constants,
         AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
 
-    private static Context context;
-    private static FragmentManager fragmentManager;
+    private static Context mContext;
+    private static FragmentManager mFrManager;
     private static OnFragmentEventsListener onFragmentEventsListener;
-    public static DataBaseHelper dataBaseHelper;
-    public static SQLiteDatabase database;
-    private static ListView listView;
+    public static DataBaseHelper mDataBaseHelper;
+    public static SQLiteDatabase mDatabase;
+    private static ListView mListView;
     private static View view;
-    public static ArrayList<ListData> adapter;
+    public static ArrayList<ListData> mAdapter;
     private static TextView text_empty_text_list_recipe;
-    private ContentValues contentValues;
-    private static String nameForAction;
-    private static int idItem;
-    private static int fav; // key, added recipe in favorite list
-    public static int idParentItem = 0; //id subcategory where is recipe
-    private static int startupMode = MODE_RECIPE_FROM_CATEGORY;
-    private static String searchString;
-    private static int firstVisibleItem = 0;
+    private ContentValues mContentValues;
+    private static String mNameForAction;
+    private static int mIdItem;
+    private static int mFav; // key, added recipe in favorite list
+    public static int mIdParentItem = 0; //id subcategory where is recipe
+    private static int mStartupMode = MODE_RECIPE_FROM_CATEGORY;
+    private static String mSearchString;
+    private static int mFirstVisibleItem = 0;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        FragListRecipe.context = context;
-        dataBaseHelper = new DataBaseHelper(context);
-        this.contentValues = new ContentValues();
+        FragListRecipe.mContext = context;
+        mDataBaseHelper = new DataBaseHelper(context);
+        mContentValues = new ContentValues();
+        setRetainInstance(true);
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-            idParentItem = bundle.getInt(TAG_PARENT_ITEM_ID);
-            startupMode = bundle.getInt(TAG_MODE);
-            searchString = bundle.getString(TAG_SEARCH_STRING);
-        }
-        Log.d("TG", "ListResipe:   = idParentItem" + idParentItem + "  startupMode= " + startupMode);
+            mIdParentItem = bundle.getInt(TAG_PARENT_ITEM_ID);
+            mStartupMode = bundle.getInt(TAG_MODE);
+            mSearchString = bundle.getString(TAG_SEARCH_STRING);
+        }//else getSettingsFromPreferences();
+        Log.d("TG", "ListResipe:   = mIdParentItem" + mIdParentItem + "  mStartupMode= " + mStartupMode);
 
         onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
     }
@@ -97,26 +99,58 @@ public class FragListRecipe extends Fragment implements Constants,
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.frag_list_recipe, null);
-        listView = (ListView) view.findViewById(R.id.listRecipe);
+        mListView = (ListView) view.findViewById(R.id.listRecipe);
         text_empty_text_list_recipe = (TextView) view.findViewById(R.id.text_empty_text_list_recipe);
-        database = dataBaseHelper.getWritableDatabase();
-        fragmentManager = getFragmentManager();
+        mDatabase = mDataBaseHelper.getWritableDatabase();
+        mFrManager = getFragmentManager();
         FragListRecipe.view = view;
         return view;
     }
 
+    /**
+     * Saving preferences
+     * <p/>
+     * mFirstVisibleItem - of the list view
+     * mQuery - query if it is
+     */
+    private void setSettingsToPreferences() {
+        SharedPreferences userDetails =
+                mContext.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = userDetails.edit();
+        edit.clear();
+        edit.putInt(FIRST_VISIBLE_ITEM, mFirstVisibleItem);
+        edit.putInt(SAVED_PARENT_ITEM_ID, mIdParentItem);
+        edit.putInt(SAVED_MODE, mStartupMode);
+        edit.putString(SAVED_QUERY, mSearchString);
+        edit.apply();
+    }
+
+    /**
+     * Getting stored preferences
+     */
+    private void getSettingsFromPreferences() {
+        SharedPreferences userDetails =
+                mContext.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        mFirstVisibleItem = userDetails.getInt(FIRST_VISIBLE_ITEM, 0);//get preferences
+        mIdParentItem = userDetails.getInt(SAVED_PARENT_ITEM_ID, 0);
+        mStartupMode = userDetails.getInt(SAVED_MODE, 0);
+        mSearchString = userDetails.getString(SAVED_QUERY, null);
+
+    }
+
+
     public static void setParams(int idParentItem, int startupMode, String searchString) {
-        FragListRecipe.startupMode = startupMode;
-        FragListRecipe.idParentItem = idParentItem;
-        FragListRecipe.searchString = searchString;
+        FragListRecipe.mStartupMode = startupMode;
+        FragListRecipe.mIdParentItem = idParentItem;
+        FragListRecipe.mSearchString = searchString;
     }
 
     public void showListRecipe() {
-        switch (startupMode) {
+        switch (mStartupMode) {
             case MODE_RECIPE_FROM_CATEGORY:
-                adapter = new PrepareListRecipes(context, idParentItem).getFilledAdapter();
+                mAdapter = new PrepareListRecipes(mContext, mIdParentItem).getFilledAdapter();
                 Log.d("TG", "MODE_RECIPE_FROM_CATEGORY");
-                if (adapter.size() == 0) {
+                if (mAdapter.size() == 0) {
                     text_empty_text_list_recipe.setText(R.string.text_add_recipe);
                 } else text_empty_text_list_recipe.setText(null);
 
@@ -134,10 +168,10 @@ public class FragListRecipe extends Fragment implements Constants,
 
             case MODE_FAVORITE_RECIPE:
                 MainActivity.overrideActionBar(null,
-                        context.getString(R.string.text_list_favorite_recipe));
+                        mContext.getString(R.string.text_list_favorite_recipe));
                 Log.d("TG", "MODE_FAVORITE_RECIPE");
-                adapter = new PrepareListRecipes(context).getFilledAdapter();
-                if (adapter.size() == 0) {
+                mAdapter = new PrepareListRecipes(mContext).getFilledAdapter();
+                if (mAdapter.size() == 0) {
                     text_empty_text_list_recipe.setText(R.string.text_favorite_not_found);
                 } else text_empty_text_list_recipe.setText(null);
                 MainActivity.hideAllFloatButtons();
@@ -146,22 +180,22 @@ public class FragListRecipe extends Fragment implements Constants,
 
             case MODE_SEARCH_RESULT:
                 MainActivity.overrideActionBar(null,
-                        context.getString(R.string.text_list_search_result));
+                        mContext.getString(R.string.text_list_search_result));
                 Log.d("TG", "MODE_SEARCH_RESULT");
-                adapter = new PrepareListRecipes(context, searchString).getFilledAdapter();
-                if (adapter.size() == 0) {
+                mAdapter = new PrepareListRecipes(mContext, mSearchString).getFilledAdapter();
+                if (mAdapter.size() == 0) {
                     text_empty_text_list_recipe.setText(R.string.text_search_not_found);
                 } else text_empty_text_list_recipe.setText(null);
                 MainActivity.hideAllFloatButtons();
                 setHasOptionsMenu(true); //override menu, call 'onCreateOptionsMenu' in this class
                 break;
         }
-        ListAdapter listAdapter = new ListAdapter(context, adapter);
-        listView.setAdapter(listAdapter);
-        registerForContextMenu(listView);
-        listView.setOnItemLongClickListener(this);
-        listView.setOnItemClickListener(this);
-        listView.setSelection(firstVisibleItem); //mechanism save and restore state of list view
+        ListAdapter listAdapter = new ListAdapter(mContext, mAdapter);
+        mListView.setAdapter(listAdapter);
+        registerForContextMenu(mListView);
+        mListView.setOnItemLongClickListener(this);
+        mListView.setOnItemClickListener(this);
+        mListView.setSelection(mFirstVisibleItem); //mechanism save and restore state of list view
     }
 
     @Override
@@ -172,8 +206,9 @@ public class FragListRecipe extends Fragment implements Constants,
     @Override
     public void onPause() {
         super.onPause();
-        Log.d("TG", "onPause FragListRecipe : ");
-        MainActivity.saveListState(TAG_LIST_RECIPE, firstVisibleItem); //save list view state
+        setSettingsToPreferences();
+//        Log.d("TG", "onPause FragListRecipe : ");
+//        MainActivity.saveListState(TAG_LIST_RECIPE, mFirstVisibleItem); //save list view state
     }
 
     @Override
@@ -185,17 +220,19 @@ public class FragListRecipe extends Fragment implements Constants,
     @Override
     public void onResume() {
         super.onResume();
-        firstVisibleItem = MainActivity.restoreListState(TAG_LIST_RECIPE); //restore list view state
+//        mFirstVisibleItem = MainActivity.restoreListState(TAG_LIST_RECIPE); //restore list view state
+        MainActivity.isNoFragmentsAttached = false; //fragment attached
+        MainActivity.listAllFragments();
+//        getSettingsFromPreferences();
         showListRecipe();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d("TG", "onDetach FragListRecipe : ");
         MainActivity.saveListState(TAG_LIST_RECIPE, 0); //reset list view state
-        database.close();
-        dataBaseHelper.close();
+        mDatabase.close();
+        mDataBaseHelper.close();
     }
 
     /**
@@ -206,8 +243,8 @@ public class FragListRecipe extends Fragment implements Constants,
      */
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        nameForAction = adapter.get(position).getListTitle();
-        idItem = adapter.get(position).getItemId();
+        mNameForAction = mAdapter.get(position).getListTitle();
+        mIdItem = mAdapter.get(position).getItemId();
         return false;
     }
 
@@ -224,13 +261,13 @@ public class FragListRecipe extends Fragment implements Constants,
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case ID_POPUP_ITEM_REN:
-                showDialog(DIALOG_REN_RECIPE_LISTRECIPE, nameForAction);
+                showDialog(DIALOG_REN_RECIPE_LISTRECIPE, mNameForAction);
                 break;
             case ID_POPUP_ITEM_DEL:
-                showDialog(DIALOG_DEL_RECIPE_LISTRECIPE, nameForAction);
+                showDialog(DIALOG_DEL_RECIPE_LISTRECIPE, mNameForAction);
                 break;
             case ID_POPUP_ITEM_MOV:
-                showDialog(DIALOG_MOV_RECIPE_LISTRECIPE, nameForAction);
+                showDialog(DIALOG_MOV_RECIPE_LISTRECIPE, mNameForAction);
                 break;
             case ID_POPUP_ITEM_FAV:
                 setUnsetFav();
@@ -241,26 +278,26 @@ public class FragListRecipe extends Fragment implements Constants,
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ListData ld = adapter.get(position);
+        ListData ld = mAdapter.get(position);
         Log.d("TG", "ListResipe: onItemClick = " + ld.getItemId());
         onFragmentEventsListener.onListItemClick(ID_ACTION_LIST_RECIPE, ld.getItemId());
     }
 
     private void setUnsetFav() {
-        Cursor cursor = database.query(TABLE_LIST_RECIPE, null, null, null, null,
+        Cursor cursor = mDatabase.query(TABLE_LIST_RECIPE, null, null, null, null,
                 null, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    if (cursor.getInt(0) == idItem) {
-                        fav = cursor.getInt(4);
-                        fav = fav == 0 ? 1 : 0; // if recipe was 'like' unlike him
+                    if (cursor.getInt(0) == mIdItem) {
+                        mFav = cursor.getInt(4);
+                        mFav = mFav == 0 ? 1 : 0; // if recipe was 'like' unlike him
                     }
                 } while (cursor.moveToNext());
             }
-            contentValues = new ContentValues();
-            contentValues.put("make", fav);
-            long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idItem, null);
+            mContentValues = new ContentValues();
+            mContentValues.put("make", mFav);
+            long rowId = mDatabase.update(TABLE_LIST_RECIPE, mContentValues, "_ID=" + mIdItem, null);
             showListRecipe();
         }
     }
@@ -269,8 +306,8 @@ public class FragListRecipe extends Fragment implements Constants,
         Bundle bundle = new Bundle();
         bundle.putInt(ID_DIALOG, idDialog);
         bundle.putString(NAME_FOR_ACTION, nameForAction);
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        Fragment fragment = fragmentManager.findFragmentByTag(TAG_DIALOG);
+        FragmentTransaction ft = mFrManager.beginTransaction();
+        Fragment fragment = mFrManager.findFragmentByTag(TAG_DIALOG);
         if (fragment != null) {
             ft.remove(fragment);
         }
@@ -278,7 +315,7 @@ public class FragListRecipe extends Fragment implements Constants,
 
         DialogFragment dialogFragment = new FragDialog();
         dialogFragment.setArguments(bundle);
-        dialogFragment.show(fragmentManager, TAG_DIALOG);
+        dialogFragment.show(mFrManager, TAG_DIALOG);
     }
 
     public void onDialogClick(int idDialog, String param, int typeFolder, int idCategory) {
@@ -291,7 +328,7 @@ public class FragListRecipe extends Fragment implements Constants,
                 break;
             case DIALOG_MOV_RECIPE_LISTRECIPE:
                 if (idCategory != NOP) moveRecipe(typeFolder, idCategory);
-                else makeSnackbar(context
+                else makeSnackbar(mContext
                         .getString(R.string.folder_folder_not_select));
                 break;
         }
@@ -301,33 +338,33 @@ public class FragListRecipe extends Fragment implements Constants,
      * Just change value in columns "category_id" & "sub_category_id" in TABLE_LIST_RECIPE
      */
     private void moveRecipe(int typeFolder, int idCategory) {
-        contentValues = new ContentValues();
+        mContentValues = new ContentValues();
         if (typeFolder == PARENT) {
-            contentValues.put("category_id", idCategory);
-            contentValues.put("sub_category_id", DEFAULT_VALUE_COLUMN);
+            mContentValues.put("category_id", idCategory);
+            mContentValues.put("sub_category_id", DEFAULT_VALUE_COLUMN);
         } else if (typeFolder == CHILD) {
-            contentValues.put("category_id", DEFAULT_VALUE_COLUMN);
-            contentValues.put("sub_category_id", idCategory);
+            mContentValues.put("category_id", DEFAULT_VALUE_COLUMN);
+            mContentValues.put("sub_category_id", idCategory);
         }
-        long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idItem, null);
+        long rowId = mDatabase.update(TABLE_LIST_RECIPE, mContentValues, "_ID=" + mIdItem, null);
         showListRecipe();
         Log.d("TG", "Frag List Recipe : moveRecipe ");
 
-        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(mContext.getString(R.string.success));
     }
 
     private void deleteRecipe() {
-        long rowId = database.delete(TABLE_LIST_RECIPE, "_ID=" + idItem, null);
+        long rowId = mDatabase.delete(TABLE_LIST_RECIPE, "_ID=" + mIdItem, null);
         showListRecipe();
-        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(mContext.getString(R.string.success));
     }
 
     private void renameRecipe(String param) {
-        contentValues = new ContentValues();
-        contentValues.put("recipe_title", param);
-        long rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idItem, null);
+        mContentValues = new ContentValues();
+        mContentValues.put("recipe_title", param);
+        long rowId = mDatabase.update(TABLE_LIST_RECIPE, mContentValues, "_ID=" + mIdItem, null);
         showListRecipe();
-        if (rowId >= 0) makeSnackbar(context.getString(R.string.success));
+        if (rowId >= 0) makeSnackbar(mContext.getString(R.string.success));
     }
 
     private void makeSnackbar(String text) {
@@ -341,6 +378,6 @@ public class FragListRecipe extends Fragment implements Constants,
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        FragListRecipe.firstVisibleItem = firstVisibleItem;
+        mFirstVisibleItem = firstVisibleItem;
     }
 }

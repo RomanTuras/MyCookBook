@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ua.com.spacetv.mycookbook.tools;
+package ua.com.spacetv.mycookbook.interfaces;
 
 /**
  * Created by Roman Turas on 02/01/2016
@@ -23,13 +23,10 @@ package ua.com.spacetv.mycookbook.tools;
 public interface Constants {
 
     /* Tags for fragments */
-    String FRAGMENT_INDEX = "FRAGMENT_INDEX";
     String TAG_CATEGORY = "ID_CATEGORY";
     String TAG_SUBCATEGORY = "ID_SUBCATEGORY";
     String TAG_LIST_RECIPE = "ID_LIST_RECIPE";
-    String TAG_TEXT_RECIPE = "ID_TEXT_RECIPE";
     String TAG_DIALOG = "TAG_DIALOG";
-    String TAG_FILE_DIALOG = "TAG_FILE_DIALOG";
 
     /* id of Dialogs */
     String ID_DIALOG = "ID_DIALOG";
@@ -48,6 +45,14 @@ public interface Constants {
     byte DIALOG_DEL_RECIPE_LISTRECIPE = 12;
     byte DIALOG_MOV_RECIPE_LISTRECIPE = 13;
     int NOP = -1;
+
+    //Preferences
+    String SHARED_PREFERENCES = "SHARED_PREFERENCES";
+    String FIRST_VISIBLE_ITEM = "FIRST_VISIBLE_ITEM";
+    String SAVED_PARENT_ITEM_ID = "SAVED_PARENT_ITEM_ID";
+    String SAVED_MODE = "SAVED_MODE";
+    String SAVED_QUERY = "SAVED_QUERY";
+    String IS_NO_FRAGMENTS_ATTACHED = "IS_NO_FRAGMENTS_ATTACHED";
 
     /* id of actions (from where do it) */
     int ID_ACTION_TOP_CATEGORY = 0;
@@ -112,6 +117,8 @@ public interface Constants {
     /* Google services */
     String TRACK_ID ="UA-64362552-1";
     String AD_UNIT_ID = "ca-app-pub-7481052517653982/5697171795";
-    boolean isDebugModeOn = false; // !! change to 'false' before production !!
+
+    boolean isDebugModeOn = true; // TODO !! change to 'false' before production !!
+
     String TEST_DEVICE = "77A1F05FE188A3F51A0FF103708EDEF9";
 }

@@ -28,6 +28,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import ua.com.spacetv.mycookbook.R;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Created by Roman Turas on 25/11/2015.
