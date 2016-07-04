@@ -23,9 +23,9 @@ package ua.com.spacetv.mycookbook.interfaces;
 public interface Constants {
 
     /* Tags for fragments */
-    String TAG_CATEGORY = "ID_CATEGORY";
-    String TAG_SUBCATEGORY = "ID_SUBCATEGORY";
-    String TAG_LIST_RECIPE = "ID_LIST_RECIPE";
+//    String TAG_CATEGORY = "ID_CATEGORY";
+//    String TAG_SUBCATEGORY = "ID_SUBCATEGORY";
+//    String TAG_LIST_RECIPE = "ID_LIST_RECIPE";
     String TAG_DIALOG = "TAG_DIALOG";
 
     /* id of Dialogs */
@@ -48,11 +48,10 @@ public interface Constants {
 
     //Preferences
     String SHARED_PREFERENCES = "SHARED_PREFERENCES";
-    String FIRST_VISIBLE_ITEM = "FIRST_VISIBLE_ITEM";
-    String SAVED_PARENT_ITEM_ID = "SAVED_PARENT_ITEM_ID";
-    String SAVED_MODE = "SAVED_MODE";
-    String SAVED_QUERY = "SAVED_QUERY";
-    String IS_NO_FRAGMENTS_ATTACHED = "IS_NO_FRAGMENTS_ATTACHED";
+    String FIRST_ITEM_TOP_CATEGORY = "FIRST_ITEM_TOP_CATEGORY";
+    String FIRST_ITEM_SUB_CATEGORY = "FIRST_ITEM_SUB_CATEGORY";
+    String FIRST_ITEM_LIST_RESIPE = "FIRST_ITEM_LIST_RESIPE";
+
 
     /* id of actions (from where do it) */
     int ID_ACTION_TOP_CATEGORY = 0;
@@ -108,7 +107,6 @@ public interface Constants {
     /*id icons for Folder or Recipe and for Like-icon*/
     byte ID_IMG_FOLDER = 0;
     byte ID_IMG_RECIPE = 1;
-    byte ID_IMG_LIKE = 1;
     byte ID_IMG_LIKE_OFF = 0;
 
     /* Default value of columns 'category_id' and 'sub_category_id'*/

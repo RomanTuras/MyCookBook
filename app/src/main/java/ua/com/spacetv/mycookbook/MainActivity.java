@@ -19,7 +19,6 @@ package ua.com.spacetv.mycookbook;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -52,21 +51,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.List;
 
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.helpers.FragmentHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
+import ua.com.spacetv.mycookbook.interfaces.LicenseKey;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.RestoreDatabaseRecipes;
 import ua.com.spacetv.mycookbook.tools.SaveDatabaseRecipes;
 import ua.com.spacetv.mycookbook.tools.Utilities;
+import ua.com.spacetv.mycookbook.util.IabHelper;
+import ua.com.spacetv.mycookbook.util.IabResult;
+import ua.com.spacetv.mycookbook.util.Purchase;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Constants,
-        OnFragmentEventsListener, View.OnClickListener {
+        OnFragmentEventsListener, View.OnClickListener, LicenseKey,
+        IabHelper.OnIabPurchaseFinishedListener {
 
     private static final int PERMISSION_REQUEST_CODE = 2;
     private static FragmentHelper mFragmentHelper;
@@ -78,7 +81,9 @@ public class MainActivity extends AppCompatActivity
     private static android.support.v7.app.ActionBar actionBar;
     private static HashMap<String, Integer> mapState = new HashMap<>(3);
     private static int mAction;
-    public static boolean isNoFragmentsAttached = true;
+    //**** Purchase in app
+    private IabHelper mHelper;
+    private IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,41 +111,68 @@ public class MainActivity extends AppCompatActivity
 
 //        getSettingsFromPreferences();
 
-        if(mFragmentManager.findFragmentByTag(FragTopCategory.class.getSimpleName()) == null) {
+        if (mFragmentManager.findFragmentByTag(FragTopCategory.class.getSimpleName()) == null) {
             mFragmentHelper.attachTopCategoryFragment();
         }
 
+//        settingUpGooglePlayBilling();
+    }
+
+    /**
+     * Setting Up Google Play Billing in the Application
+     */
+    private void settingUpGooglePlayBilling() {
+        mHelper = new IabHelper(this, LICENSE_KEY);
+        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+            public void onIabSetupFinished(IabResult result) {
+                if (!result.isSuccess()) {
+                    Log.d("TG", "In-app Billing setup failed: " +
+                            result);
+                } else {
+                    Log.d("TG", "In-app Billing is set up OK");
+                }
+            }
+        });
+
+        IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
+                = new IabHelper.OnIabPurchaseFinishedListener() {
+            public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+                if (result.isFailure()) {
+                    // Handle error
+                    return;
+                } else if (purchase.getSku().equals(ITEM_SKU)) {
+//                    consumeItem();
+//                    buyButton.setEnabled(false);
+                }
+            }
+        };
+    }
+
+//    public void consumeItem() {
+//        mHelper.queryInventoryAsync(mReceivedInventoryListener);
+//    }
+
+//    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
+//            = new IabHelper.QueryInventoryFinishedListener() {
+//        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+//            if (result.isFailure()) {
+//                // Handle failure
+//            } else {
+//                mHelper.consumeAsync(inventory.getPurchase(ITEM_SKU), mConsumeFinishedListener);
+//            }
+//        }
+//    };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
-        Log.d("TG", "isAttachedOneFragment = "+ isNoFragmentsAttached);
-        setSettingsToPreferences();
-    }
-
-    /**
-     * Saving preferences
-     * <p/>
-     * mFirstVisibleItem - of the list view
-     * mQuery - query if it is
-     */
-    private void setSettingsToPreferences() {
-        SharedPreferences userDetails =
-                mContext.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor edit = userDetails.edit();
-        edit.clear();
-        edit.putBoolean(IS_NO_FRAGMENTS_ATTACHED, isNoFragmentsAttached);
-        edit.apply();
-    }
-
-    /**
-     * Getting stored preferences
-     */
-    private void getSettingsFromPreferences() {
-        SharedPreferences userDetails =
-                mContext.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        isNoFragmentsAttached = userDetails.getBoolean(IS_NO_FRAGMENTS_ATTACHED, true);
     }
 
     /**
@@ -151,13 +183,6 @@ public class MainActivity extends AppCompatActivity
     private int countBackStackFragment() {
         int i = mFragmentManager.getBackStackEntryCount();
         return i;
-    }
-
-    public static void listAllFragments(){
-        List<Fragment> fragmentList = mFragmentManager.getFragments();
-        for (Fragment frarment: fragmentList) {
-            Log.d("TG", "fragment" + frarment);
-        }
     }
 
     /**
@@ -279,6 +304,9 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.drawer_home) {
             clearBackStackOfFragments();
+//        } else if (id == R.id.drawer_remove_ads) {
+//            mHelper.launchPurchaseFlow(this, ITEM_SKU, 10001,
+//                    mPurchaseFinishedListener, "mypurchasetoken");
         } else if (id == R.id.drawer_favorite) {
             String tag = FragListRecipe.class.getSimpleName();
             tag += "Favorite";
@@ -471,16 +499,6 @@ public class MainActivity extends AppCompatActivity
         Snackbar.make(fabSubCategory, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 
-    public static void saveListState(String idFragment, int firstVisibleItem) {
-        mapState.put(idFragment, firstVisibleItem);
-    }
-
-    public static int restoreListState(String idFragment) {
-        if (mapState.size() != 0 && mapState.containsKey(idFragment))
-            return mapState.get(idFragment);
-        else return 0;
-    }
-
     /**
      * Invokes when user selected the permissions
      * This is format for use from activity
@@ -513,4 +531,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public void onIabPurchaseFinished(IabResult result, Purchase info) {
+
+    }
 }

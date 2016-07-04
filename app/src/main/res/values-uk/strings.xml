@@ -104,5 +104,6 @@
     <string name="common_progress_message">Please wait...</string>
     <string name="common_server_error">Server error!</string>
     <string name="permissions_error">Без цих дозволів додаток буде працювати некоректно!</string>
+    <string name="drawer_remove_ads">Відключити рекламу</string>
 
 </resources>

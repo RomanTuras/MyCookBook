@@ -106,5 +106,6 @@
     <string name="common_progress_message">Please wait...</string>
     <string name="common_server_error">Server error!</string>
     <string name="permissions_error">Без этих разрешений приложение будет работать некорректно!</string>
+    <string name="drawer_remove_ads">Отключить рекламу</string>
 
 </resources>

@@ -95,7 +95,7 @@ public class FragmentHelper implements Constants {
         String tag = FragTextRecipe.class.getSimpleName();
         Fragment fragment = mFrManager.findFragmentByTag(tag);
         if (typeFolder == PARENT) {
-            bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.idParentItem);//get id TOP category
+            bundle.putInt(TAG_PARENT_ITEM_ID, FragSubCategory.mIdParentItem);//get id TOP category
         } else if (typeFolder == CHILD) {
             bundle.putInt(TAG_PARENT_ITEM_ID, FragListRecipe.mIdParentItem);//get id SUB category
         }

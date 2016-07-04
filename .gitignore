@@ -1,3 +1,4 @@
+/app/src/main/java/ua/com/spacetv/mycookbook/interfaces/LicenseKey.java
 *.iml
 .gradle
 /local.properties

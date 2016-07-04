@@ -88,6 +88,7 @@
     <!--Drawer-->
     <string name="drawer_home">Home</string>
     <string name="drawer_favorite">Favorite Recipes</string>
+    <string name="drawer_remove_ads">Remove ads</string>
     <string name="drawer_search">Search by content</string>
     <string name="drawer_export_db">Save</string>
     <string name="drawer_import_db">Restore</string>

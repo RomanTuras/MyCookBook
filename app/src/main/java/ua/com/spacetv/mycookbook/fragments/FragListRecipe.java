@@ -18,7 +18,6 @@ package ua.com.spacetv.mycookbook.fragments;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -35,7 +34,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -51,13 +49,14 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
+import ua.com.spacetv.mycookbook.tools.Preferences;
 
 /**
  * Created by Roman Turas on 07/01/2016.
  *
  */
 public class FragListRecipe extends Fragment implements Constants,
-        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
+        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
     private static Context mContext;
     private static FragmentManager mFrManager;
@@ -107,38 +106,6 @@ public class FragListRecipe extends Fragment implements Constants,
         return view;
     }
 
-    /**
-     * Saving preferences
-     * <p/>
-     * mFirstVisibleItem - of the list view
-     * mQuery - query if it is
-     */
-    private void setSettingsToPreferences() {
-        SharedPreferences userDetails =
-                mContext.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor edit = userDetails.edit();
-        edit.clear();
-        edit.putInt(FIRST_VISIBLE_ITEM, mFirstVisibleItem);
-        edit.putInt(SAVED_PARENT_ITEM_ID, mIdParentItem);
-        edit.putInt(SAVED_MODE, mStartupMode);
-        edit.putString(SAVED_QUERY, mSearchString);
-        edit.apply();
-    }
-
-    /**
-     * Getting stored preferences
-     */
-    private void getSettingsFromPreferences() {
-        SharedPreferences userDetails =
-                mContext.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        mFirstVisibleItem = userDetails.getInt(FIRST_VISIBLE_ITEM, 0);//get preferences
-        mIdParentItem = userDetails.getInt(SAVED_PARENT_ITEM_ID, 0);
-        mStartupMode = userDetails.getInt(SAVED_MODE, 0);
-        mSearchString = userDetails.getString(SAVED_QUERY, null);
-
-    }
-
-
     public static void setParams(int idParentItem, int startupMode, String searchString) {
         FragListRecipe.mStartupMode = startupMode;
         FragListRecipe.mIdParentItem = idParentItem;
@@ -154,10 +121,10 @@ public class FragListRecipe extends Fragment implements Constants,
                     text_empty_text_list_recipe.setText(R.string.text_add_recipe);
                 } else text_empty_text_list_recipe.setText(null);
 
-                if (FragTopCategory.nameOfTopCategory != null) {
-                    String path = FragTopCategory.nameOfTopCategory;
-                    if (FragSubCategory.nameOfSubCategory != null) {
-                        path += "\\ " + FragSubCategory.nameOfSubCategory;
+                if (FragTopCategory.mNameOfTopCategory != null) {
+                    String path = FragTopCategory.mNameOfTopCategory;
+                    if (FragSubCategory.mNameOfSubCategory != null) {
+                        path += "\\ " + FragSubCategory.mNameOfSubCategory;
                     }
                     MainActivity.overrideActionBar(null, path);
                 } else MainActivity.overrideActionBar(null, null);
@@ -206,9 +173,8 @@ public class FragListRecipe extends Fragment implements Constants,
     @Override
     public void onPause() {
         super.onPause();
-        setSettingsToPreferences();
-//        Log.d("TG", "onPause FragListRecipe : ");
-//        MainActivity.saveListState(TAG_LIST_RECIPE, mFirstVisibleItem); //save list view state
+        mFirstVisibleItem = mListView.getFirstVisiblePosition();
+        Preferences.setSettingsToPreferences(mContext, FIRST_ITEM_LIST_RESIPE, mFirstVisibleItem);
     }
 
     @Override
@@ -220,17 +186,14 @@ public class FragListRecipe extends Fragment implements Constants,
     @Override
     public void onResume() {
         super.onResume();
-//        mFirstVisibleItem = MainActivity.restoreListState(TAG_LIST_RECIPE); //restore list view state
-        MainActivity.isNoFragmentsAttached = false; //fragment attached
-        MainActivity.listAllFragments();
-//        getSettingsFromPreferences();
+        mFirstVisibleItem = Preferences
+                .getSettingsFromPreferences(mContext, FIRST_ITEM_LIST_RESIPE);
         showListRecipe();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        MainActivity.saveListState(TAG_LIST_RECIPE, 0); //reset list view state
         mDatabase.close();
         mDataBaseHelper.close();
     }
@@ -348,8 +311,6 @@ public class FragListRecipe extends Fragment implements Constants,
         }
         long rowId = mDatabase.update(TABLE_LIST_RECIPE, mContentValues, "_ID=" + mIdItem, null);
         showListRecipe();
-        Log.d("TG", "Frag List Recipe : moveRecipe ");
-
         if (rowId >= 0) makeSnackbar(mContext.getString(R.string.success));
     }
 
@@ -369,15 +330,5 @@ public class FragListRecipe extends Fragment implements Constants,
 
     private void makeSnackbar(String text) {
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        mFirstVisibleItem = firstVisibleItem;
     }
 }

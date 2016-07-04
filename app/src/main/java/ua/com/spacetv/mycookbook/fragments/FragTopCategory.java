@@ -31,7 +31,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -47,13 +46,14 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
 import ua.com.spacetv.mycookbook.tools.ListData;
+import ua.com.spacetv.mycookbook.tools.Preferences;
 
 /**
  * Created by salden on 02/01/2016.
  * Class is responsible for list top category
  */
 public class FragTopCategory extends Fragment implements Constants,
-        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
+        AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
     private static DataBaseHelper mDataBaseHelper;
     private static SQLiteDatabase mDatabase;
@@ -62,15 +62,14 @@ public class FragTopCategory extends Fragment implements Constants,
     private static ListView mListView;
     private static ArrayList<ListData> mAdapter;
     private ArrayList<Integer> mArrayIdSubCategories;
-    private static View view;
-    private static TextView text_empty_text_topcategory;
+    private static View mViewForSnackbar;
+    private static TextView mTextView; //shoving when category is empty
     private static OnFragmentEventsListener onFragmentEventsListener;
     private ContentValues mContentValues;
     private static String mNameForAction;
     public static int mIdParentCategory;
-
-    public static String nameOfTopCategory = null;
-    private static int firstVisibleItem = 0;
+    public static String mNameOfTopCategory = null;
+    private static int mFirstVisibleItem = 0;
 
     @Override
     public void onAttach(Context context) {
@@ -85,34 +84,31 @@ public class FragTopCategory extends Fragment implements Constants,
                              Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.frag_top_category, null);
         mListView = (ListView) view.findViewById(R.id.listTopCategory);
-        mListView.setOnScrollListener(this);
-        text_empty_text_topcategory = (TextView) view.findViewById(R.id.text_empty_text_topcategory);
+        mTextView = (TextView) view.findViewById(R.id.text_empty_text_topcategory);
 
         mFrManager = getFragmentManager();
         mDataBaseHelper = new DataBaseHelper(mContext);
         mDatabase = mDataBaseHelper.getWritableDatabase();
-//        Log.d("TG", "FragTopCategory onCreateView: mDataBaseHelper = " + mDataBaseHelper.toString() + "  mDatabase =" + mDatabase.toString());
-        FragTopCategory.view = view;
+        mViewForSnackbar = view;
         return view;
     }
 
     public void showAllCategory() {
         mAdapter = new ArrayList<>();
 
-        if(mDatabase == null | mDataBaseHelper == null) {
+        if (mDatabase == null | mDataBaseHelper == null) {
             mDataBaseHelper = new DataBaseHelper(mContext);
             mDatabase = mDataBaseHelper.getWritableDatabase();
         }
-//        Log.d("TG", "FragTopCategory showAllCategory: mDataBaseHelper = " + mDataBaseHelper.toString() + "  mDatabase =" + mDatabase.toString());
 
         categoryInList();
-        if (mAdapter.size() == 0) text_empty_text_topcategory
+        if (mAdapter.size() == 0) mTextView
                 .setText(R.string.text_add_folder_top_category);
-        else text_empty_text_topcategory.setText(null);
+        else mTextView.setText(null);
         ListAdapter listAdapter = new ListAdapter(mContext, mAdapter);
         mListView.setAdapter(listAdapter);
         registerForContextMenu(mListView);
-        mListView.setSelection(firstVisibleItem); //mechanism save and restore state of list view
+        mListView.setSelection(mFirstVisibleItem); //mechanism save and restore state of list view
         mListView.setOnItemLongClickListener(this);
         mListView.setOnItemClickListener(this);
     }
@@ -177,22 +173,17 @@ public class FragTopCategory extends Fragment implements Constants,
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
-        MainActivity.saveListState(TAG_CATEGORY, firstVisibleItem); //save list view state
+        mFirstVisibleItem = mListView.getFirstVisiblePosition();
+        Preferences.setSettingsToPreferences(mContext, FIRST_ITEM_TOP_CATEGORY, mFirstVisibleItem);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        MainActivity.isNoFragmentsAttached = true; //fragment attached
-        MainActivity.listAllFragments();
-        firstVisibleItem = MainActivity.restoreListState(TAG_CATEGORY); //restore list view state
+        mFirstVisibleItem = Preferences
+                .getSettingsFromPreferences(mContext, FIRST_ITEM_TOP_CATEGORY);
         showAllCategory();
         MainActivity.showFloatButtonTopCategory();
         MainActivity.overrideActionBar(null, null);
@@ -338,22 +329,12 @@ public class FragTopCategory extends Fragment implements Constants,
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ListData ld = mAdapter.get(position);
-        nameOfTopCategory = ld.getListTitle();
+        mNameOfTopCategory = ld.getListTitle();
         onFragmentEventsListener.onListItemClick(ID_ACTION_TOP_CATEGORY, ld.getItemId());
     }
 
     private void makeSnackbar(String text) {
-        Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+        Snackbar.make(mViewForSnackbar, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
 
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        FragTopCategory.firstVisibleItem = firstVisibleItem;
-    }
 }

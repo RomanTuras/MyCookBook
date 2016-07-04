@@ -58,6 +58,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
@@ -65,8 +67,8 @@ import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
 import ua.com.spacetv.mycookbook.helpers.ImagePickHelper;
-import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
+import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.Utilities;
 
 /**
@@ -76,7 +78,6 @@ public class FragTextRecipe extends Fragment implements Constants,
         OnRequestPermissionsResultCallback {
 
     private static final int PERMISSION_REQUEST_CODE = 2;
-    private static final int REQUEST_INTERNET = 1;
     private static Context mContext;
     private static FragmentManager fragmentManager;
     private static OnFragmentEventsListener onFragmentEventsListener;
@@ -102,6 +103,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     private String textRecipeFromDatabase = null;
     private static String databaseImagePath;
     private static Fragment mFragmentTextRecipe;
+    private Timer mScheduledTimeTimer;
 
     @Override
     public void onAttach(Context context) {
@@ -111,6 +113,7 @@ public class FragTextRecipe extends Fragment implements Constants,
         this.contentValues = new ContentValues();
         mFragmentTextRecipe = new FragTextRecipe();
         setRetainInstance(true);
+//        mScheduledTimeTimer = new Timer();
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
@@ -167,6 +170,7 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     private void modeNewRecipe() {
         Log.d("TG", "modeNewRecipe *** ");
+        if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
         editTitleRecipe.requestFocus();
@@ -177,6 +181,7 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     private void modeEdit() {
         Log.d("TG", "modeEdit *** ");
+        if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
         editTitleRecipe.setFocusableInTouchMode(true);
         editTitleRecipe.setFocusable(true);
         editTextRecipe.setFocusableInTouchMode(true);
@@ -190,6 +195,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     private void modeReview() {
         new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
 
+        startScheduledTimeTimer();
         Log.d("TG", "modeReview *** ");
         editTitleRecipe.setFocusableInTouchMode(false);
         editTitleRecipe.setFocusable(false);
@@ -199,6 +205,26 @@ public class FragTextRecipe extends Fragment implements Constants,
         startupMode = MODE_REVIEW_RECIPE;
         setHasOptionsMenu(false);
         setHasOptionsMenu(true);
+    }
+
+    private void startScheduledTimeTimer() {
+        mScheduledTimeTimer = new Timer();
+        mScheduledTimeTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (ads.getInterstitialAd() != null) {
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Log.d("TG", "-= startScheduledTimeTimer =-");
+                            ads.showAd();
+                        }
+                    });
+
+                    if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
+                }
+            }
+        }, 1000 * 10, 1000 * 10); //delay 100 ms, period 10 sec
     }
 
     private void getDisplayMetrics() {
@@ -500,7 +526,6 @@ public class FragTextRecipe extends Fragment implements Constants,
     @Override
     public void onResume() {
         super.onResume();
-        MainActivity.isNoFragmentsAttached = false; //fragment attached
         MainActivity.overrideActionBar(mContext.getString(R.string.text_recipe), null);
         MainActivity.hideAllFloatButtons();
         loadAds();
@@ -509,12 +534,12 @@ public class FragTextRecipe extends Fragment implements Constants,
     @Override
     public void onDetach() {
         super.onDetach();
-        MainActivity.listAllFragments();
         if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
         database.close();
         dataBaseHelper.close();
+        if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
 //        ads.showAd();
     }
 

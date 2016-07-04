@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Environment;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,6 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
 public class RestoreDatabaseRecipes implements Constants {
     private static boolean isOkButtonShow = true; //show or hidden OK button
 
-
     /**
      * Checking if SD card is available - showing save dialog
      * Else - showing error dialog with one "cancel" button
@@ -33,11 +31,11 @@ public class RestoreDatabaseRecipes implements Constants {
      * @param context
      */
     public static void dialogRestoreDatabase(Context context) {
+        isOkButtonShow = true;
         String pathFolder = getPath();
         String title = context.getResources().getString(R.string.dlg_restore_file);
         String message;
         if (pathFolder != null) {//SD card mounted, folder found
-            Log.d("TG", "DIALOG_FILE_RESTORE pathFolder =" + pathFolder);
             if (checkFile() != null) {//file founded - restore available
                 message = context.getResources().getString(R.string.dlg_file_found);
                 message += '\n' + checkFile();

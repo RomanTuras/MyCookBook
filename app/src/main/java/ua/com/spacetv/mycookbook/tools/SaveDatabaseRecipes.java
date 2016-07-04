@@ -29,6 +29,7 @@ public class SaveDatabaseRecipes implements Constants {
      * @param context
      */
     public static void dialogSaveDatabase(Context context) {
+        isOkButtonShow = true;
         String pathFolder = getPath();
         String title = context.getResources().getString(R.string.dlg_save_file);
         String message;
