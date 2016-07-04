@@ -26,6 +26,3 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="com.android.vending.BILLING" />
 </manifest>
-
-    <!--android:screenOrientation="portrait"-->
-
