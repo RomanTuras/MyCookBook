@@ -50,20 +50,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
+import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.FragmentHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.LicenseKey;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
+import ua.com.spacetv.mycookbook.tools.Preferences;
 import ua.com.spacetv.mycookbook.tools.RestoreDatabaseRecipes;
 import ua.com.spacetv.mycookbook.tools.SaveDatabaseRecipes;
 import ua.com.spacetv.mycookbook.tools.Utilities;
 import ua.com.spacetv.mycookbook.util.IabHelper;
 import ua.com.spacetv.mycookbook.util.IabResult;
+import ua.com.spacetv.mycookbook.util.Inventory;
 import ua.com.spacetv.mycookbook.util.Purchase;
 
 public class MainActivity extends AppCompatActivity
@@ -79,11 +81,12 @@ public class MainActivity extends AppCompatActivity
     private static FloatingActionButton fabAddRecipeListRecipe;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
-    private static HashMap<String, Integer> mapState = new HashMap<>(3);
     private static int mAction;
     //**** Purchase in app
-    private IabHelper mHelper;
-    private IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener;
+    private static IabHelper mHelper;
+    public static boolean isPurchaseActive = false;//key to purchase
+    private boolean isRemoveAdsPressed = false;//this key showing is button "Remove ads" is pressed
+    boolean isClearPurchase = false; //test, remove it
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,63 +112,141 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        getSettingsFromPreferences();
-
         if (mFragmentManager.findFragmentByTag(FragTopCategory.class.getSimpleName()) == null) {
             mFragmentHelper.attachTopCategoryFragment();
         }
 
-//        settingUpGooglePlayBilling();
+        mHelper = new IabHelper(this, LICENSE_KEY);
+        isPurchaseActive = Preferences.getSettingsFromPreferences(mContext, IS_PURCHASE_OWNED, 0);
+        if (!isPurchaseActive) {
+            setupBillingInApp();
+        } else {
+            Log.d("TG", "Purchase already owned!");
+        }
+
     }
 
     /**
-     * Setting Up Google Play Billing in the Application
+     * 'Purchase in app'
+     * Setup billing in app
      */
-    private void settingUpGooglePlayBilling() {
-        mHelper = new IabHelper(this, LICENSE_KEY);
+    private void setupBillingInApp() {
+        mHelper.enableDebugLogging(isDebugModeOn);
         mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
             public void onIabSetupFinished(IabResult result) {
                 if (!result.isSuccess()) {
-                    Log.d("TG", "In-app Billing setup failed: " +
-                            result);
+                    Log.d("TG", "In-app Billing setup failed: " + result);
                 } else {
                     Log.d("TG", "In-app Billing is set up OK");
+                    consumeItem();
                 }
             }
         });
-
-        IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
-                = new IabHelper.OnIabPurchaseFinishedListener() {
-            public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-                if (result.isFailure()) {
-                    // Handle error
-                    return;
-                } else if (purchase.getSku().equals(ITEM_SKU)) {
-//                    consumeItem();
-//                    buyButton.setEnabled(false);
-                }
-            }
-        };
     }
 
-//    public void consumeItem() {
-//        mHelper.queryInventoryAsync(mReceivedInventoryListener);
-//    }
+    /**
+     * 'Purchase in app'
+     * Sending query inventory async
+     */
+    private void consumeItem() {
+        try {
+            mHelper.queryInventoryAsync(mReceivedInventoryListener);
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            e.printStackTrace();
+        }
+    }
 
-//    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
-//            = new IabHelper.QueryInventoryFinishedListener() {
-//        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
-//            if (result.isFailure()) {
-//                // Handle failure
-//            } else {
-//                mHelper.consumeAsync(inventory.getPurchase(ITEM_SKU), mConsumeFinishedListener);
-//            }
-//        }
-//    };
+    /**
+     * 'Purchase in app'
+     * Listener for 'queryInventoryAsync'
+     * Getting status of purchase and save it into preferences
+     */
+    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
+            = new IabHelper.QueryInventoryFinishedListener() {
+        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+            if (result.isFailure()) {
+                // Handle failure
+            } else {
 
+                // Getting status of purchase and save it into preferences
+                // called when 'Remove ads' button NOT pressed
+                if (!isRemoveAdsPressed) {
+                    if (inventory.getPurchase(ITEM_SKU) != null) {
+                        if (inventory.getPurchase(ITEM_SKU).getSku().equals(ITEM_SKU)) {
+                            isPurchaseActive = true; //purchase is owned
+                        } else {
+                            isPurchaseActive = false; //purchase is not owned
+                        }
+                        Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseActive);
+                    }
+                } else {
+//                    if(!isClearPurchase) {
+                    isRemoveAdsPressed = false;
+                    if (inventory.getPurchase(ITEM_SKU) == null) {
+                        try {
+                            mHelper.launchPurchaseFlow(MainActivity.this, ITEM_SKU, RC_REQUEST,
+                                    mPurchaseFinishedListener, "mypurchasetoken");
+                        } catch (IabHelper.IabAsyncInProgressException e) {
+                            e.printStackTrace();
+                        }
+                    }
+//                    }else {
+//                        isClearPurchase = false;
+//                        try {
+//                            mHelper.consumeAsync(inventory.getPurchase(ITEM_SKU),//***
+//                                    mConsumeFinishedListener);//****
+//                        } catch (IabHelper.IabAsyncInProgressException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+                }
+            }
+        }
+    };
+
+    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
+            new IabHelper.OnConsumeFinishedListener() {
+                public void onConsumeFinished(Purchase purchase, IabResult result) {
+                    if (result.isSuccess()) {
+                        isPurchaseActive = false;
+                        Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseActive);
+                        Log.d("TG", "Purchase is canceled! ");
+                    } else {
+                        Log.d("TG", "Purchase is NOT canceled! handle error ");
+                    }
+                }
+            };
+
+    /**
+     * 'Purchase in app'
+     * Listener for 'QueryInventoryFinishedListener'
+     */
+    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
+            = new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+            if (result.isFailure()) {
+                // Handle error
+                return;
+            } else if (purchase.getSku().equals(ITEM_SKU)) {
+                isPurchaseActive = true;
+                Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseActive);
+                Log.d("TG", "Purchase is owned! ");
+            }
+        }
+    };
+
+    /**
+     * 'Purchase in app'
+     * Getting result
+     * Check (mHelper != null) <-- fixed NullPointer from some device
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+        if (mHelper != null && !mHelper.handleActivityResult(requestCode, resultCode, data)) {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -173,6 +254,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //'Purchase in app'
+        if (mHelper != null) try {
+            mHelper.dispose();
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            e.printStackTrace();
+        }
+        mHelper = null;
     }
 
     /**
@@ -304,9 +392,14 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.drawer_home) {
             clearBackStackOfFragments();
-//        } else if (id == R.id.drawer_remove_ads) {
-//            mHelper.launchPurchaseFlow(this, ITEM_SKU, 10001,
-//                    mPurchaseFinishedListener, "mypurchasetoken");
+        } else if (id == R.id.drawer_remove_ads) {
+            isRemoveAdsPressed = true;
+            if (!isPurchaseActive) consumeItem();
+            if (!isDebugModeOn) {//if debug mode off - send analytics
+                String str = "isPurchaseActive = " + isPurchaseActive;
+                new Analytics(mContext).sendAnalytics("myCookBook", "Main Activity",
+                        "Attempt to buy", str);
+            }
         } else if (id == R.id.drawer_favorite) {
             String tag = FragListRecipe.class.getSimpleName();
             tag += "Favorite";

@@ -40,4 +40,31 @@ public class Preferences implements Constants {
                 context.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         return userDetails.getInt(tag, 0);
     }
+
+    /**
+     * Saving preferences type "boolean"
+     * @param context
+     * @param tag - TAG for save preferences
+     * @param key - boolean
+     */
+    public static void setSettingsToPreferences(Context context, String tag, boolean key) {
+        SharedPreferences userDetails =
+                context.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = userDetails.edit();
+        edit.putBoolean(tag, key);
+        edit.apply();
+    }
+
+    /**
+     * Getting stored preferences type "boolean"
+     * @param context
+     * @param tag - TAG for save preferences
+     *            @param i - any number, key for return boolean from preferences
+     * @return  - boolean
+     */
+    public static boolean getSettingsFromPreferences(Context context, String tag, int i) {
+        SharedPreferences userDetails =
+                context.getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        return userDetails.getBoolean(tag, false);
+    }
 }

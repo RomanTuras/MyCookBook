@@ -113,7 +113,6 @@ public class FragTextRecipe extends Fragment implements Constants,
         this.contentValues = new ContentValues();
         mFragmentTextRecipe = new FragTextRecipe();
         setRetainInstance(true);
-//        mScheduledTimeTimer = new Timer();
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
@@ -194,8 +193,9 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     private void modeReview() {
         new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
+        //If the service is not purchased - show ads
+        if(!MainActivity.isPurchaseActive) startScheduledTimeTimer();
 
-        startScheduledTimeTimer();
         Log.d("TG", "modeReview *** ");
         editTitleRecipe.setFocusableInTouchMode(false);
         editTitleRecipe.setFocusable(false);
@@ -207,20 +207,22 @@ public class FragTextRecipe extends Fragment implements Constants,
         setHasOptionsMenu(true);
     }
 
+    /**
+     * Starting 10 seconds timer for showing ads banner
+     * Timer timer work once
+     */
     private void startScheduledTimeTimer() {
         mScheduledTimeTimer = new Timer();
         mScheduledTimeTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (ads.getInterstitialAd() != null) {
-
                     getActivity().runOnUiThread(new Runnable() {
                         public void run() {
                             Log.d("TG", "-= startScheduledTimeTimer =-");
                             ads.showAd();
                         }
                     });
-
                     if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
                 }
             }
@@ -540,7 +542,6 @@ public class FragTextRecipe extends Fragment implements Constants,
         database.close();
         dataBaseHelper.close();
         if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
-//        ads.showAd();
     }
 
     /* If text or image was changed -> save recipe in mDatabase*/

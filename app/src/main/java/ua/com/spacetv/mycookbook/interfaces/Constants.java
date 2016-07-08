@@ -23,9 +23,6 @@ package ua.com.spacetv.mycookbook.interfaces;
 public interface Constants {
 
     /* Tags for fragments */
-//    String TAG_CATEGORY = "ID_CATEGORY";
-//    String TAG_SUBCATEGORY = "ID_SUBCATEGORY";
-//    String TAG_LIST_RECIPE = "ID_LIST_RECIPE";
     String TAG_DIALOG = "TAG_DIALOG";
 
     /* id of Dialogs */
@@ -48,6 +45,7 @@ public interface Constants {
 
     //Preferences
     String SHARED_PREFERENCES = "SHARED_PREFERENCES";
+    String IS_PURCHASE_OWNED = "IS_PURCHASE_OWNED";
     String FIRST_ITEM_TOP_CATEGORY = "FIRST_ITEM_TOP_CATEGORY";
     String FIRST_ITEM_SUB_CATEGORY = "FIRST_ITEM_SUB_CATEGORY";
     String FIRST_ITEM_LIST_RESIPE = "FIRST_ITEM_LIST_RESIPE";
@@ -116,7 +114,7 @@ public interface Constants {
     String TRACK_ID ="UA-64362552-1";
     String AD_UNIT_ID = "ca-app-pub-7481052517653982/5697171795";
 
-    boolean isDebugModeOn = false; // change to 'false' before production !!
+    boolean isDebugModeOn = true; // change to 'false' before production !!
 
     String TEST_DEVICE = "77A1F05FE188A3F51A0FF103708EDEF9";
 }

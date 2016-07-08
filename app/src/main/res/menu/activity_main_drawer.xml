@@ -11,10 +11,10 @@
         android:id="@+id/drawer_favorite"
         android:icon="@drawable/ic_favorite_black_24dp"
         android:title="@string/drawer_favorite" />
-        <!--<item-->
-            <!--android:id="@+id/drawer_remove_ads"-->
-            <!--android:icon="@drawable/ic_not_interested_black_24dp"-->
-            <!--android:title="@string/drawer_remove_ads" />-->
+        <item
+            android:id="@+id/drawer_remove_ads"
+            android:icon="@drawable/ic_not_interested_black_24dp"
+            android:title="@string/drawer_remove_ads" />
     </group>
     <item android:title="@string/drawer_backup_group">
         <menu>
