@@ -56,6 +56,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -194,7 +197,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     private void modeReview() {
         new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
         //If the service is not purchased - show ads
-        if(!MainActivity.isPurchaseActive) startScheduledTimeTimer();
+        if (!MainActivity.isPurchaseActive) startScheduledTimeTimer();
 
         Log.d("TG", "modeReview *** ");
         editTitleRecipe.setFocusableInTouchMode(false);
@@ -236,7 +239,28 @@ public class FragTextRecipe extends Fragment implements Constants,
         displayWidth = metrics.widthPixels;
     }
 
-    public void setImage(Bitmap bitmap) {
+    /**
+     * Set image into image viev
+     * Usage Glide library
+     *
+     * @param path
+     */
+    private void setImage(String path) {
+        Glide.with(mContext).load(path).asBitmap().fitCenter()
+                .into(new BitmapImageViewTarget(imageView) {
+                    @Override
+                    protected void setResource(Bitmap resource) {
+                        if (resource != null) setBitmapToImageView(resource);
+                    }
+                });
+    }
+
+    /**
+     * Set bitmap to image view
+     *
+     * @param bitmap
+     */
+    public void setBitmapToImageView(Bitmap bitmap) {
         bitmap = getRoundedCornerBitmap(bitmap, 30);
         imageView.setImageBitmap(bitmap);
         imageView.getLayoutParams().height = ActionBar.LayoutParams.WRAP_CONTENT;
@@ -250,6 +274,13 @@ public class FragTextRecipe extends Fragment implements Constants,
         }
     }
 
+    /**
+     * Rounding corners on bitmap
+     *
+     * @param bitmap
+     * @param pixels - radius
+     * @return
+     */
     public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
                 .getHeight(), Bitmap.Config.ARGB_8888);
@@ -355,23 +386,17 @@ public class FragTextRecipe extends Fragment implements Constants,
                     Bitmap bitmap;
                     if (data != null) { // ** Gallery **
                         selectedImagePath = getDataColumn(data.getData());
-                        bitmap = ImagePickHelper.decodeBitmapFromPath(selectedImagePath, displayWidth);
-                        if (bitmap != null) setImage(bitmap);
-//                        ImageLoader.getInstance().displayImage("file://" + selectedImagePath, imageView);
-//                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
-                        Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
+                        setImage(selectedImagePath);
                         Log.d("TG", "data!=null; getPath = " + selectedImagePath);
-                        new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Add Image", "Gallery");
+                        new Analytics(mContext).sendAnalytics("myCookBook", "Text Category",
+                                "Add Image", "Gallery");
                     } else { // ** Camera **
                         selectedImagePath = ImagePickHelper.getImageFromResult(resultCode, data);
                         ImagePickHelper.addImageToGallery(selectedImagePath);
-                        bitmap = ImagePickHelper.decodeBitmapFromPath(selectedImagePath, displayWidth);
-                        if (bitmap != null) setImage(bitmap);
-//                        ImageLoader.getInstance().displayImage("file://" + selectedImagePath, imageView);
-//                        imageLoader.loadImage("file://" + selectedImagePath, targetSize, this);
-                        Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
+                        setImage(selectedImagePath);
                         Log.d("TG", "data==null; getPath = " + selectedImagePath);
-                        new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Add Image", "Camera");
+                        new Analytics(mContext).sendAnalytics("myCookBook", "Text Category",
+                                "Add Image", "Camera");
                     }
                     break;
             }
@@ -499,22 +524,14 @@ public class FragTextRecipe extends Fragment implements Constants,
                     if (cursor.getInt(0) == idRecipe) {
                         titleRecipeFromDatabase = cursor.getString(1);
                         editTitleRecipe.setText(titleRecipeFromDatabase);
-                        Log.d("TG", "readRecipeFromDatabase title= " + titleRecipeFromDatabase);
                         textRecipeFromDatabase = cursor.getString(2);
                         editTextRecipe.setText(textRecipeFromDatabase);
                         topFolder_id = cursor.getInt(3);
                         subFolder_id = cursor.getInt(5);
                         databaseImagePath = cursor.getString(6);
+                        Log.d("TG", "databaseImagePath = " + databaseImagePath);
                         if (databaseImagePath != null && databaseImagePath != "") {
-                            Log.d("TG", "readRecipeFromDatabase -> databaseImagePath = " + databaseImagePath);
-                            Bitmap bitmap = ImagePickHelper.decodeBitmapFromPath(databaseImagePath,
-                                    displayWidth);
-                            if (bitmap != null) {
-                                setImage(bitmap);
-                                Log.d("TG", "width = " + bitmap.getWidth() + "  height = " + bitmap.getHeight());
-                            } else Log.d("TG", "Picture not found!");
-//                            ImageLoader.getInstance().displayImage("file://" + databaseImagePath, imageView);
-//                            imageLoader.loadImage("file://" + databaseImagePath, targetSize, this);
+                            setImage(databaseImagePath);
                         }
                     }
                 } while (cursor.moveToNext());

@@ -27,4 +27,5 @@ dependencies {
     compile 'com.github.clans:fab:1.6.2'
     compile 'com.google.android.gms:play-services-analytics:8.4.0'
     compile 'com.google.android.gms:play-services-ads:8.4.0'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
 }

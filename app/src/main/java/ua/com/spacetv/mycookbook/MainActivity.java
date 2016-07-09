@@ -122,7 +122,9 @@ public class MainActivity extends AppCompatActivity
             setupBillingInApp();
         } else {
             Log.d("TG", "Purchase already owned!");
+//            setupBillingInApp();
         }
+
 
     }
 
