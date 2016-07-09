@@ -55,6 +55,7 @@ import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
+import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.helpers.FragmentHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.LicenseKey;
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity
     private static FloatingActionButton fabAddRecipeListRecipe;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
+    public static DbHelper mDbHelper;
     private static int mAction;
     //**** Purchase in app
     private static IabHelper mHelper;
@@ -95,6 +97,8 @@ public class MainActivity extends AppCompatActivity
 
         mFragmentManager = getSupportFragmentManager();
         mContext = getBaseContext();
+
+        mDbHelper = DbHelper.init(mContext);
 
         mFragmentHelper = new FragmentHelper(mFragmentManager);
 
@@ -257,12 +261,16 @@ public class MainActivity extends AppCompatActivity
     public void onDestroy() {
         super.onDestroy();
         //'Purchase in app'
-        if (mHelper != null) try {
-            mHelper.dispose();
-        } catch (IabHelper.IabAsyncInProgressException e) {
-            e.printStackTrace();
-        }
+        if (mContext != null && mHelper != null)
+            try {
+                mHelper.dispose();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (IabHelper.IabAsyncInProgressException e) {
+                e.printStackTrace();
+            }
         mHelper = null;
+        if (mDbHelper != null) mDbHelper.close();
     }
 
     /**

@@ -41,7 +41,7 @@ import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.dialogs.FragDialog;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
-import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
@@ -49,13 +49,13 @@ import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.tools.Preferences;
 
 /**
- * Created by salden on 02/01/2016.
- * Class is responsible for list top category
+ * Class is responsible for list of top category
  */
 public class FragTopCategory extends Fragment implements Constants,
         AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
-    private static DataBaseHelper mDataBaseHelper;
+//    private static DataBaseHelper mDataBaseHelper;
+    private static DbHelper mDbHelper;
     private static SQLiteDatabase mDatabase;
     private static Context mContext;
     private static FragmentManager mFrManager;
@@ -87,8 +87,11 @@ public class FragTopCategory extends Fragment implements Constants,
         mTextView = (TextView) view.findViewById(R.id.text_empty_text_topcategory);
 
         mFrManager = getFragmentManager();
-        mDataBaseHelper = new DataBaseHelper(mContext);
-        mDatabase = mDataBaseHelper.getWritableDatabase();
+//        mDataBaseHelper = new DataBaseHelper(mContext);
+//        mDatabase = mDataBaseHelper.getWritableDatabase();
+        mDbHelper = MainActivity.mDbHelper;
+        mDatabase = mDbHelper.getWritableDatabase();
+
         mViewForSnackbar = view;
         return view;
     }
@@ -96,10 +99,11 @@ public class FragTopCategory extends Fragment implements Constants,
     public void showAllCategory() {
         mAdapter = new ArrayList<>();
 
-        if (mDatabase == null | mDataBaseHelper == null) {
-            mDataBaseHelper = new DataBaseHelper(mContext);
-            mDatabase = mDataBaseHelper.getWritableDatabase();
-        }
+//        if (mDatabase == null | mDataBaseHelper == null) {
+//            mDataBaseHelper = new DataBaseHelper(mContext);
+//            mDatabase = mDataBaseHelper.getWritableDatabase();
+//        }
+        if(mDatabase == null) mDatabase = mDbHelper.getWritableDatabase();
 
         categoryInList();
         if (mAdapter.size() == 0) mTextView
@@ -197,7 +201,7 @@ public class FragTopCategory extends Fragment implements Constants,
     @Override
     public void onDetach() {
         super.onDetach();
-        mDataBaseHelper.close();
+//        mDataBaseHelper.close();
         mDatabase.close();
     }
 
@@ -268,8 +272,9 @@ public class FragTopCategory extends Fragment implements Constants,
 
     private void addCategory(String param) {
         new Analytics(mContext).sendAnalytics("myCookBook", "Top Category", "Add top category", param);
-        mDataBaseHelper = new DataBaseHelper(mContext);
-        mDatabase = mDataBaseHelper.getWritableDatabase();
+//        mDataBaseHelper = new DataBaseHelper(mContext);
+//        mDatabase = mDataBaseHelper.getWritableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
 
         mContentValues = new ContentValues();
         mContentValues.put("category", param);
@@ -279,8 +284,10 @@ public class FragTopCategory extends Fragment implements Constants,
     }
 
     private void renameCategory(String param) {
-        mDataBaseHelper = new DataBaseHelper(mContext);
-        mDatabase = mDataBaseHelper.getWritableDatabase();
+//        mDataBaseHelper = new DataBaseHelper(mContext);
+//        mDatabase = mDataBaseHelper.getWritableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
+
         mContentValues = new ContentValues();
         mContentValues.put("category", param);
         long rowId = mDatabase.update(TABLE_TOP_CATEGORY, mContentValues, "_ID=" + mIdParentCategory, null);
@@ -289,8 +296,10 @@ public class FragTopCategory extends Fragment implements Constants,
     }
 
     private void deleteCategory() {
-        mDataBaseHelper = new DataBaseHelper(mContext);
-        mDatabase = mDataBaseHelper.getWritableDatabase();
+//        mDataBaseHelper = new DataBaseHelper(mContext);
+//        mDatabase = mDataBaseHelper.getWritableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
+
         long rowId = mDatabase.delete(TABLE_TOP_CATEGORY, "_ID=" + mIdParentCategory, null);
         showAllCategory();
         if (rowId >= 0) makeSnackbar(mContext.getString(R.string.success));
