@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.dialogs.FragDialog;
-import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.helpers.PrepareListRecipes;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
@@ -61,7 +61,8 @@ public class FragListRecipe extends Fragment implements Constants,
     private static Context mContext;
     private static FragmentManager mFrManager;
     private static OnFragmentEventsListener onFragmentEventsListener;
-    public static DataBaseHelper mDataBaseHelper;
+//    public static DataBaseHelper mDataBaseHelper;
+    public static DbHelper mDbHelper;
     public static SQLiteDatabase mDatabase;
     private static ListView mListView;
     private static View view;
@@ -80,7 +81,8 @@ public class FragListRecipe extends Fragment implements Constants,
     public void onAttach(Context context) {
         super.onAttach(context);
         FragListRecipe.mContext = context;
-        mDataBaseHelper = new DataBaseHelper(context);
+//        mDataBaseHelper = new DataBaseHelper(context);
+        mDbHelper = MainActivity.mDbHelper;
         mContentValues = new ContentValues();
         setRetainInstance(true);
 
@@ -100,7 +102,8 @@ public class FragListRecipe extends Fragment implements Constants,
         View view = inflater.inflate(R.layout.frag_list_recipe, null);
         mListView = (ListView) view.findViewById(R.id.listRecipe);
         text_empty_text_list_recipe = (TextView) view.findViewById(R.id.text_empty_text_list_recipe);
-        mDatabase = mDataBaseHelper.getWritableDatabase();
+//        mDatabase = mDataBaseHelper.getWritableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
         mFrManager = getFragmentManager();
         FragListRecipe.view = view;
         return view;
@@ -195,7 +198,7 @@ public class FragListRecipe extends Fragment implements Constants,
     public void onDetach() {
         super.onDetach();
         mDatabase.close();
-        mDataBaseHelper.close();
+//        mDataBaseHelper.close();
     }
 
     /**

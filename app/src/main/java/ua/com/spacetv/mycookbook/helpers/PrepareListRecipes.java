@@ -25,6 +25,7 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 
+import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.tools.ListData;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 
@@ -35,7 +36,8 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
 public class PrepareListRecipes implements Constants {
     private static ArrayList<ListData> adapter;
     private SQLiteDatabase database;
-    private DataBaseHelper dataBaseHelper;
+//    private DataBaseHelper dataBaseHelper;
+    private DbHelper mDbHelper;
     private final static int KEY_FAVORITE = 1;
     private final static byte UPPER = 1;
     private final static byte LOWER = 0;
@@ -46,8 +48,9 @@ public class PrepareListRecipes implements Constants {
      * To prepare a list of recipes that are in 'idParentFolder'
      */
     public PrepareListRecipes(Context context, int idParentFolder) {
-        dataBaseHelper = new DataBaseHelper(context);
-        database = dataBaseHelper.getWritableDatabase();
+//        dataBaseHelper = new DataBaseHelper(context);
+        mDbHelper = MainActivity.mDbHelper;
+        database = mDbHelper.getWritableDatabase();
         adapter = new ArrayList<>();
         recipeToAdapter(idParentFolder);
     }
@@ -56,16 +59,18 @@ public class PrepareListRecipes implements Constants {
      * To prepare a list of favorite recipes
      */
     public PrepareListRecipes(Context context) {
-        dataBaseHelper = new DataBaseHelper(context);
-        database = dataBaseHelper.getWritableDatabase();
+//        dataBaseHelper = new DataBaseHelper(context);
+        mDbHelper = MainActivity.mDbHelper;
+        database = mDbHelper.getWritableDatabase();
         adapter = new ArrayList<>();
         recipeToAdapter();
     }
 
     /** To prepare a list of recipes depend of search request */
     public PrepareListRecipes(Context context, String searchRequest) {
-        dataBaseHelper = new DataBaseHelper(context);
-        database = dataBaseHelper.getWritableDatabase();
+//        dataBaseHelper = new DataBaseHelper(context);
+        mDbHelper = MainActivity.mDbHelper;
+        database = mDbHelper.getWritableDatabase();
         adapter = new ArrayList<>();
         String[] query = new String[2];
 
@@ -126,7 +131,7 @@ public class PrepareListRecipes implements Constants {
             }
             cursor.close();
         }
-        dataBaseHelper.close();
+//        dataBaseHelper.close();
         database.close();
     }
 

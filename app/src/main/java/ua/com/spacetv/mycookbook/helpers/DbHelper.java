@@ -8,7 +8,7 @@ import android.util.Log;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
- * Singleton database helper class
+ * Singleton mDatabase helper class
  */
 public class DbHelper extends SQLiteOpenHelper implements Constants {
     private static DbHelper mInstance = null;

@@ -52,6 +52,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -68,14 +69,15 @@ import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
-import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.helpers.ImagePickHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.Utilities;
 
 /**
- * Created by Roman Turas on 07/01/2016
+ * Fragment is managing of reviews, creating new and editing recipes
+ * Depends of startup mode: MODE_EDIT_RECIPE, MODE_REVIEW_RECIPE, MODE_NEW_RECIPE
  */
 public class FragTextRecipe extends Fragment implements Constants,
         OnRequestPermissionsResultCallback {
@@ -84,10 +86,11 @@ public class FragTextRecipe extends Fragment implements Constants,
     private static Context mContext;
     private static FragmentManager fragmentManager;
     private static OnFragmentEventsListener onFragmentEventsListener;
-    public static DataBaseHelper dataBaseHelper;
-    public static SQLiteDatabase database;
-    private ContentValues contentValues;
-    private static Ads ads;
+//    public static DataBaseHelper dataBaseHelper;
+    private static DbHelper mDbHelper;
+    public static SQLiteDatabase mDatabase;
+    private ContentValues mContentValues;
+    private static Ads mAds;
     private static View view;
     private EditText editTitleRecipe, editTextRecipe;
     private TextView textTextRecipe;
@@ -112,8 +115,9 @@ public class FragTextRecipe extends Fragment implements Constants,
     public void onAttach(Context context) {
         super.onAttach(context);
         FragTextRecipe.mContext = context;
-        FragTextRecipe.dataBaseHelper = new DataBaseHelper(context);
-        this.contentValues = new ContentValues();
+//        FragTextRecipe.dataBaseHelper = new DataBaseHelper(context);
+        mDbHelper = MainActivity.mDbHelper;
+        this.mContentValues = new ContentValues();
         mFragmentTextRecipe = new FragTextRecipe();
         setRetainInstance(true);
 
@@ -132,7 +136,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     }
 
     private void loadAds() {
-        if (ads.getInterstitialAd() == null) ads.initAds(); // init and preload Ads
+        if (mAds.getInterstitialAd() == null) mAds.initAds(); // init and preload Ads
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
@@ -145,9 +149,10 @@ public class FragTextRecipe extends Fragment implements Constants,
 
         getDisplayMetrics();
 
-        ads = new Ads(mContext);
+        mAds = new Ads(mContext);
 
-        database = dataBaseHelper.getWritableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
+//        mDatabase = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
 
         if (startupMode == MODE_EDIT_RECIPE) modeEdit();
@@ -168,6 +173,16 @@ public class FragTextRecipe extends Fragment implements Constants,
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    /**
+     * Hiding software keyboard
+     * @param v - View
+     */
+    private void hideKeyboard(View v){
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
     private void modeNewRecipe() {
@@ -196,7 +211,7 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     private void modeReview() {
         new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
-        //If the service is not purchased - show ads
+        //If the service is not purchased - show mAds
         if (!MainActivity.isPurchaseActive) startScheduledTimeTimer();
 
         Log.d("TG", "modeReview *** ");
@@ -211,7 +226,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     }
 
     /**
-     * Starting 10 seconds timer for showing ads banner
+     * Starting 10 seconds timer for showing mAds banner
      * Timer timer work once
      */
     private void startScheduledTimeTimer() {
@@ -219,11 +234,11 @@ public class FragTextRecipe extends Fragment implements Constants,
         mScheduledTimeTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (ads.getInterstitialAd() != null) {
+                if (mAds.getInterstitialAd() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         public void run() {
                             Log.d("TG", "-= startScheduledTimeTimer =-");
-                            ads.showAd();
+                            mAds.showAd();
                         }
                     });
                     if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
@@ -323,8 +338,8 @@ public class FragTextRecipe extends Fragment implements Constants,
                 break;
             case R.id.action_photo:
                 //get permissions to access camera or gallery
+                hideKeyboard(editTitleRecipe);
                 checkPermissions();
-//                getPickImageIntent();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -513,10 +528,10 @@ public class FragTextRecipe extends Fragment implements Constants,
         if (startupMode == MODE_NEW_RECIPE) {
             String selectQuery = "SELECT * FROM " + TABLE_LIST_RECIPE +
                     " WHERE rowid=last_insert_rowid()";
-            cursor = database.rawQuery(selectQuery, null);
+            cursor = mDatabase.rawQuery(selectQuery, null);
             cursor.moveToFirst();
             idRecipe = cursor.getInt(0);
-        } else cursor = database.query(TABLE_LIST_RECIPE, null, null, null, null, null, null);
+        } else cursor = mDatabase.query(TABLE_LIST_RECIPE, null, null, null, null, null, null);
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -556,8 +571,8 @@ public class FragTextRecipe extends Fragment implements Constants,
         if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
-        database.close();
-        dataBaseHelper.close();
+        mDatabase.close();
+//        dataBaseHelper.close();
         if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
     }
 
@@ -585,35 +600,35 @@ public class FragTextRecipe extends Fragment implements Constants,
     }
 
     private void saveRecipe() {
-        contentValues = new ContentValues();
+        mContentValues = new ContentValues();
         String titleRecipe = getString(R.string.text_recipe_no_title);
         String textRecipe = getString(R.string.text_recipe_no_text);
         if (editTitleRecipe.getText().length() > 0)
             titleRecipe = editTitleRecipe.getText().toString();
         if (editTextRecipe.getText().length() > 0) textRecipe = editTextRecipe.getText().toString();
 
-        contentValues.put("recipe_title", titleRecipe);
-        contentValues.put("recipe", textRecipe);
+        mContentValues.put("recipe_title", titleRecipe);
+        mContentValues.put("recipe", textRecipe);
         if (startupMode == MODE_NEW_RECIPE) {
             if (typeReceivedFolder == PARENT) {
-                contentValues.put("category_id", idReceivedFolderItem);
-                contentValues.put("sub_category_id", DEFAULT_VALUE_COLUMN);
-                contentValues.put("image", databaseImagePath);
+                mContentValues.put("category_id", idReceivedFolderItem);
+                mContentValues.put("sub_category_id", DEFAULT_VALUE_COLUMN);
+                mContentValues.put("image", databaseImagePath);
             } else if (typeReceivedFolder == CHILD) {
-                contentValues.put("category_id", DEFAULT_VALUE_COLUMN);
-                contentValues.put("sub_category_id", idReceivedFolderItem);
-                contentValues.put("image", databaseImagePath);
+                mContentValues.put("category_id", DEFAULT_VALUE_COLUMN);
+                mContentValues.put("sub_category_id", idReceivedFolderItem);
+                mContentValues.put("image", databaseImagePath);
             }
         } else {
-            contentValues.put("category_id", topFolder_id);
-            contentValues.put("sub_category_id", subFolder_id);
-            contentValues.put("image", databaseImagePath);
+            mContentValues.put("category_id", topFolder_id);
+            mContentValues.put("sub_category_id", subFolder_id);
+            mContentValues.put("image", databaseImagePath);
         }
         long rowId = 0;
         if (startupMode == MODE_NEW_RECIPE) { // if Added a new recipe -> call 'insert' method
-            rowId = database.insert(TABLE_LIST_RECIPE, null, contentValues);
+            rowId = mDatabase.insert(TABLE_LIST_RECIPE, null, mContentValues);
         } else if (startupMode == MODE_EDIT_RECIPE) { // if edit existing recipe -> call 'update'
-            rowId = database.update(TABLE_LIST_RECIPE, contentValues, "_ID=" + idRecipe, null);
+            rowId = mDatabase.update(TABLE_LIST_RECIPE, mContentValues, "_ID=" + idRecipe, null);
         }
         modeReview();
         if (rowId >= 0) makeSnackbar(mContext.getString(R.string.success));

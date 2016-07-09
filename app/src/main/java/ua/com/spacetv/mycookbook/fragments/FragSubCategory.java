@@ -42,7 +42,7 @@ import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.dialogs.FragDialog;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
-import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.ListAdapter;
@@ -59,7 +59,8 @@ public class FragSubCategory extends Fragment implements Constants,
     private static Context mContext;
     private static FragmentManager mFrManager;
     private static OnFragmentEventsListener onFragmentEventsListener;
-    public static DataBaseHelper mDataBaseHelper;
+//    public static DataBaseHelper mDataBaseHelper;
+    public static DbHelper mDbHelper;
     public static SQLiteDatabase mDatabase;
     private static ListView mListView;
     private static View mViewForSnackbar;
@@ -78,7 +79,8 @@ public class FragSubCategory extends Fragment implements Constants,
     public void onAttach(Context context) {
         super.onAttach(context);
         FragSubCategory.mContext = context;
-        mDataBaseHelper = new DataBaseHelper(context);
+//        mDataBaseHelper = new DataBaseHelper(context);
+        mDbHelper = MainActivity.mDbHelper;
         this.mContentValues = new ContentValues();
         setRetainInstance(true);
 
@@ -101,7 +103,8 @@ public class FragSubCategory extends Fragment implements Constants,
         View view = inflater.inflate(R.layout.frag_sub_category, null);
         mListView = (ListView) view.findViewById(R.id.listSubCategory);
         mTextView = (TextView) view.findViewById(R.id.text_empty_text_subcategory);
-        mDatabase = mDataBaseHelper.getWritableDatabase();
+//        mDatabase = mDataBaseHelper.getWritableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
         mFrManager = getFragmentManager();
 
         mViewForSnackbar = view;
@@ -209,7 +212,7 @@ public class FragSubCategory extends Fragment implements Constants,
     public void onDetach() {
         super.onDetach();
         mDatabase.close();
-        mDataBaseHelper.close();
+//        mDataBaseHelper.close();
     }
 
     /** onLongClick() - This returns a boolean to indicate whether you have consumed the event and

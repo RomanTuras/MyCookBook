@@ -39,11 +39,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import ua.com.spacetv.mycookbook.MainActivity;
+import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
-import ua.com.spacetv.mycookbook.R;
-import ua.com.spacetv.mycookbook.helpers.DataBaseHelper;
+import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /** Created by Roman Turas on 02/01/2016.
@@ -59,7 +60,8 @@ public class FragDialog extends DialogFragment implements Constants,
     private Map<String, Object> map;
     private Context context;
     private SQLiteDatabase database;
-    private DataBaseHelper dataBaseHelper;
+//    private DataBaseHelper dataBaseHelper;
+    private DbHelper mDbHelper;
     private AlertDialog.Builder adb;
     private TextView textView;
 
@@ -80,8 +82,9 @@ public class FragDialog extends DialogFragment implements Constants,
         this.idDialog = getArguments().getInt(ID_DIALOG);
         this.nameForAction = getArguments().getString(NAME_FOR_ACTION);
         this.context = getContext();
-        dataBaseHelper = new DataBaseHelper(context);
-        database = dataBaseHelper.getWritableDatabase();
+//        dataBaseHelper = new DataBaseHelper(context);
+        mDbHelper = MainActivity.mDbHelper;
+        database = mDbHelper.getWritableDatabase();
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Holo_Light_Dialog);
     }
 
@@ -322,7 +325,7 @@ public class FragDialog extends DialogFragment implements Constants,
     @Override
     public void onDismiss(DialogInterface unused) {
         super.onDismiss(unused);
-        dataBaseHelper.close();
+//        dataBaseHelper.close();
         database.close();
     }
 

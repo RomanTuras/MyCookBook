@@ -270,6 +270,7 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         mHelper = null;
+        //close DbHelper
         if (mDbHelper != null) mDbHelper.close();
     }
 
