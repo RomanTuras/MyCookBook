@@ -89,6 +89,7 @@
     <string name="drawer_home">Home</string>
     <string name="drawer_favorite">Favorite Recipes</string>
     <string name="drawer_remove_ads">Remove ads</string>
+    <string name="drawer_additionally">Additionally</string>
     <string name="drawer_search">Search by content</string>
     <string name="drawer_export_db">Save</string>
     <string name="drawer_import_db">Restore</string>
@@ -108,4 +109,15 @@
     <string name="common_server_error">Server error!</string>
     <string name="permissions_error">This app needs this permission to work correctly!</string>
 
+    <!--Settings-->
+    <string name="text_select_color_theme">Select color theme</string>
+    <string-array name="themes">
+        <item>Indigo</item>
+        <item>Teal</item>
+        <item>Green</item>
+        <item>Lime</item>
+        <item>Orange</item>
+    </string-array>
+    <string name="checkbox_white_background">Leave a white background</string>
+    <string name="button_apply">Apply selected theme</string>
 </resources>

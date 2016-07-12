@@ -1,10 +1,11 @@
 <resources>
 
     <!-- Base application theme Theme.AppCompat.Dark.DarkActionBar Base.V7.Theme.AppCompat -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <!-- Indigo color theme by default -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:colorBackground">@color/colorPrimaryBackground</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -34,6 +35,38 @@
         <item name="fab_colorNormal">#FF4081</item>
         <item name="fab_colorPressed">#AF1050</item>
         <item name="fab_colorRipple">#FF4081</item>
+    </style>
+
+    <!--COLOR THEMES-->
+    <!--Indigo theme (default) -->
+    <style name="IndigoTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:colorBackground">@color/colorPrimaryBackground</item>
+    </style>
+    <!--Team theme-->
+    <style name="TealTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/tealColorPrimary</item>
+        <item name="colorPrimaryDark">@color/tealColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/tealColorPrimaryBackground</item>
+    </style>
+    <!--Green theme-->
+    <style name="GreenTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/greenColorPrimary</item>
+        <item name="colorPrimaryDark">@color/greenColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/greenColorPrimaryBackground</item>
+    </style>
+    <!--Lime theme-->
+    <style name="LimeTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/limeColorPrimary</item>
+        <item name="colorPrimaryDark">@color/limeColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/limeColorPrimaryBackground</item>
+    </style>
+    <!--Orange theme-->
+    <style name="OrangeTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/orangeColorPrimary</item>
+        <item name="colorPrimaryDark">@color/orangeColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/orangeColorPrimaryBackground</item>
     </style>
 
 

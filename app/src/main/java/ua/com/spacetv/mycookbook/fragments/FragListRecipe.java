@@ -189,6 +189,7 @@ public class FragListRecipe extends Fragment implements Constants,
     @Override
     public void onResume() {
         super.onResume();
+        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
         mFirstVisibleItem = Preferences
                 .getSettingsFromPreferences(mContext, FIRST_ITEM_LIST_RESIPE);
         showListRecipe();

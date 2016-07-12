@@ -186,6 +186,7 @@ public class FragTopCategory extends Fragment implements Constants,
     @Override
     public void onResume() {
         super.onResume();
+        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
         mFirstVisibleItem = Preferences
                 .getSettingsFromPreferences(mContext, FIRST_ITEM_TOP_CATEGORY);
         showAllCategory();

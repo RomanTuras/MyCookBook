@@ -5,7 +5,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Настройки</string>
     <string name="action_search_by_text">Поиск по содержанию</string>
 
 
@@ -107,5 +107,9 @@
     <string name="common_server_error">Server error!</string>
     <string name="permissions_error">Без этих разрешений приложение будет работать некорректно!</string>
     <string name="drawer_remove_ads">Отключить рекламу</string>
+    <string name="drawer_additionally">Дополнительно</string>
+    <string name="button_apply">Применить тему</string>
+    <string name="checkbox_white_background">Оставить фон белым</string>
+    <string name="text_select_color_theme">Выберите цвет темы</string>
 
 </resources>

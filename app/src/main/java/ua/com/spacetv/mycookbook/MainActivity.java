@@ -20,6 +20,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,6 +41,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -50,9 +53,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
+import ua.com.spacetv.mycookbook.fragments.FragSettings;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
+import ua.com.spacetv.mycookbook.fragments.FragTextRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DbHelper;
@@ -89,37 +95,39 @@ public class MainActivity extends AppCompatActivity
     public static boolean isPurchaseActive = false;//key to purchase
     private boolean isRemoveAdsPressed = false;//this key showing is button "Remove ads" is pressed
     boolean isClearPurchase = false; //test, remove it
+    public static Toolbar mToolbar;
+    public static FrameLayout mFrameLayout;
+    private boolean mIsBackgroundWhite;
+    public static LinearLayout mHeaderNavigationDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getBaseContext();
+        setColorTheme();
         setContentView(R.layout.activity_main);
 
         mFragmentManager = getSupportFragmentManager();
-        mContext = getBaseContext();
-
         mDbHelper = DbHelper.init(mContext);
-
         mFragmentHelper = new FragmentHelper(mFragmentManager);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
         actionBar = getSupportActionBar();
+
+        //Container for all fragments
+        mFrameLayout = (FrameLayout) findViewById(R.id.container);
+        if(mIsBackgroundWhite) mFrameLayout.setBackgroundColor(Color.WHITE);
+
         initFloatAction();
+        initDrawerLayout(mToolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
+        //adding TopCategoryFragment when activity recreated
         if (mFragmentManager.findFragmentByTag(FragTopCategory.class.getSimpleName()) == null) {
             mFragmentHelper.attachTopCategoryFragment();
         }
 
+        //Purchase in app section
         mHelper = new IabHelper(this, LICENSE_KEY);
         isPurchaseActive = Preferences.getSettingsFromPreferences(mContext, IS_PURCHASE_OWNED, 0);
         if (!isPurchaseActive) {
@@ -129,7 +137,68 @@ public class MainActivity extends AppCompatActivity
 //            setupBillingInApp();
         }
 
+    }
 
+    /**
+     * Init DrawerLayout and set listener
+     * If Drawer is open - check and kill timer (witch showing ads banner)
+     *
+     * @param toolbar
+     */
+    private void initDrawerLayout(Toolbar toolbar) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+        drawer.setDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                if (FragTextRecipe.mScheduledTimeTimer != null) {
+                    FragTextRecipe.mScheduledTimeTimer.cancel();
+                }
+                //Header od drawer layout, find him only when it is open!!!
+//                if(mHeaderNavigationDrawerLayout == null) {
+                    mHeaderNavigationDrawerLayout =
+                            (LinearLayout) findViewById(R.id.drawer_navigation_header);
+//                }
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+            }
+        });
+    }
+
+    /**
+     * Getting and apply saved color theme
+     */
+    private void setColorTheme() {
+        int numberOfTheme = Preferences.getSettingsFromPreferences(mContext, COLOR_THEME);
+        mIsBackgroundWhite = Preferences.getSettingsFromPreferences(mContext,
+                IS_BACKGROUND_WHITE, 0);
+        switch (numberOfTheme){
+            case INDIGO: setTheme(R.style.IndigoTheme);
+                break;
+            case TEAL: setTheme(R.style.TealTheme);
+                break;
+            case GREEN: setTheme(R.style.GreenTheme);
+                break;
+            case LIME: setTheme(R.style.LimeTheme);
+                break;
+            case ORANGE: setTheme(R.style.OrangeTheme);
+                break;
+        }
     }
 
     /**
@@ -271,7 +340,7 @@ public class MainActivity extends AppCompatActivity
             }
         mHelper = null;
         //close DbHelper
-        if (mDbHelper != null) mDbHelper.close();
+//        if (mDbHelper != null) mDbHelper.close();
     }
 
     /**
@@ -430,8 +499,17 @@ public class MainActivity extends AppCompatActivity
             // check permissions before call to dialog
             checkPermissions(DIALOG_FILE_RESTORE);
 
-        } else if (id == R.id.drawer_send_question) {
-            sendMailToDevelopers();
+//        } else if (id == R.id.drawer_send_question) {
+//            sendMailToDevelopers();
+        } else if (id == R.id.drawer_settings) {
+            List<Fragment> fragments = mFragmentManager.getFragments();
+            boolean isFragmentFound = false;
+            for (Fragment fr : fragments) {
+                if (fr != null)
+                    if (fr.getTag().equals(FragSettings.class.getSimpleName()))
+                        isFragmentFound = true;
+            }
+            if (!isFragmentFound) mFragmentHelper.attachSettingsFragment();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

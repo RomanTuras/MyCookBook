@@ -26,8 +26,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -47,10 +49,12 @@ import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 
-/** Created by Roman Turas on 02/01/2016.
+/**
+ * Created by Roman Turas on 02/01/2016.
  * Create dialog with different views, depends from input params
  * Input params: ID_DIALOG (what dialog was do) and string NAME_FOR_ACTION
- * Output: ID_DIALOG, String param, int typeFolder (parent or child), int idCategory*/
+ * Output: ID_DIALOG, String param, int typeFolder (parent or child), int idCategory
+ */
 
 public class FragDialog extends DialogFragment implements Constants,
         DialogInterface.OnClickListener, AdapterView.OnItemClickListener {
@@ -58,9 +62,9 @@ public class FragDialog extends DialogFragment implements Constants,
     private ListView listView;
     private ArrayList<Map<String, Object>> data = new ArrayList<>();
     private Map<String, Object> map;
-    private Context context;
+    private Context mContext;
     private SQLiteDatabase database;
-//    private DataBaseHelper dataBaseHelper;
+    //    private DataBaseHelper dataBaseHelper;
     private DbHelper mDbHelper;
     private AlertDialog.Builder adb;
     private TextView textView;
@@ -81,8 +85,8 @@ public class FragDialog extends DialogFragment implements Constants,
         super.onCreate(savedInstanceState);
         this.idDialog = getArguments().getInt(ID_DIALOG);
         this.nameForAction = getArguments().getString(NAME_FOR_ACTION);
-        this.context = getContext();
-//        dataBaseHelper = new DataBaseHelper(context);
+        this.mContext = getContext();
+//        dataBaseHelper = new DataBaseHelper(mContext);
         mDbHelper = MainActivity.mDbHelper;
         database = mDbHelper.getWritableDatabase();
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Holo_Light_Dialog);
@@ -112,6 +116,8 @@ public class FragDialog extends DialogFragment implements Constants,
                 title = getResources().getString(R.string.dlg_rename_recipe);
                 input.setText(nameForAction);
                 adb.setView(input);
+                input.requestFocus();
+                showKeyboard(input);
                 break;
             case DIALOG_DEL_RECIPE_LISTRECIPE:
                 title = getResources().getString(R.string.dlg_confirm_del_recipe);
@@ -132,11 +138,15 @@ public class FragDialog extends DialogFragment implements Constants,
                 title = getResources().getString(R.string.dlg_add_category);
                 input.setHint(R.string.dlg_hint);
                 adb.setView(input);
+                input.requestFocus();
+                showKeyboard(input);
                 break;
             case DIALOG_REN_SUBCATEGORY:
                 title = getResources().getString(R.string.dlg_rename_category);
                 input.setText(nameForAction);
                 adb.setView(input);
+                input.requestFocus();
+                showKeyboard(input);
                 break;
             case DIALOG_DEL_SUBCATEGORY:
                 title = getResources().getString(R.string.dlg_confirm_delete);
@@ -148,6 +158,8 @@ public class FragDialog extends DialogFragment implements Constants,
                 title = getResources().getString(R.string.dlg_rename_recipe);
                 input.setText(nameForAction);
                 adb.setView(input);
+                input.requestFocus();
+                showKeyboard(input);
                 break;
             case DIALOG_DEL_RECIPE_SUBCATEGORY:
                 title = getResources().getString(R.string.dlg_confirm_del_recipe);
@@ -167,11 +179,15 @@ public class FragDialog extends DialogFragment implements Constants,
                 title = getResources().getString(R.string.dlg_add_category);
                 input.setHint(R.string.dlg_hint);
                 adb.setView(input);
+                input.requestFocus();
+                showKeyboard(input);
                 break;
             case DIALOG_REN_CATEGORY:
                 title = getResources().getString(R.string.dlg_rename_category);
                 input.setText(nameForAction);
                 adb.setView(input);
+                input.requestFocus();
+                showKeyboard(input);
                 break;
             case DIALOG_DEL_CATEGORY:
                 title = getResources().getString(R.string.dlg_confirm_delete);
@@ -180,7 +196,29 @@ public class FragDialog extends DialogFragment implements Constants,
         }
     }
 
-    private void initAllViewsInDialog(){
+    /**
+     * Showing software keyboard
+     *
+     * @param v - View
+     */
+    private void showKeyboard(View v) {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
+    /**
+     * Hide software keyboard
+     *
+     * @param v - View
+     */
+    private void hideKeyboard(View v) {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+    }
+
+    private void initAllViewsInDialog() {
         adb = new AlertDialog.Builder(getActivity());
         input = new EditText(getActivity());
         listView = new ListView(getActivity());
@@ -188,12 +226,18 @@ public class FragDialog extends DialogFragment implements Constants,
 
         int paddingH = (int) getResources().getDimension(R.dimen.dialog_padding_left_right);
         int paddingV = (int) getResources().getDimension(R.dimen.dialog_padding_up_down);
-        int textColor = ContextCompat.getColor(context, R.color.colorWhite);
-        int barColor = ContextCompat.getColor(context, R.color.colorPrimary);
-        int bgColor = ContextCompat.getColor(context, R.color.colorPrimaryBackground);
+
+        //Getting color from current theme
+        TypedValue typedValue = new TypedValue();
+        mContext.getTheme().resolveAttribute(android.R.attr.colorBackground, typedValue, true);
+        int bgColor = typedValue.data;
+        mContext.getTheme().resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
+        int barColor = typedValue.data;
+
+        int textColor = ContextCompat.getColor(mContext, R.color.colorWhite);
 
         if (Build.VERSION.SDK_INT < 23) {
-            textView.setTextAppearance(context, android.R.style.TextAppearance_Large);
+            textView.setTextAppearance(mContext, android.R.style.TextAppearance_Large);
         } else {
             textView.setTextAppearance(android.R.style.TextAppearance_Large);
         }
@@ -213,17 +257,19 @@ public class FragDialog extends DialogFragment implements Constants,
         listView.requestFocus();
     }
 
-    /** Define variables for transfer in called class
-     * Add in selected folder to title*/
+    /**
+     * Define variables for transfer in called class
+     * Add in selected folder to title
+     */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         typeFolder = (int) data.get(position).get(TYPE_FOLDER);
         idCategory = (int) data.get(position).get(ID_ITEM);
         String txt;
-        if(typeFolder == PARENT) {
-            txt = title + "\n" + "\'" + data.get(position).get(TITLE_CATEGORY) +"\'";
-        }else {
-            txt = title + "\n"+"\'" + data.get(position).get(TITLE_SUBCATEGORY)+"\'";
+        if (typeFolder == PARENT) {
+            txt = title + "\n" + "\'" + data.get(position).get(TITLE_CATEGORY) + "\'";
+        } else {
+            txt = title + "\n" + "\'" + data.get(position).get(TITLE_SUBCATEGORY) + "\'";
         }
         textView.setText(txt);
     }
@@ -246,16 +292,16 @@ public class FragDialog extends DialogFragment implements Constants,
             cursor.close();
         }
 
-        String[] from = { TITLE_CATEGORY, TITLE_SUBCATEGORY, IMG, ID_ITEM, TYPE_FOLDER };
-        int[] to = { R.id.textListDialogTitle, R.id.textListDialogSubTitle, R.id.imgTopCategory };
+        String[] from = {TITLE_CATEGORY, TITLE_SUBCATEGORY, IMG, ID_ITEM, TYPE_FOLDER};
+        int[] to = {R.id.textListDialogTitle, R.id.textListDialogSubTitle, R.id.imgTopCategory};
 
         SimpleAdapter sAdapter = new SimpleAdapter(getActivity(), data,
                 R.layout.format_list_dialog, from, to);
         listView.setAdapter(sAdapter);
     }
 
-    private void subCategoryInList(int idParent){
-        String selectQuery ="SELECT * FROM " + TABLE_SUB_CATEGORY +
+    private void subCategoryInList(int idParent) {
+        String selectQuery = "SELECT * FROM " + TABLE_SUB_CATEGORY +
                 " WHERE parent_id=" + idParent + " ORDER BY name";
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor != null) {
@@ -274,7 +320,8 @@ public class FragDialog extends DialogFragment implements Constants,
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        if(which == DialogInterface.BUTTON_POSITIVE) {
+        hideKeyboard(input);
+        if (which == DialogInterface.BUTTON_POSITIVE) {
             /** Dialog Category */
             if (idDialog == DIALOG_ADD_CATEGORY) {
                 if (input.getText().toString().length() != 0) {
@@ -318,7 +365,7 @@ public class FragDialog extends DialogFragment implements Constants,
             } else if (idDialog == DIALOG_MOV_RECIPE_LISTRECIPE) {
                 new FragListRecipe().onDialogClick(idDialog, null, typeFolder, idCategory);
             }
-        }else onCancel(dialog);
+        } else onCancel(dialog);
 
     }
 

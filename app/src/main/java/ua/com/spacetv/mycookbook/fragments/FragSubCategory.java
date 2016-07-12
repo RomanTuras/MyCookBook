@@ -81,7 +81,7 @@ public class FragSubCategory extends Fragment implements Constants,
         FragSubCategory.mContext = context;
 //        mDataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
-        this.mContentValues = new ContentValues();
+        mContentValues = new ContentValues();
         setRetainInstance(true);
 
         Bundle bundle = this.getArguments();
@@ -199,6 +199,7 @@ public class FragSubCategory extends Fragment implements Constants,
     @Override
     public void onResume(){
         super.onResume();
+        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
         mFirstVisibleItem = Preferences
                 .getSettingsFromPreferences(mContext, FIRST_ITEM_SUB_CATEGORY);
         showCategoryAndRecipe();
@@ -206,6 +207,7 @@ public class FragSubCategory extends Fragment implements Constants,
         if(FragTopCategory.mNameOfTopCategory != null){
             MainActivity.overrideActionBar(null, FragTopCategory.mNameOfTopCategory);
         }else MainActivity.overrideActionBar(null, null);
+
     }
 
     @Override

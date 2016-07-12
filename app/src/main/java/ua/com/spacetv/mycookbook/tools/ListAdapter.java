@@ -32,8 +32,6 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Created by Roman Turas on 25/11/2015.
- * Class CardsAdapter for adding content to Main Activity
- * It working with CardView
  */
 public class ListAdapter extends BaseAdapter implements Constants {
     Context context;

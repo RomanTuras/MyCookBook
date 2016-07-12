@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/scrollView2"
+        android:layout_gravity="center_horizontal" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/horisont_margin_setup_screen"
+            android:layout_marginRight="@dimen/horisont_margin_setup_screen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/text_select_color_theme"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/textViewColorTheme"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/vertic_margin_setup_screen"
+                android:gravity="center_horizontal"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/themes"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_marginTop="@dimen/vertic_margin_setup_screen"
+                android:layout_marginBottom="@dimen/vertic_margin_setup_screen"
+                android:id="@+id/spinner_themes" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/check_white_background"
+                android:text="@string/checkbox_white_background"
+                android:textColor="@color/colorDarkGray"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_marginTop="@dimen/vertic_margin_setup_screen"
+                android:layout_gravity="left"
+                android:clickable="true" />
+
+            <include layout="@xml/divider_gray" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

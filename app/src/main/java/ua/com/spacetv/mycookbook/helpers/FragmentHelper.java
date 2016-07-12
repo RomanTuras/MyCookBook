@@ -22,6 +22,7 @@ import android.support.v4.app.FragmentManager;
 
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
+import ua.com.spacetv.mycookbook.fragments.FragSettings;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTextRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
@@ -105,6 +106,18 @@ public class FragmentHelper implements Constants {
         if (fragment == null) {
             fragment = new FragTextRecipe();
             fragment.setArguments(bundle);
+        }
+        doTransaction(fragment, tag);
+    }
+
+    /**
+     * Attaching FragSettings
+     */
+    public void attachSettingsFragment(){
+        String tag = FragSettings.class.getSimpleName();
+        Fragment fragment = mFrManager.findFragmentByTag(tag);
+        if (fragment == null) {
+            fragment = new FragSettings();
         }
         doTransaction(fragment, tag);
     }

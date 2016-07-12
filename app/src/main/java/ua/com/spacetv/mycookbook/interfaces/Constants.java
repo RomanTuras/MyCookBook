@@ -46,9 +46,18 @@ public interface Constants {
     //Preferences
     String SHARED_PREFERENCES = "SHARED_PREFERENCES";
     String IS_PURCHASE_OWNED = "IS_PURCHASE_OWNED";
+    String COLOR_THEME = "COLOR_THEME";
+    String IS_BACKGROUND_WHITE = "IS_BACKGROUND_WHITE";
     String FIRST_ITEM_TOP_CATEGORY = "FIRST_ITEM_TOP_CATEGORY";
     String FIRST_ITEM_SUB_CATEGORY = "FIRST_ITEM_SUB_CATEGORY";
     String FIRST_ITEM_LIST_RESIPE = "FIRST_ITEM_LIST_RESIPE";
+
+    //Color themes
+    int INDIGO = 0;
+    int TEAL = 1;
+    int GREEN = 2;
+    int LIME = 3;
+    int ORANGE = 4;
 
 
     /* id of actions (from where do it) */

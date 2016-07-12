@@ -11,11 +11,26 @@
         android:id="@+id/drawer_favorite"
         android:icon="@drawable/ic_favorite_black_24dp"
         android:title="@string/drawer_favorite" />
-        <item
-            android:id="@+id/drawer_remove_ads"
-            android:icon="@drawable/ic_not_interested_black_24dp"
-            android:title="@string/drawer_remove_ads" />
+
     </group>
+
+    <item android:title="@string/drawer_additionally">
+        <menu>
+            <item
+                android:id="@+id/drawer_remove_ads"
+                android:icon="@drawable/ic_not_interested_black_24dp"
+                android:title="@string/drawer_remove_ads" />
+            <item
+                android:id="@+id/drawer_settings"
+                android:icon="@drawable/ic_settings_black_24dp"
+                android:title="@string/action_settings" />
+            <!--<item-->
+                <!--android:id="@+id/drawer_send_question"-->
+                <!--android:icon="@drawable/ic_menu_send"-->
+                <!--android:title="@string/drawer_send_question" />-->
+        </menu>
+    </item>
+
     <item android:title="@string/drawer_backup_group">
         <menu>
         <item
@@ -29,13 +44,6 @@
         </menu>
     </item>
 
-    <item android:title="@string/drawer_callback">
-        <menu>
-            <item
-                android:id="@+id/drawer_send_question"
-                android:icon="@drawable/ic_menu_send"
-                android:title="@string/drawer_send_question" />
-        </menu>
-    </item>
+
 
 </menu>

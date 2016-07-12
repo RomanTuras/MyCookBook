@@ -5,9 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/container"
-    android:background="@color/colorPrimaryBackground"
+    android:background="?android:colorBackground"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="ua.com.spacetv.mycookbook.MainActivity"
     tools:showIn="@layout/activity_main">
 
 </FrameLayout>
+
+    <!-- Important! 'colorAccent' - this is a background color for all fragments -->

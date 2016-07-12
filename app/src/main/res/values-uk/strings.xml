@@ -5,7 +5,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Налаштування</string>
     <string name="action_search_by_text">Пошук за складом</string>
 
 
@@ -105,5 +105,9 @@
     <string name="common_server_error">Server error!</string>
     <string name="permissions_error">Без цих дозволів додаток буде працювати некоректно!</string>
     <string name="drawer_remove_ads">Відключити рекламу</string>
+    <string name="drawer_additionally">Додатково</string>
+    <string name="button_apply">Застосувати тему</string>
+    <string name="checkbox_white_background">Залишити фон білим</string>
+    <string name="text_select_color_theme">Оберіть колір теми</string>
 
 </resources>

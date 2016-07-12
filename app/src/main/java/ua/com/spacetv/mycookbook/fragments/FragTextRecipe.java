@@ -55,7 +55,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
@@ -92,9 +91,9 @@ public class FragTextRecipe extends Fragment implements Constants,
     private ContentValues mContentValues;
     private static Ads mAds;
     private static View view;
-    private EditText editTitleRecipe, editTextRecipe;
-    private TextView textTextRecipe;
-    private static Intent chooseImageIntent;
+    private EditText mEditTitleRecipe, mEditTextRecipe;
+//    private TextView textTextRecipe;
+    private static Intent mChooseImageIntent;
     private static ImageView imageView;
     private static int idReceivedFolderItem = 0; // id of folder where was or will TEXT of RECIPE
     private static int idRecipe = 0; // id Received (mode REVIEW) or Just Created recipe (mode NEW)
@@ -109,7 +108,8 @@ public class FragTextRecipe extends Fragment implements Constants,
     private String textRecipeFromDatabase = null;
     private static String databaseImagePath;
     private static Fragment mFragmentTextRecipe;
-    private Timer mScheduledTimeTimer;
+    public static Timer mScheduledTimeTimer;
+    private static Activity mActivity;
 
     @Override
     public void onAttach(Context context) {
@@ -117,8 +117,9 @@ public class FragTextRecipe extends Fragment implements Constants,
         FragTextRecipe.mContext = context;
 //        FragTextRecipe.dataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
-        this.mContentValues = new ContentValues();
+        mContentValues = new ContentValues();
         mFragmentTextRecipe = new FragTextRecipe();
+        mActivity = getActivity();
         setRetainInstance(true);
 
         Bundle bundle = this.getArguments();
@@ -142,9 +143,9 @@ public class FragTextRecipe extends Fragment implements Constants,
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle saveInstanceState) {
         view = inflater.inflate(R.layout.frag_text_recipe, null);
-        editTitleRecipe = (EditText) view.findViewById(R.id.editTitleRecipe);
-        editTextRecipe = (EditText) view.findViewById(R.id.editTextRecipe);
-        textTextRecipe = (TextView) view.findViewById(R.id.textTextRecipe);
+        mEditTitleRecipe = (EditText) view.findViewById(R.id.editTitleRecipe);
+        mEditTextRecipe = (EditText) view.findViewById(R.id.editTextRecipe);
+//        textTextRecipe = (TextView) view.findViewById(R.id.textTextRecipe);
         imageView = (ImageView) view.findViewById(R.id.imageRecipe);
 
         getDisplayMetrics();
@@ -188,21 +189,21 @@ public class FragTextRecipe extends Fragment implements Constants,
     private void modeNewRecipe() {
         Log.d("TG", "modeNewRecipe *** ");
         if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
-        editTitleRecipe.setFocusableInTouchMode(true);
-        editTitleRecipe.setFocusable(true);
-        editTitleRecipe.requestFocus();
-        editTextRecipe.setFocusableInTouchMode(true);
-        editTextRecipe.setFocusable(true);
+        mEditTitleRecipe.setFocusableInTouchMode(true);
+        mEditTitleRecipe.setFocusable(true);
+        mEditTitleRecipe.requestFocus();
+        mEditTextRecipe.setFocusableInTouchMode(true);
+        mEditTextRecipe.setFocusable(true);
         setHasOptionsMenu(true);
     }
 
     private void modeEdit() {
         Log.d("TG", "modeEdit *** ");
         if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
-        editTitleRecipe.setFocusableInTouchMode(true);
-        editTitleRecipe.setFocusable(true);
-        editTextRecipe.setFocusableInTouchMode(true);
-        editTextRecipe.setFocusable(true);
+        mEditTitleRecipe.setFocusableInTouchMode(true);
+        mEditTitleRecipe.setFocusable(true);
+        mEditTextRecipe.setFocusableInTouchMode(true);
+        mEditTextRecipe.setFocusable(true);
         readRecipeFromDatabase();
         startupMode = MODE_EDIT_RECIPE;
         setHasOptionsMenu(false);
@@ -215,10 +216,10 @@ public class FragTextRecipe extends Fragment implements Constants,
         if (!MainActivity.isPurchaseActive) startScheduledTimeTimer();
 
         Log.d("TG", "modeReview *** ");
-        editTitleRecipe.setFocusableInTouchMode(false);
-        editTitleRecipe.setFocusable(false);
-        editTextRecipe.setFocusableInTouchMode(false);
-        editTextRecipe.setFocusable(false);
+        mEditTitleRecipe.setFocusableInTouchMode(false);
+        mEditTitleRecipe.setFocusable(false);
+        mEditTextRecipe.setFocusableInTouchMode(false);
+        mEditTextRecipe.setFocusable(false);
         readRecipeFromDatabase();
         startupMode = MODE_REVIEW_RECIPE;
         setHasOptionsMenu(false);
@@ -229,13 +230,13 @@ public class FragTextRecipe extends Fragment implements Constants,
      * Starting 10 seconds timer for showing mAds banner
      * Timer timer work once
      */
-    private void startScheduledTimeTimer() {
+    private static void startScheduledTimeTimer() {
         mScheduledTimeTimer = new Timer();
         mScheduledTimeTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (mAds.getInterstitialAd() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
+                    mActivity.runOnUiThread(new Runnable() {
                         public void run() {
                             Log.d("TG", "-= startScheduledTimeTimer =-");
                             mAds.showAd();
@@ -321,6 +322,11 @@ public class FragTextRecipe extends Fragment implements Constants,
     /**
      * Getting action from menu
      *
+     * action_save - if changes is it, hide keyboard and save recipe
+     * action_edit - edit recipe
+     * action_share - share current recipe
+     * action_photo - pick image from camera or gallery
+     *
      * @param item
      * @return
      */
@@ -328,17 +334,21 @@ public class FragTextRecipe extends Fragment implements Constants,
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                if (isChangesFromRecipe()) saveRecipe();
+                if (isChangesFromRecipe()){
+                    hideKeyboard(mEditTitleRecipe);
+                    saveRecipe();
+                }
                 break;
             case R.id.action_edit:
                 modeEdit();
                 break;
             case R.id.action_share:
+                if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();// stop ads
                 shareRecipe();
                 break;
             case R.id.action_photo:
                 //get permissions to access camera or gallery
-                hideKeyboard(editTitleRecipe);
+                hideKeyboard(mEditTitleRecipe);
                 checkPermissions();
                 break;
         }
@@ -387,8 +397,8 @@ public class FragTextRecipe extends Fragment implements Constants,
     }
 
     public void getPickImageIntent() {
-        chooseImageIntent = ImagePickHelper.getPickImageIntent(mContext);
-        startActivityForResult(chooseImageIntent, CHOOSE_IMAGE);
+        mChooseImageIntent = ImagePickHelper.getPickImageIntent(mContext);
+        startActivityForResult(mChooseImageIntent, CHOOSE_IMAGE);
     }
 
 
@@ -444,9 +454,9 @@ public class FragTextRecipe extends Fragment implements Constants,
     }
 
     private void shareRecipe() {
-        if (editTitleRecipe.getText().length() > 0 & editTextRecipe.getText().length() > 0) {
-            String title = editTitleRecipe.getText().toString();
-            String text = editTextRecipe.getText().toString();
+        if (mEditTitleRecipe.getText().length() > 0 & mEditTextRecipe.getText().length() > 0) {
+            String title = mEditTitleRecipe.getText().toString();
+            String text = mEditTextRecipe.getText().toString();
             Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
             emailIntent.setType("text/plain");
 //            emailIntent.setType("image/jpeg");
@@ -463,8 +473,8 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     public void shareRecipe(int j) {
         Resources resources = getResources();
-        String title = editTitleRecipe.getText().toString();
-        String text = editTextRecipe.getText().toString();
+        String title = mEditTitleRecipe.getText().toString();
+        String text = mEditTextRecipe.getText().toString();
 //
         PackageManager pm = getActivity().getPackageManager();
 
@@ -538,9 +548,9 @@ public class FragTextRecipe extends Fragment implements Constants,
                 do {
                     if (cursor.getInt(0) == idRecipe) {
                         titleRecipeFromDatabase = cursor.getString(1);
-                        editTitleRecipe.setText(titleRecipeFromDatabase);
+                        mEditTitleRecipe.setText(titleRecipeFromDatabase);
                         textRecipeFromDatabase = cursor.getString(2);
-                        editTextRecipe.setText(textRecipeFromDatabase);
+                        mEditTextRecipe.setText(textRecipeFromDatabase);
                         topFolder_id = cursor.getInt(3);
                         subFolder_id = cursor.getInt(5);
                         databaseImagePath = cursor.getString(6);
@@ -566,6 +576,12 @@ public class FragTextRecipe extends Fragment implements Constants,
     }
 
     @Override
+    public void onPause(){
+        super.onPause();
+        if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
@@ -582,16 +598,16 @@ public class FragTextRecipe extends Fragment implements Constants,
             databaseImagePath = selectedImagePath;
             return true; // image was changed
         }
-        if (editTitleRecipe.getText().length() > 0 & editTextRecipe.getText().length() > 0) {
-            String tempTitle = editTitleRecipe.getText().toString();
-            String tempText = editTextRecipe.getText().toString();
+        if (mEditTitleRecipe.getText().length() > 0 & mEditTextRecipe.getText().length() > 0) {
+            String tempTitle = mEditTitleRecipe.getText().toString();
+            String tempText = mEditTextRecipe.getText().toString();
 
             if (tempTitle.equals(titleRecipeFromDatabase) &
                     tempText.equals(textRecipeFromDatabase)) {
                 makeSnackbar(mContext.getString(R.string.there_is_no_change));
                 return false;
             }
-        } else if (editTitleRecipe.getText().length() == 0 & editTextRecipe.getText().length() == 0) {
+        } else if (mEditTitleRecipe.getText().length() == 0 & mEditTextRecipe.getText().length() == 0) {
             Log.d("TG", "editText's == 0");
             makeSnackbar(mContext.getString(R.string.nothing_was_entered));
             return false;
@@ -603,9 +619,9 @@ public class FragTextRecipe extends Fragment implements Constants,
         mContentValues = new ContentValues();
         String titleRecipe = getString(R.string.text_recipe_no_title);
         String textRecipe = getString(R.string.text_recipe_no_text);
-        if (editTitleRecipe.getText().length() > 0)
-            titleRecipe = editTitleRecipe.getText().toString();
-        if (editTextRecipe.getText().length() > 0) textRecipe = editTextRecipe.getText().toString();
+        if (mEditTitleRecipe.getText().length() > 0)
+            titleRecipe = mEditTitleRecipe.getText().toString();
+        if (mEditTextRecipe.getText().length() > 0) textRecipe = mEditTextRecipe.getText().toString();
 
         mContentValues.put("recipe_title", titleRecipe);
         mContentValues.put("recipe", textRecipe);

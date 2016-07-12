@@ -23,7 +23,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@xml/fragment_holder" />
+    <include layout="@layout/fragment_holder" />
 
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fabAddTopCategory"
