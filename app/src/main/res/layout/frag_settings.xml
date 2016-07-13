@@ -36,8 +36,8 @@
                 android:layout_height="wrap_content"
                 android:entries="@array/themes"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginTop="@dimen/vertic_margin_setup_screen"
-                android:layout_marginBottom="@dimen/vertic_margin_setup_screen"
+                android:paddingTop="@dimen/vertic_margin_setup_screen"
+                android:paddingBottom="@dimen/vertic_margin_setup_screen"
                 android:id="@+id/spinner_themes" />
 
             <CheckBox

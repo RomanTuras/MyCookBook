@@ -50,8 +50,6 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
     private CheckBox mCheckBox;
     private int mColorBackground;
 
-    // TODO set checkbox from preferences !!!!
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -63,14 +61,15 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
         View view = inflater.inflate(R.layout.frag_settings, null);
 
         mSpinnerThemes = (Spinner) view.findViewById(R.id.spinner_themes);
+        //getting settings of current theme
         int numberOfTheme = Preferences.getSettingsFromPreferences(mContext, COLOR_THEME);
         mSpinnerThemes.setSelection(numberOfTheme);
+
         mSpinnerThemes.setOnItemSelectedListener(this);
         mCheckBox = (CheckBox) view.findViewById(R.id.check_white_background);
         mCheckBox.setOnCheckedChangeListener(this);
         isBackgroundWhite = Preferences.getSettingsFromPreferences(mContext, IS_BACKGROUND_WHITE, 0);
         mCheckBox.setChecked(isBackgroundWhite);
-
 
         //getting settings of background
         isBackgroundWhite = Preferences.getSettingsFromPreferences(mContext, IS_BACKGROUND_WHITE, 0);
@@ -90,6 +89,9 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
         setHasOptionsMenu(true);
     }
 
+    /**
+     * Set title to actionbar, hide all float buttons
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -108,14 +110,64 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
         Preferences.setSettingsToPreferences(mContext, IS_BACKGROUND_WHITE, isBackgroundWhite);
     }
 
+    /**
+     * Application of the chosen theme on the fly
+     * @param parent
+     * @param view
+     * @param position
+     * @param id
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        int colorPrimaryDark = R.color.colorPrimaryDark;
-        int colorPrimary = R.color.colorPrimary;
-        int colorPrimaryBackground = R.color.colorPrimaryBackground;
-        int colorTheme = R.style.IndigoTheme;
+        //set default INDIGO theme
+        int colorPrimaryDark = R.color.colorPrimaryDark; //status bar
+        int colorPrimary = R.color.colorPrimary; //tool bar
+        int colorPrimaryBackground = R.color.colorPrimaryBackground; //main background
+        int colorTheme = R.style.IndigoTheme; //name of color theme
 
         switch (position) {
+            case PINK:
+                colorPrimaryDark = R.color.pinkColorPrimaryDark;
+                colorPrimary = R.color.pinkColorPrimary;
+                colorPrimaryBackground = R.color.pinkColorPrimaryBackground;
+                colorTheme = R.style.PinkTheme;
+                break;
+            case PURPLE:
+                colorPrimaryDark = R.color.purpleColorPrimaryDark;
+                colorPrimary = R.color.purpleColorPrimary;
+                colorPrimaryBackground = R.color.purpleColorPrimaryBackground;
+                colorTheme = R.style.PurpleTheme;
+                break;
+            case DEEP_PURPLE:
+                colorPrimaryDark = R.color.deepPurpleColorPrimaryDark;
+                colorPrimary = R.color.deepPurpleColorPrimary;
+                colorPrimaryBackground = R.color.deepPurpleColorPrimaryBackground;
+                colorTheme = R.style.DeepPurpleTheme;
+                break;
+            case RED:
+                colorPrimaryDark = R.color.redColorPrimaryDark;
+                colorPrimary = R.color.redColorPrimary;
+                colorPrimaryBackground = R.color.redColorPrimaryBackground;
+                colorTheme = R.style.RedTheme;
+                break;
+            case BLUE:
+                colorPrimaryDark = R.color.bluePrimaryDark;
+                colorPrimary = R.color.bluePrimary;
+                colorPrimaryBackground = R.color.bluePrimaryBackground;
+                colorTheme = R.style.BlueTheme;
+                break;
+            case LIGHT_BLUE:
+                colorPrimaryDark = R.color.lightBluePrimaryDark;
+                colorPrimary = R.color.lightBluePrimary;
+                colorPrimaryBackground = R.color.lightBluePrimaryBackground;
+                colorTheme = R.style.LightBlueTheme;
+                break;
+            case CYAN:
+                colorPrimaryDark = R.color.cyanPrimaryDark;
+                colorPrimary = R.color.cyanPrimary;
+                colorPrimaryBackground = R.color.cyanPrimaryBackground;
+                colorTheme = R.style.CyanTheme;
+                break;
             case TEAL:
                 colorPrimaryDark = R.color.tealColorPrimaryDark;
                 colorPrimary = R.color.tealColorPrimary;
@@ -128,17 +180,65 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
                 colorPrimaryBackground = R.color.greenColorPrimaryBackground;
                 colorTheme = R.style.GreenTheme;
                 break;
+            case LIGHT_GREEN:
+                colorPrimaryDark = R.color.lightGreenColorPrimaryDark;
+                colorPrimary = R.color.lightGreenColorPrimary;
+                colorPrimaryBackground = R.color.lightGreenColorPrimaryBackground;
+                colorTheme = R.style.LightGreenTheme;
+                break;
             case LIME:
                 colorPrimaryDark = R.color.limeColorPrimaryDark;
                 colorPrimary = R.color.limeColorPrimary;
                 colorPrimaryBackground = R.color.limeColorPrimaryBackground;
                 colorTheme = R.style.LimeTheme;
                 break;
+            case YELLOW:
+                colorPrimaryDark = R.color.yellowColorPrimaryDark;
+                colorPrimary = R.color.yellowColorPrimary;
+                colorPrimaryBackground = R.color.yellowColorPrimaryBackground;
+                colorTheme = R.style.YellowTheme;
+                break;
+            case AMBER:
+                colorPrimaryDark = R.color.amberColorPrimaryDark;
+                colorPrimary = R.color.amberColorPrimary;
+                colorPrimaryBackground = R.color.amberColorPrimaryBackground;
+                colorTheme = R.style.AmberTheme;
+                break;
             case ORANGE:
                 colorPrimaryDark = R.color.orangeColorPrimaryDark;
                 colorPrimary = R.color.orangeColorPrimary;
                 colorPrimaryBackground = R.color.orangeColorPrimaryBackground;
                 colorTheme = R.style.OrangeTheme;
+                break;
+            case DEEP_ORANGE:
+                colorPrimaryDark = R.color.deepOrangeColorPrimaryDark;
+                colorPrimary = R.color.deepOrangeColorPrimary;
+                colorPrimaryBackground = R.color.deepOrangeColorPrimaryBackground;
+                colorTheme = R.style.DeepOrangeTheme;
+                break;
+            case BROWN:
+                colorPrimaryDark = R.color.brownColorPrimaryDark;
+                colorPrimary = R.color.brownColorPrimary;
+                colorPrimaryBackground = R.color.brownColorPrimaryBackground;
+                colorTheme = R.style.BrownTheme;
+                break;
+            case GREY:
+                colorPrimaryDark = R.color.greyColorPrimaryDark;
+                colorPrimary = R.color.greyColorPrimary;
+                colorPrimaryBackground = R.color.greyColorPrimaryBackground;
+                colorTheme = R.style.GreyTheme;
+                break;
+            case BLUE_GREY:
+                colorPrimaryDark = R.color.blueGreyColorPrimaryDark;
+                colorPrimary = R.color.blueGreyColorPrimary;
+                colorPrimaryBackground = R.color.blueGreyColorPrimaryBackground;
+                colorTheme = R.style.BlueGreyTheme;
+                break;
+            case BLACK_WHITE:
+                colorPrimaryDark = R.color.blackWhiteColorPrimaryDark;
+                colorPrimary = R.color.blackWhiteColorPrimary;
+                colorPrimaryBackground = R.color.blackWhiteColorPrimaryBackground;
+                colorTheme = R.style.BlackWhiteTheme;
                 break;
         }
         int colorStatusBar = ContextCompat.getColor(mContext, colorPrimaryDark);
@@ -147,8 +247,8 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
         MainActivity.mHeaderNavigationDrawerLayout.setBackgroundColor(colorToolbar);
         getActivity().setTheme(colorTheme);
 
+        //Getting status bar if Lolipop+
         if (Build.VERSION.SDK_INT >= 21) {
-            //Getting status bar
             Window window = getActivity().getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -166,6 +266,12 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
 
     }
 
+    /**
+     * Handling checkbox, to control of background color
+     * If checked - leave background a white, else apply selected theme
+     * @param buttonView
+     * @param isChecked
+     */
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {

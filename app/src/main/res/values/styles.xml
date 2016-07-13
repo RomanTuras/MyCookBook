@@ -44,7 +44,49 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:colorBackground">@color/colorPrimaryBackground</item>
     </style>
-    <!--Team theme-->
+    <!--Pink theme-->
+    <style name="PinkTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/pinkColorPrimary</item>
+        <item name="colorPrimaryDark">@color/pinkColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/pinkColorPrimaryBackground</item>
+    </style>
+    <!--Purple theme-->
+    <style name="PurpleTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/purpleColorPrimary</item>
+        <item name="colorPrimaryDark">@color/purpleColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/purpleColorPrimaryBackground</item>
+    </style>
+    <!--Deep Purple theme-->
+    <style name="DeepPurpleTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/deepPurpleColorPrimary</item>
+        <item name="colorPrimaryDark">@color/deepPurpleColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/deepPurpleColorPrimaryBackground</item>
+    </style>
+    <!--Red theme-->
+    <style name="RedTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/redColorPrimary</item>
+        <item name="colorPrimaryDark">@color/redColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/redColorPrimaryBackground</item>
+    </style>
+    <!--Blue theme-->
+    <style name="BlueTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/bluePrimary</item>
+        <item name="colorPrimaryDark">@color/bluePrimaryDark</item>
+        <item name="android:colorBackground">@color/bluePrimaryBackground</item>
+    </style>
+    <!--Light Blue theme-->
+    <style name="LightBlueTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/lightBluePrimary</item>
+        <item name="colorPrimaryDark">@color/lightBluePrimaryDark</item>
+        <item name="android:colorBackground">@color/lightBluePrimaryBackground</item>
+    </style>
+    <!--Cyan theme-->
+    <style name="CyanTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/cyanPrimary</item>
+        <item name="colorPrimaryDark">@color/cyanPrimaryDark</item>
+        <item name="android:colorBackground">@color/cyanPrimaryBackground</item>
+    </style>
+    <!--Teal theme-->
     <style name="TealTheme" parent="AppTheme.NoActionBar">
         <item name="colorPrimary">@color/tealColorPrimary</item>
         <item name="colorPrimaryDark">@color/tealColorPrimaryDark</item>
@@ -56,11 +98,29 @@
         <item name="colorPrimaryDark">@color/greenColorPrimaryDark</item>
         <item name="android:colorBackground">@color/greenColorPrimaryBackground</item>
     </style>
+    <!--Light Green theme-->
+    <style name="LightGreenTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/lightGreenColorPrimary</item>
+        <item name="colorPrimaryDark">@color/lightGreenColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/lightBluePrimaryBackground</item>
+    </style>
     <!--Lime theme-->
     <style name="LimeTheme" parent="AppTheme.NoActionBar">
         <item name="colorPrimary">@color/limeColorPrimary</item>
         <item name="colorPrimaryDark">@color/limeColorPrimaryDark</item>
         <item name="android:colorBackground">@color/limeColorPrimaryBackground</item>
+    </style>
+    <!--Yellow theme-->
+    <style name="YellowTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/yellowColorPrimary</item>
+        <item name="colorPrimaryDark">@color/yellowColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/yellowColorPrimaryBackground</item>
+    </style>
+    <!--Amber theme-->
+    <style name="AmberTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/amberColorPrimary</item>
+        <item name="colorPrimaryDark">@color/amberColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/amberColorPrimaryBackground</item>
     </style>
     <!--Orange theme-->
     <style name="OrangeTheme" parent="AppTheme.NoActionBar">
@@ -68,6 +128,35 @@
         <item name="colorPrimaryDark">@color/orangeColorPrimaryDark</item>
         <item name="android:colorBackground">@color/orangeColorPrimaryBackground</item>
     </style>
-
+    <!--Deep Orange theme-->
+    <style name="DeepOrangeTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/deepOrangeColorPrimary</item>
+        <item name="colorPrimaryDark">@color/deepOrangeColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/deepOrangeColorPrimaryBackground</item>
+    </style>
+    <!--Brown theme-->
+    <style name="BrownTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/brownColorPrimary</item>
+        <item name="colorPrimaryDark">@color/brownColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/brownColorPrimaryBackground</item>
+    </style>
+    <!--Grey theme-->
+    <style name="GreyTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/greyColorPrimary</item>
+        <item name="colorPrimaryDark">@color/greyColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/greyColorPrimaryBackground</item>
+    </style>
+    <!--Blue Grey theme-->
+    <style name="BlueGreyTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/blueGreyColorPrimary</item>
+        <item name="colorPrimaryDark">@color/blueGreyColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/blueGreyColorPrimaryBackground</item>
+    </style>
+    <!--Black White theme-->
+    <style name="BlackWhiteTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/blackWhiteColorPrimary</item>
+        <item name="colorPrimaryDark">@color/blackWhiteColorPrimaryDark</item>
+        <item name="android:colorBackground">@color/blackWhiteColorPrimaryBackground</item>
+    </style>
 
 </resources>

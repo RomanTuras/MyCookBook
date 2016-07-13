@@ -13,21 +13,81 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorPrimaryBackground">#BBDEFB</color>
-    <!--Team Theme-->
+    <!--Pink Theme-->
+    <color name="pinkColorPrimary">#E91E63</color>
+    <color name="pinkColorPrimaryDark">#C2185B</color>
+    <color name="pinkColorPrimaryBackground">#FCE4EC</color>
+    <!--Purple Theme-->
+    <color name="purpleColorPrimary">#9C27B0</color>
+    <color name="purpleColorPrimaryDark">#7B1FA2</color>
+    <color name="purpleColorPrimaryBackground">#F3E5F5</color>
+    <!--Deep Purple Theme-->
+    <color name="deepPurpleColorPrimary">#673AB7</color>
+    <color name="deepPurpleColorPrimaryDark">#512DA8</color>
+    <color name="deepPurpleColorPrimaryBackground">#EDE7F6</color>
+    <!--Red Theme-->
+    <color name="redColorPrimary">#F44336</color>
+    <color name="redColorPrimaryDark">#D32F2F</color>
+    <color name="redColorPrimaryBackground">#FFEBEE</color>
+    <!--Blue Theme -->
+    <color name="bluePrimary">#2196F3</color>
+    <color name="bluePrimaryDark">#1976D2</color>
+    <color name="bluePrimaryBackground">#E3F2FD</color>
+    <!--Light Blue Theme -->
+    <color name="lightBluePrimary">#03A9F4</color>
+    <color name="lightBluePrimaryDark">#0288D1</color>
+    <color name="lightBluePrimaryBackground">#E1F5FE</color>
+    <!--Cyan Theme -->
+    <color name="cyanPrimary">#00BCD4</color>
+    <color name="cyanPrimaryDark">#0097A7</color>
+    <color name="cyanPrimaryBackground">#E0F7FA</color>
+    <!--Teal Theme-->
     <color name="tealColorPrimary">#009688</color>
     <color name="tealColorPrimaryDark">#00796B</color>
     <color name="tealColorPrimaryBackground">#E0F2F1</color>
     <!--Green Theme-->
-    <color name="greenColorPrimary">#8BC34A</color>
-    <color name="greenColorPrimaryDark">#689F38</color>
-    <color name="greenColorPrimaryBackground">#F1F8E9</color>
+    <color name="greenColorPrimary">#4CAF50</color>
+    <color name="greenColorPrimaryDark">#388E3C</color>
+    <color name="greenColorPrimaryBackground">#E8F5E9</color>
+    <!--Light Green Theme-->
+    <color name="lightGreenColorPrimary">#8BC34A</color>
+    <color name="lightGreenColorPrimaryDark">#689F38</color>
+    <color name="lightGreenColorPrimaryBackground">#F1F8E9</color>
     <!--Lime Theme-->
     <color name="limeColorPrimary">#CDDC39</color>
     <color name="limeColorPrimaryDark">#AFB42B</color>
     <color name="limeColorPrimaryBackground">#F9FBE7</color>
+    <!--Yellow Theme-->
+    <color name="yellowColorPrimary">#FFEB3B</color>
+    <color name="yellowColorPrimaryDark">#FBC02D</color>
+    <color name="yellowColorPrimaryBackground">#FFFDE7</color>
+    <!--Amber Theme-->
+    <color name="amberColorPrimary">#FFC107</color>
+    <color name="amberColorPrimaryDark">#FFA000</color>
+    <color name="amberColorPrimaryBackground">#FFF8E1</color>
     <!--Orange Theme-->
     <color name="orangeColorPrimary">#FF9800</color>
     <color name="orangeColorPrimaryDark">#F57C00</color>
     <color name="orangeColorPrimaryBackground">#FFF3E0</color>
+    <!--Deep Orange Theme-->
+    <color name="deepOrangeColorPrimary">#FF5722</color>
+    <color name="deepOrangeColorPrimaryDark">#E64A19</color>
+    <color name="deepOrangeColorPrimaryBackground">#FBE9E7</color>
+    <!--Brown Theme-->
+    <color name="brownColorPrimary">#795548</color>
+    <color name="brownColorPrimaryDark">#5D4037</color>
+    <color name="brownColorPrimaryBackground">#EFEBE9</color>
+    <!--Grey Theme-->
+    <color name="greyColorPrimary">#9E9E9E</color>
+    <color name="greyColorPrimaryDark">#616161</color>
+    <color name="greyColorPrimaryBackground">#FAFAFA</color>
+    <!--Blue Grey Theme-->
+    <color name="blueGreyColorPrimary">#607D8B</color>
+    <color name="blueGreyColorPrimaryDark">#455A64</color>
+    <color name="blueGreyColorPrimaryBackground">#ECEFF1</color>
+    <!--Black White Theme-->
+    <color name="blackWhiteColorPrimary">#303030</color>
+    <color name="blackWhiteColorPrimaryDark">#000000</color>
+    <color name="blackWhiteColorPrimaryBackground">#FFFFFF</color>
 
 </resources>

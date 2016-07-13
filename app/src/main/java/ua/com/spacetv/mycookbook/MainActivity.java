@@ -190,13 +190,43 @@ public class MainActivity extends AppCompatActivity
         switch (numberOfTheme){
             case INDIGO: setTheme(R.style.IndigoTheme);
                 break;
+            case PINK: setTheme(R.style.PinkTheme);
+                break;
+            case PURPLE: setTheme(R.style.PurpleTheme);
+                break;
+            case DEEP_PURPLE: setTheme(R.style.DeepPurpleTheme);
+                break;
+            case RED: setTheme(R.style.RedTheme);
+                break;
+            case BLUE: setTheme(R.style.BlueTheme);
+                break;
+            case LIGHT_BLUE: setTheme(R.style.LightBlueTheme);
+                break;
+            case CYAN: setTheme(R.style.CyanTheme);
+                break;
             case TEAL: setTheme(R.style.TealTheme);
                 break;
             case GREEN: setTheme(R.style.GreenTheme);
                 break;
+            case LIGHT_GREEN: setTheme(R.style.LightGreenTheme);
+                break;
             case LIME: setTheme(R.style.LimeTheme);
                 break;
+            case YELLOW: setTheme(R.style.YellowTheme);
+                break;
+            case AMBER: setTheme(R.style.AmberTheme);
+                break;
             case ORANGE: setTheme(R.style.OrangeTheme);
+                break;
+            case DEEP_ORANGE: setTheme(R.style.DeepOrangeTheme);
+                break;
+            case BROWN: setTheme(R.style.BrownTheme);
+                break;
+            case GREY: setTheme(R.style.GreyTheme);
+                break;
+            case BLUE_GREY: setTheme(R.style.BlueGreyTheme);
+                break;
+            case BLACK_WHITE: setTheme(R.style.BlackWhiteTheme);
                 break;
         }
     }

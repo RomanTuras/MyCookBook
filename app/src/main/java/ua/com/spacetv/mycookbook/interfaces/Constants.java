@@ -54,10 +54,25 @@ public interface Constants {
 
     //Color themes
     int INDIGO = 0;
-    int TEAL = 1;
-    int GREEN = 2;
-    int LIME = 3;
-    int ORANGE = 4;
+    int PINK = 1;
+    int PURPLE = 2;
+    int DEEP_PURPLE = 3;
+    int RED = 4;
+    int BLUE = 5;
+    int LIGHT_BLUE = 6;
+    int CYAN = 7;
+    int TEAL = 8;
+    int GREEN = 9;
+    int LIGHT_GREEN = 10;
+    int LIME = 11;
+    int YELLOW = 12;
+    int AMBER = 13;
+    int ORANGE = 14;
+    int DEEP_ORANGE = 15;
+    int BROWN = 16;
+    int GREY = 17;
+    int BLUE_GREY = 18;
+    int BLACK_WHITE = 19;
 
 
     /* id of actions (from where do it) */

@@ -227,14 +227,17 @@ public class FragDialog extends DialogFragment implements Constants,
         int paddingH = (int) getResources().getDimension(R.dimen.dialog_padding_left_right);
         int paddingV = (int) getResources().getDimension(R.dimen.dialog_padding_up_down);
 
-        //Getting color from current theme
-        TypedValue typedValue = new TypedValue();
-        mContext.getTheme().resolveAttribute(android.R.attr.colorBackground, typedValue, true);
-        int bgColor = typedValue.data;
-        mContext.getTheme().resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
-        int barColor = typedValue.data;
-
-        int textColor = ContextCompat.getColor(mContext, R.color.colorWhite);
+        int textColor;
+        if(Build.VERSION.SDK_INT >= 21) {
+            //Getting color from current theme
+            TypedValue typedValue = new TypedValue();
+            mContext.getTheme().resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
+            int barColor = typedValue.data;
+            textView.setBackgroundColor(barColor);
+            textColor = ContextCompat.getColor(mContext, R.color.colorWhite);
+        }else{
+            textColor = ContextCompat.getColor(mContext, R.color.colorBlack);
+        }
 
         if (Build.VERSION.SDK_INT < 23) {
             textView.setTextAppearance(mContext, android.R.style.TextAppearance_Large);
@@ -243,14 +246,12 @@ public class FragDialog extends DialogFragment implements Constants,
         }
 
         textView.setTextColor(textColor);
-        textView.setBackgroundColor(barColor);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
 
         textView.setPadding(paddingH, paddingV, paddingH, paddingV);
         input.setPadding(paddingH, paddingV, paddingH, paddingV);
 
         listView.setSelected(true);
-        listView.setBackgroundColor(bgColor);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         listView.setSelector(R.drawable.list_color_selector);
         listView.setOnItemClickListener(this);
