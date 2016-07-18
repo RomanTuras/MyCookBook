@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.dialogs.FragDialog;
+import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
@@ -104,7 +105,9 @@ public class FragSubCategory extends Fragment implements Constants,
         mListView = (ListView) view.findViewById(R.id.listSubCategory);
         mTextView = (TextView) view.findViewById(R.id.text_empty_text_subcategory);
 //        mDatabase = mDataBaseHelper.getWritableDatabase();
-        mDatabase = mDbHelper.getWritableDatabase();
+//        mDatabase = mDbHelper.getWritableDatabase();
+        mDatabase = MainActivity.mDatabase;
+
         mFrManager = getFragmentManager();
 
         mViewForSnackbar = view;
@@ -137,10 +140,11 @@ public class FragSubCategory extends Fragment implements Constants,
                     int imgLike = cursor.getInt(4);
                     int topFolder_id = cursor.getInt(3);
                     int subFolder_id = cursor.getInt(5);
+                    String path = cursor.getString(6);
 
                     mAdapter.add(new ListData(cursor.getString(1),
                             "", ID_IMG_RECIPE,
-                            imgLike, 0, item_id, IS_RECIPE, topFolder_id, subFolder_id));
+                            imgLike, 0, item_id, IS_RECIPE, topFolder_id, subFolder_id, path));
                 } while (cursor.moveToNext());
             }
             cursor.close();
@@ -158,8 +162,9 @@ public class FragSubCategory extends Fragment implements Constants,
                 do {
                     int item_id = cursor.getInt(0);
                     int numberRecipe = countRecipe(item_id);
+
                     mAdapter.add(new ListData(cursor.getString(1), "", ID_IMG_FOLDER, ID_IMG_LIKE_OFF,
-                            numberRecipe, item_id, IS_FOLDER, 0, 0));
+                            numberRecipe, item_id, IS_FOLDER, 0, 0, null));
                 } while (cursor.moveToNext());
             }
             cursor.close();
@@ -199,7 +204,7 @@ public class FragSubCategory extends Fragment implements Constants,
     @Override
     public void onResume(){
         super.onResume();
-        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
+//        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
         mFirstVisibleItem = Preferences
                 .getSettingsFromPreferences(mContext, FIRST_ITEM_SUB_CATEGORY);
         showCategoryAndRecipe();
@@ -208,12 +213,14 @@ public class FragSubCategory extends Fragment implements Constants,
             MainActivity.overrideActionBar(null, FragTopCategory.mNameOfTopCategory);
         }else MainActivity.overrideActionBar(null, null);
 
+        MainActivity.mAds = new Ads(mContext);
+        if (MainActivity.mAds.getInterstitialAd() == null) MainActivity.mAds.initAds();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mDatabase.close();
+//        mDatabase.close();
 //        mDataBaseHelper.close();
     }
 

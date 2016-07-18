@@ -17,6 +17,10 @@
 package ua.com.spacetv.mycookbook.tools;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +29,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+
+import java.io.File;
 import java.util.ArrayList;
 
 import ua.com.spacetv.mycookbook.R;
@@ -34,14 +42,15 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
  * Created by Roman Turas on 25/11/2015.
  */
 public class ListAdapter extends BaseAdapter implements Constants {
-    Context context;
+    Context mContext;
     ArrayList<ListData> arrayData;
     LayoutInflater lInflater;
+    private boolean isShowingDefaultImageRecipe = false;
 
     public ListAdapter(Context context, ArrayList<ListData> arrayData) {
-        this.context = context;
+        mContext = context;
         this.arrayData = arrayData;
-        lInflater = (LayoutInflater) this.context
+        lInflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -86,7 +95,16 @@ public class ListAdapter extends BaseAdapter implements Constants {
         if(listData.getImgIcon() == ID_IMG_FOLDER){
             imageIcon.setImageResource(R.drawable.ic_folder_open_black_24dp);
         }else if(listData.getImgIcon() == ID_IMG_RECIPE){
-            imageIcon.setImageResource(R.drawable.ic_document_24);
+            if(isShowingDefaultImageRecipe) {
+                imageIcon.setImageResource(R.drawable.ic_document_24);
+            }else{
+                String path = listData.getPathImage();
+                if(path == null || path.equals("") || !ifFileFound(path)) {
+                    imageIcon.setImageResource(R.drawable.ic_document_24);
+                }else {
+                    setImage(path, imageIcon);
+                }
+            }
         }
 
         /** if 'Like' not set on recipe -> disable show layoutImgLike */
@@ -96,6 +114,35 @@ public class ListAdapter extends BaseAdapter implements Constants {
         }
 
         return view;
+    }
+
+    /**
+     * Checking whatever the file is present
+     *
+     * @param filename - name of the image
+     * @return true, if exist
+     */
+    public boolean ifFileFound(String filename) {
+        File file = new File(filename);
+        return file.exists();
+    }
+
+    /**
+     * Set image into image viev
+     * Usage Glide library
+     *
+     * @param path
+     */
+    private void setImage(String path, final ImageView img) {
+        Glide.with(mContext).load(path).asBitmap().centerCrop().into(new BitmapImageViewTarget(img) {
+            @Override
+            protected void setResource(Bitmap resource) {
+                RoundedBitmapDrawable circularBitmapDrawable =
+                        RoundedBitmapDrawableFactory.create(mContext.getResources(), resource);
+                circularBitmapDrawable.setCircular(true);
+                img.setImageDrawable(circularBitmapDrawable);
+            }
+        });
     }
 
 }

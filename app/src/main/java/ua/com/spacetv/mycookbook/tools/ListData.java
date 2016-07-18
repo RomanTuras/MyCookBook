@@ -23,6 +23,7 @@ package ua.com.spacetv.mycookbook.tools;
 public class ListData {
     private String listTitle;
     private String listSubTitle;
+    private String pathImage;
     private int imgIcon;
     private int imgLike;
     private int number;
@@ -32,7 +33,7 @@ public class ListData {
     private boolean isFolder;
 
     public ListData(String listTitle, String listSubTitle, int imgIcon, int imgLike, int number,
-                    int item_id, boolean isFolder, int topFolder_id, int subFolder_id){
+                    int item_id, boolean isFolder, int topFolder_id, int subFolder_id, String path){
         this.listTitle = listTitle;
         this.listSubTitle = listSubTitle;
         this.imgIcon = imgIcon;
@@ -42,6 +43,7 @@ public class ListData {
         this.isFolder = isFolder;
         this.topFolder_id = topFolder_id;
         this.subFolder_id = subFolder_id;
+        this.pathImage = path;
     }
 
     public String getListTitle() {
@@ -62,6 +64,10 @@ public class ListData {
 
     public int getNumber() {
         return number;
+    }
+
+    public String getPathImage(){
+        return pathImage;
     }
 
     public int getItemId() { return item_id; }

@@ -35,7 +35,7 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
  */
 public class PrepareListRecipes implements Constants {
     private static ArrayList<ListData> adapter;
-    private SQLiteDatabase database;
+    private SQLiteDatabase mDatabase;
 //    private DataBaseHelper dataBaseHelper;
     private DbHelper mDbHelper;
     private final static int KEY_FAVORITE = 1;
@@ -50,7 +50,7 @@ public class PrepareListRecipes implements Constants {
     public PrepareListRecipes(Context context, int idParentFolder) {
 //        dataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
-        database = mDbHelper.getWritableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
         adapter = new ArrayList<>();
         recipeToAdapter(idParentFolder);
     }
@@ -61,7 +61,9 @@ public class PrepareListRecipes implements Constants {
     public PrepareListRecipes(Context context) {
 //        dataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
-        database = mDbHelper.getWritableDatabase();
+//        mDatabase = mDbHelper.getWritableDatabase();
+        mDatabase = MainActivity.mDatabase;
+
         adapter = new ArrayList<>();
         recipeToAdapter();
     }
@@ -70,7 +72,7 @@ public class PrepareListRecipes implements Constants {
     public PrepareListRecipes(Context context, String searchRequest) {
 //        dataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
-        database = mDbHelper.getWritableDatabase();
+        mDatabase = mDbHelper.getWritableDatabase();
         adapter = new ArrayList<>();
         String[] query = new String[2];
 
@@ -92,7 +94,7 @@ public class PrepareListRecipes implements Constants {
                 "recipe_title LIKE " + query[1] + " OR " +
                 "recipe LIKE " + query[0] + " OR " +
                 "recipe LIKE " + query[1] + " ORDER BY recipe_title";
-        Cursor cursor = database.rawQuery(selectQuery, null);
+        Cursor cursor = mDatabase.rawQuery(selectQuery, null);
 
         readDatabaseInToAdapter(cursor);
         cursor.close();
@@ -104,7 +106,7 @@ public class PrepareListRecipes implements Constants {
     private void recipeToAdapter() {
         String selectQuery = "SELECT * FROM " + TABLE_LIST_RECIPE +
                 " WHERE make=" + KEY_FAVORITE + " ORDER BY recipe_title";
-        readDatabaseInToAdapter(database.rawQuery(selectQuery, null));
+        readDatabaseInToAdapter(mDatabase.rawQuery(selectQuery, null));
     }
 
     /**
@@ -113,7 +115,7 @@ public class PrepareListRecipes implements Constants {
     private void recipeToAdapter(int idParentFolder) {
         String selectQuery = "SELECT * FROM " + TABLE_LIST_RECIPE +
                 " WHERE sub_category_id=" + idParentFolder + " ORDER BY recipe_title";
-        readDatabaseInToAdapter(database.rawQuery(selectQuery, null));
+        readDatabaseInToAdapter(mDatabase.rawQuery(selectQuery, null));
     }
 
     private void readDatabaseInToAdapter(Cursor cursor){
@@ -124,15 +126,16 @@ public class PrepareListRecipes implements Constants {
                     int imgLike = cursor.getInt(4);
                     int topFolder_id = cursor.getInt(3);
                     int subFolder_id = cursor.getInt(5);
+                    String pathImage = cursor.getString(6);
 
                     adapter.add(new ListData(cursor.getString(1), "", ID_IMG_RECIPE, imgLike, 0,
-                            item_id, IS_RECIPE, topFolder_id, subFolder_id));
+                            item_id, IS_RECIPE, topFolder_id, subFolder_id, pathImage));
                 } while (cursor.moveToNext());
             }
             cursor.close();
         }
 //        dataBaseHelper.close();
-        database.close();
+//        mDatabase.close();
     }
 
     public ArrayList<ListData> getFilledAdapter() {

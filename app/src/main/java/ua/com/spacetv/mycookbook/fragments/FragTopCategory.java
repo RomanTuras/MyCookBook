@@ -26,6 +26,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -90,7 +91,9 @@ public class FragTopCategory extends Fragment implements Constants,
 //        mDataBaseHelper = new DataBaseHelper(mContext);
 //        mDatabase = mDataBaseHelper.getWritableDatabase();
         mDbHelper = MainActivity.mDbHelper;
-        mDatabase = mDbHelper.getWritableDatabase();
+        mDatabase = MainActivity.mDatabase;
+//        mDatabase = mDbHelper.getWritableDatabase();
+        Log.d("TG", "%%% Top Category onCreate ");
 
         mViewForSnackbar = view;
         return view;
@@ -103,7 +106,7 @@ public class FragTopCategory extends Fragment implements Constants,
 //            mDataBaseHelper = new DataBaseHelper(mContext);
 //            mDatabase = mDataBaseHelper.getWritableDatabase();
 //        }
-        if(mDatabase == null) mDatabase = mDbHelper.getWritableDatabase();
+//        if(mDatabase == null) mDatabase = mDbHelper.getWritableDatabase();
 
         categoryInList();
         if (mAdapter.size() == 0) mTextView
@@ -126,8 +129,9 @@ public class FragTopCategory extends Fragment implements Constants,
                     int item_id = cursor.getInt(0);
                     String subCategories = getSubcategories(item_id);
                     int numberRecipe = countRecipe(item_id);
+
                     mAdapter.add(new ListData(cursor.getString(1), subCategories, ID_IMG_FOLDER,
-                            ID_IMG_LIKE_OFF, numberRecipe, item_id, IS_FOLDER, 0, 0));
+                            ID_IMG_LIKE_OFF, numberRecipe, item_id, IS_FOLDER, 0, 0, null));
                 } while (cursor.moveToNext());
             }
             cursor.close();
@@ -186,7 +190,7 @@ public class FragTopCategory extends Fragment implements Constants,
     @Override
     public void onResume() {
         super.onResume();
-        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
+//        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
         mFirstVisibleItem = Preferences
                 .getSettingsFromPreferences(mContext, FIRST_ITEM_TOP_CATEGORY);
         showAllCategory();
@@ -203,7 +207,7 @@ public class FragTopCategory extends Fragment implements Constants,
     public void onDetach() {
         super.onDetach();
 //        mDataBaseHelper.close();
-        mDatabase.close();
+//        mDatabase.close();
     }
 
 
@@ -275,7 +279,7 @@ public class FragTopCategory extends Fragment implements Constants,
         new Analytics(mContext).sendAnalytics("myCookBook", "Top Category", "Add top category", param);
 //        mDataBaseHelper = new DataBaseHelper(mContext);
 //        mDatabase = mDataBaseHelper.getWritableDatabase();
-        mDatabase = mDbHelper.getWritableDatabase();
+//        mDatabase = mDbHelper.getWritableDatabase();
 
         mContentValues = new ContentValues();
         mContentValues.put("category", param);
@@ -287,7 +291,7 @@ public class FragTopCategory extends Fragment implements Constants,
     private void renameCategory(String param) {
 //        mDataBaseHelper = new DataBaseHelper(mContext);
 //        mDatabase = mDataBaseHelper.getWritableDatabase();
-        mDatabase = mDbHelper.getWritableDatabase();
+//        mDatabase = mDbHelper.getWritableDatabase();
 
         mContentValues = new ContentValues();
         mContentValues.put("category", param);
@@ -299,7 +303,7 @@ public class FragTopCategory extends Fragment implements Constants,
     private void deleteCategory() {
 //        mDataBaseHelper = new DataBaseHelper(mContext);
 //        mDatabase = mDataBaseHelper.getWritableDatabase();
-        mDatabase = mDbHelper.getWritableDatabase();
+//        mDatabase = mDbHelper.getWritableDatabase();
 
         long rowId = mDatabase.delete(TABLE_TOP_CATEGORY, "_ID=" + mIdParentCategory, null);
         showAllCategory();

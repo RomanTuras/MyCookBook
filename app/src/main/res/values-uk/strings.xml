@@ -109,5 +109,27 @@
     <string name="button_apply">Застосувати тему</string>
     <string name="checkbox_white_background">Залишити фон білим</string>
     <string name="text_select_color_theme">Оберіть колір теми</string>
+    <string-array name="themes">
+        <item>Indigo</item>
+        <item>Pink</item>
+        <item>Purple</item>
+        <item>Deep Purple</item>
+        <item>Red</item>
+        <item>Blue</item>
+        <item>Light Blue</item>
+        <item>Cyan</item>
+        <item>Teal</item>
+        <item>Green</item>
+        <item>Light Green</item>
+        <item>Lime</item>
+        <item>Yellow</item>
+        <item>Amber</item>
+        <item>Orange</item>
+        <item>Deep Orange</item>
+        <item>Brown</item>
+        <item>Grey</item>
+        <item>Blue Grey</item>
+        <item>Black White</item>
+    </string-array>
 
 </resources>

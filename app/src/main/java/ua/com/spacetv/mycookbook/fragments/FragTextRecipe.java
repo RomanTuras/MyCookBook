@@ -62,11 +62,9 @@ import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
-import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.helpers.ImagePickHelper;
@@ -89,7 +87,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     private static DbHelper mDbHelper;
     public static SQLiteDatabase mDatabase;
     private ContentValues mContentValues;
-    private static Ads mAds;
+//    private static Ads mAds;
     private static View view;
     private EditText mEditTitleRecipe, mEditTextRecipe;
 //    private TextView textTextRecipe;
@@ -110,6 +108,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     private static Fragment mFragmentTextRecipe;
     public static Timer mScheduledTimeTimer;
     private static Activity mActivity;
+//    private Ads mAds;
 
     @Override
     public void onAttach(Context context) {
@@ -136,9 +135,9 @@ public class FragTextRecipe extends Fragment implements Constants,
         Log.d("TG", "** FragTextRecipe onCreate **");
     }
 
-    private void loadAds() {
-        if (mAds.getInterstitialAd() == null) mAds.initAds(); // init and preload Ads
-    }
+//    private void loadAds() {
+//        if (mAds.getInterstitialAd() == null) mAds.initAds(); // init and preload Ads
+//    }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle saveInstanceState) {
@@ -150,9 +149,11 @@ public class FragTextRecipe extends Fragment implements Constants,
 
         getDisplayMetrics();
 
-        mAds = new Ads(mContext);
+//        mAds = new Ads(mContext);
 
-        mDatabase = mDbHelper.getWritableDatabase();
+//        mDatabase = mDbHelper.getWritableDatabase();
+        mDatabase = MainActivity.mDatabase;
+
 //        mDatabase = dataBaseHelper.getWritableDatabase();
         fragmentManager = getFragmentManager();
 
@@ -213,7 +214,10 @@ public class FragTextRecipe extends Fragment implements Constants,
     private void modeReview() {
         new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
         //If the service is not purchased - show mAds
-        if (!MainActivity.isPurchaseActive) startScheduledTimeTimer();
+//        if (!MainActivity.isPurchaseActive) startScheduledTimeTimer();
+
+//        MainActivity.mAds = new Ads(mContext);
+//        if (MainActivity.mAds.getInterstitialAd() == null) MainActivity.mAds.initAds();
 
         Log.d("TG", "modeReview *** ");
         mEditTitleRecipe.setFocusableInTouchMode(false);
@@ -224,28 +228,6 @@ public class FragTextRecipe extends Fragment implements Constants,
         startupMode = MODE_REVIEW_RECIPE;
         setHasOptionsMenu(false);
         setHasOptionsMenu(true);
-    }
-
-    /**
-     * Starting 10 seconds timer for showing mAds banner
-     * Timer timer work once
-     */
-    private static void startScheduledTimeTimer() {
-        mScheduledTimeTimer = new Timer();
-        mScheduledTimeTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (mAds.getInterstitialAd() != null) {
-                    mActivity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Log.d("TG", "-= startScheduledTimeTimer =-");
-                            mAds.showAd();
-                        }
-                    });
-                    if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
-                }
-            }
-        }, 1000 * 10, 1000 * 10); //delay 100 ms, period 10 sec
     }
 
     private void getDisplayMetrics() {
@@ -572,24 +554,34 @@ public class FragTextRecipe extends Fragment implements Constants,
         super.onResume();
         MainActivity.overrideActionBar(mContext.getString(R.string.text_recipe), null);
         MainActivity.hideAllFloatButtons();
-        loadAds();
     }
 
     @Override
     public void onPause(){
         super.onPause();
+        Log.d("TG", "%%% Text onPause ");
         if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        Log.d("TG", "%%% Text onDetach ");
         if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
-        mDatabase.close();
+//        mDatabase.close();
 //        dataBaseHelper.close();
         if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.d("TG", "%%% Text onDestroy ");
+        if (MainActivity.mAds.getInterstitialAd() != null) {
+                    MainActivity.mAds.showAd();
+                }
     }
 
     /* If text or image was changed -> save recipe in mDatabase*/

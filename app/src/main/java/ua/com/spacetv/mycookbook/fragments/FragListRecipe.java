@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.dialogs.FragDialog;
+import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.helpers.PrepareListRecipes;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
@@ -103,7 +104,9 @@ public class FragListRecipe extends Fragment implements Constants,
         mListView = (ListView) view.findViewById(R.id.listRecipe);
         text_empty_text_list_recipe = (TextView) view.findViewById(R.id.text_empty_text_list_recipe);
 //        mDatabase = mDataBaseHelper.getWritableDatabase();
-        mDatabase = mDbHelper.getWritableDatabase();
+//        mDatabase = mDbHelper.getWritableDatabase();
+        mDatabase = MainActivity.mDatabase;
+
         mFrManager = getFragmentManager();
         FragListRecipe.view = view;
         return view;
@@ -189,16 +192,18 @@ public class FragListRecipe extends Fragment implements Constants,
     @Override
     public void onResume() {
         super.onResume();
-        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
+//        if(!mDatabase.isOpen()) mDatabase = mDbHelper.getWritableDatabase();
         mFirstVisibleItem = Preferences
                 .getSettingsFromPreferences(mContext, FIRST_ITEM_LIST_RESIPE);
         showListRecipe();
+        MainActivity.mAds = new Ads(mContext);
+        if (MainActivity.mAds.getInterstitialAd() == null) MainActivity.mAds.initAds();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mDatabase.close();
+//        mDatabase.close();
 //        mDataBaseHelper.close();
     }
 

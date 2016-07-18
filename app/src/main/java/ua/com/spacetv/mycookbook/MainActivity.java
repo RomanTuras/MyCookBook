@@ -20,6 +20,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -60,6 +61,7 @@ import ua.com.spacetv.mycookbook.fragments.FragSettings;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTextRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
+import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
 import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.helpers.FragmentHelper;
@@ -82,13 +84,14 @@ public class MainActivity extends AppCompatActivity
 
     private static final int PERMISSION_REQUEST_CODE = 2;
     private static FragmentHelper mFragmentHelper;
-    private static Context mContext;
+    public static Context mContext;
     private static FragmentManager mFragmentManager;
     private static FloatingActionButton fabAddTopCategory;
     private static FloatingActionButton fabAddRecipeListRecipe;
     private static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
     public static DbHelper mDbHelper;
+    public static SQLiteDatabase mDatabase;
     private static int mAction;
     //**** Purchase in app
     private static IabHelper mHelper;
@@ -99,6 +102,7 @@ public class MainActivity extends AppCompatActivity
     public static FrameLayout mFrameLayout;
     private boolean mIsBackgroundWhite;
     public static LinearLayout mHeaderNavigationDrawerLayout;
+    public static Ads mAds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,8 +111,11 @@ public class MainActivity extends AppCompatActivity
         setColorTheme();
         setContentView(R.layout.activity_main);
 
-        mFragmentManager = getSupportFragmentManager();
+        //init database and database helper
         mDbHelper = DbHelper.init(mContext);
+        mDatabase = mDbHelper.getWritableDatabase();
+
+        mFragmentManager = getSupportFragmentManager();
         mFragmentHelper = new FragmentHelper(mFragmentManager);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -117,7 +124,7 @@ public class MainActivity extends AppCompatActivity
 
         //Container for all fragments
         mFrameLayout = (FrameLayout) findViewById(R.id.container);
-        if(mIsBackgroundWhite) mFrameLayout.setBackgroundColor(Color.WHITE);
+        if (mIsBackgroundWhite) mFrameLayout.setBackgroundColor(Color.WHITE);
 
         initFloatAction();
         initDrawerLayout(mToolbar);
@@ -127,16 +134,26 @@ public class MainActivity extends AppCompatActivity
             mFragmentHelper.attachTopCategoryFragment();
         }
 
+        //init ads
+        loadAds();
+
         //Purchase in app section
         mHelper = new IabHelper(this, LICENSE_KEY);
         isPurchaseActive = Preferences.getSettingsFromPreferences(mContext, IS_PURCHASE_OWNED, 0);
         if (!isPurchaseActive) {
             setupBillingInApp();
         } else {
-            Log.d("TG", "Purchase already owned!");
-//            setupBillingInApp();
+            setupBillingInApp();
         }
+        Log.d("TG", "%%% Main Activity onCreate ");
+    }
 
+    /**
+     * Init and preload ADS
+     */
+    private void loadAds() {
+        mAds = new Ads(mContext);
+        if (mAds.getInterstitialAd() == null) mAds.initAds();
     }
 
     /**
@@ -161,8 +178,8 @@ public class MainActivity extends AppCompatActivity
                 }
                 //Header od drawer layout, find him only when it is open!!!
 //                if(mHeaderNavigationDrawerLayout == null) {
-                    mHeaderNavigationDrawerLayout =
-                            (LinearLayout) findViewById(R.id.drawer_navigation_header);
+                mHeaderNavigationDrawerLayout =
+                        (LinearLayout) findViewById(R.id.drawer_navigation_header);
 //                }
             }
 
@@ -187,46 +204,66 @@ public class MainActivity extends AppCompatActivity
         int numberOfTheme = Preferences.getSettingsFromPreferences(mContext, COLOR_THEME);
         mIsBackgroundWhite = Preferences.getSettingsFromPreferences(mContext,
                 IS_BACKGROUND_WHITE, 0);
-        switch (numberOfTheme){
-            case INDIGO: setTheme(R.style.IndigoTheme);
+        switch (numberOfTheme) {
+            case INDIGO:
+                setTheme(R.style.IndigoTheme);
                 break;
-            case PINK: setTheme(R.style.PinkTheme);
+            case PINK:
+                setTheme(R.style.PinkTheme);
                 break;
-            case PURPLE: setTheme(R.style.PurpleTheme);
+            case PURPLE:
+                setTheme(R.style.PurpleTheme);
                 break;
-            case DEEP_PURPLE: setTheme(R.style.DeepPurpleTheme);
+            case DEEP_PURPLE:
+                setTheme(R.style.DeepPurpleTheme);
                 break;
-            case RED: setTheme(R.style.RedTheme);
+            case RED:
+                setTheme(R.style.RedTheme);
                 break;
-            case BLUE: setTheme(R.style.BlueTheme);
+            case BLUE:
+                setTheme(R.style.BlueTheme);
                 break;
-            case LIGHT_BLUE: setTheme(R.style.LightBlueTheme);
+            case LIGHT_BLUE:
+                setTheme(R.style.LightBlueTheme);
                 break;
-            case CYAN: setTheme(R.style.CyanTheme);
+            case CYAN:
+                setTheme(R.style.CyanTheme);
                 break;
-            case TEAL: setTheme(R.style.TealTheme);
+            case TEAL:
+                setTheme(R.style.TealTheme);
                 break;
-            case GREEN: setTheme(R.style.GreenTheme);
+            case GREEN:
+                setTheme(R.style.GreenTheme);
                 break;
-            case LIGHT_GREEN: setTheme(R.style.LightGreenTheme);
+            case LIGHT_GREEN:
+                setTheme(R.style.LightGreenTheme);
                 break;
-            case LIME: setTheme(R.style.LimeTheme);
+            case LIME:
+                setTheme(R.style.LimeTheme);
                 break;
-            case YELLOW: setTheme(R.style.YellowTheme);
+            case YELLOW:
+                setTheme(R.style.YellowTheme);
                 break;
-            case AMBER: setTheme(R.style.AmberTheme);
+            case AMBER:
+                setTheme(R.style.AmberTheme);
                 break;
-            case ORANGE: setTheme(R.style.OrangeTheme);
+            case ORANGE:
+                setTheme(R.style.OrangeTheme);
                 break;
-            case DEEP_ORANGE: setTheme(R.style.DeepOrangeTheme);
+            case DEEP_ORANGE:
+                setTheme(R.style.DeepOrangeTheme);
                 break;
-            case BROWN: setTheme(R.style.BrownTheme);
+            case BROWN:
+                setTheme(R.style.BrownTheme);
                 break;
-            case GREY: setTheme(R.style.GreyTheme);
+            case GREY:
+                setTheme(R.style.GreyTheme);
                 break;
-            case BLUE_GREY: setTheme(R.style.BlueGreyTheme);
+            case BLUE_GREY:
+                setTheme(R.style.BlueGreyTheme);
                 break;
-            case BLACK_WHITE: setTheme(R.style.BlackWhiteTheme);
+            case BLACK_WHITE:
+                setTheme(R.style.BlackWhiteTheme);
                 break;
         }
     }
@@ -242,7 +279,7 @@ public class MainActivity extends AppCompatActivity
                 if (!result.isSuccess()) {
                     Log.d("TG", "In-app Billing setup failed: " + result);
                 } else {
-                    Log.d("TG", "In-app Billing is set up OK");
+                    Log.d("TG", "In-app Billing is set up OK, consumeItem");
                     consumeItem();
                 }
             }
@@ -274,17 +311,19 @@ public class MainActivity extends AppCompatActivity
             } else {
 
                 // Getting status of purchase and save it into preferences
-                // called when 'Remove ads' button NOT pressed
+                // called when app is started ('Remove ads' button is NOT pressed)
                 if (!isRemoveAdsPressed) {
                     if (inventory.getPurchase(ITEM_SKU) != null) {
                         if (inventory.getPurchase(ITEM_SKU).getSku().equals(ITEM_SKU)) {
                             isPurchaseActive = true; //purchase is owned
+                            Log.d("TG", "Purchase already is owned, save state to preference");
                         } else {
+                            Log.d("TG", "Purchase still NOT owned, save state to preference");
                             isPurchaseActive = false; //purchase is not owned
                         }
                         Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseActive);
                     }
-                } else {
+                } else { //'Remove ads' button pressed
 //                    if(!isClearPurchase) {
                     isRemoveAdsPressed = false;
                     if (inventory.getPurchase(ITEM_SKU) == null) {
@@ -297,12 +336,12 @@ public class MainActivity extends AppCompatActivity
                     }
 //                    }else {
 //                        isClearPurchase = false;
-//                        try {
-//                            mHelper.consumeAsync(inventory.getPurchase(ITEM_SKU),//***
-//                                    mConsumeFinishedListener);//****
-//                        } catch (IabHelper.IabAsyncInProgressException e) {
-//                            e.printStackTrace();
-//                        }
+                    try {
+                        mHelper.consumeAsync(inventory.getPurchase(ITEM_SKU),//***
+                                mConsumeFinishedListener);//****
+                    } catch (IabHelper.IabAsyncInProgressException e) {
+                        e.printStackTrace();
+                    }
 //                    }
                 }
             }
@@ -359,6 +398,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d("TG", "%%% Main Activity onDestroy ");
         //'Purchase in app'
         if (mContext != null && mHelper != null)
             try {
@@ -370,7 +410,20 @@ public class MainActivity extends AppCompatActivity
             }
         mHelper = null;
         //close DbHelper
-//        if (mDbHelper != null) mDbHelper.close();
+        if (mDbHelper != null) mDbHelper.close();
+        if (mDatabase != null) mDatabase.close();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.d("TG", "%%% Main Activity onPause ");
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d("TG", "%%% Main Activity onResume ");
     }
 
     /**
@@ -500,9 +553,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.drawer_home) {
+        if (id == R.id.drawer_home) {//action: 'home'
             clearBackStackOfFragments();
-        } else if (id == R.id.drawer_remove_ads) {
+        } else if (id == R.id.drawer_remove_ads) {//action: 'remove ads'
             isRemoveAdsPressed = true;
             if (!isPurchaseActive) consumeItem();
             if (!isDebugModeOn) {//if debug mode off - send analytics
@@ -510,7 +563,7 @@ public class MainActivity extends AppCompatActivity
                 new Analytics(mContext).sendAnalytics("myCookBook", "Main Activity",
                         "Attempt to buy", str);
             }
-        } else if (id == R.id.drawer_favorite) {
+        } else if (id == R.id.drawer_favorite) {//action: 'favourite'
             String tag = FragListRecipe.class.getSimpleName();
             tag += "Favorite";
             Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
@@ -521,17 +574,17 @@ public class MainActivity extends AppCompatActivity
                 new FragListRecipe().showListRecipe();
             }
 
-        } else if (id == R.id.drawer_export_db) {
+        } else if (id == R.id.drawer_export_db) {//action: 'save database'
             // check permissions before call to dialog
             checkPermissions(DIALOG_FILE_SAVE);
 
-        } else if (id == R.id.drawer_import_db) {
+        } else if (id == R.id.drawer_import_db) {//action: 'restore database'
             // check permissions before call to dialog
             checkPermissions(DIALOG_FILE_RESTORE);
 
 //        } else if (id == R.id.drawer_send_question) {
 //            sendMailToDevelopers();
-        } else if (id == R.id.drawer_settings) {
+        } else if (id == R.id.drawer_settings) {//action: 'settings'
             List<Fragment> fragments = mFragmentManager.getFragments();
             boolean isFragmentFound = false;
             for (Fragment fr : fragments) {

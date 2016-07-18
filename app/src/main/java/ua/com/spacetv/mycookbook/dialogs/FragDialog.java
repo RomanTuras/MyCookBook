@@ -63,7 +63,7 @@ public class FragDialog extends DialogFragment implements Constants,
     private ArrayList<Map<String, Object>> data = new ArrayList<>();
     private Map<String, Object> map;
     private Context mContext;
-    private SQLiteDatabase database;
+    private SQLiteDatabase mDatabase;
     //    private DataBaseHelper dataBaseHelper;
     private DbHelper mDbHelper;
     private AlertDialog.Builder adb;
@@ -88,7 +88,9 @@ public class FragDialog extends DialogFragment implements Constants,
         this.mContext = getContext();
 //        dataBaseHelper = new DataBaseHelper(mContext);
         mDbHelper = MainActivity.mDbHelper;
-        database = mDbHelper.getWritableDatabase();
+//        mDatabase = mDbHelper.getWritableDatabase();
+        mDatabase = MainActivity.mDatabase;
+
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Holo_Light_Dialog);
     }
 
@@ -276,7 +278,7 @@ public class FragDialog extends DialogFragment implements Constants,
     }
 
     private void categoryInList() {
-        Cursor cursor = database.query(TABLE_TOP_CATEGORY, null, null, null, null, null,
+        Cursor cursor = mDatabase.query(TABLE_TOP_CATEGORY, null, null, null, null, null,
                 "category", null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -304,7 +306,7 @@ public class FragDialog extends DialogFragment implements Constants,
     private void subCategoryInList(int idParent) {
         String selectQuery = "SELECT * FROM " + TABLE_SUB_CATEGORY +
                 " WHERE parent_id=" + idParent + " ORDER BY name";
-        Cursor cursor = database.rawQuery(selectQuery, null);
+        Cursor cursor = mDatabase.rawQuery(selectQuery, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
@@ -374,7 +376,7 @@ public class FragDialog extends DialogFragment implements Constants,
     public void onDismiss(DialogInterface unused) {
         super.onDismiss(unused);
 //        dataBaseHelper.close();
-        database.close();
+//        mDatabase.close();
     }
 
     @Override

@@ -17,6 +17,7 @@
 package ua.com.spacetv.mycookbook.google_services;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -61,6 +62,12 @@ public class Ads extends AdListener implements Constants {
         if (interstitialAd != null && interstitialAd.isLoaded()) {
             this.isAdLoaded = true;
         }
+    }
+
+    @Override
+    public void onAdFailedToLoad(int errorCode) {
+        Log.d("TG", "ADS not loaded errorCode=" + errorCode);
+//        super.onAdFailedToLoad(errorCode);
     }
 
     public InterstitialAd getInterstitialAd(){
