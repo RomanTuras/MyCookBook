@@ -16,10 +16,14 @@
 
 package ua.com.spacetv.mycookbook.fragments;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -30,6 +34,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
@@ -38,16 +43,21 @@ import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.tools.Preferences;
+import ua.com.spacetv.mycookbook.tools.RestoreDatabaseRecipes;
+import ua.com.spacetv.mycookbook.tools.SaveDatabaseRecipes;
+import ua.com.spacetv.mycookbook.tools.Utilities;
 
 /**
  * Settings
  * - selecting color theme
  */
-public class FragSettings extends Fragment implements Constants, AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener {
+public class FragSettings extends Fragment implements Constants, AdapterView.OnItemSelectedListener,
+        CompoundButton.OnCheckedChangeListener, ActivityCompat.OnRequestPermissionsResultCallback {
+    private static final int PERMISSION_REQUEST_CODE = 2;
     private Spinner mSpinnerThemes;
     private Context mContext;
+    private static int mAction;
     private boolean isBackgroundWhite; //key is background white
-    private CheckBox mCheckBox;
     private int mColorBackground;
 
     @Override
@@ -66,15 +76,130 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
         mSpinnerThemes.setSelection(numberOfTheme);
 
         mSpinnerThemes.setOnItemSelectedListener(this);
-        mCheckBox = (CheckBox) view.findViewById(R.id.check_white_background);
-        mCheckBox.setOnCheckedChangeListener(this);
+        CheckBox checkBox = (CheckBox) view.findViewById(R.id.check_white_background);
+        checkBox.setOnCheckedChangeListener(this);
         isBackgroundWhite = Preferences.getSettingsFromPreferences(mContext, IS_BACKGROUND_WHITE, 0);
-        mCheckBox.setChecked(isBackgroundWhite);
+        checkBox.setChecked(isBackgroundWhite);
 
         //getting settings of background
         isBackgroundWhite = Preferences.getSettingsFromPreferences(mContext, IS_BACKGROUND_WHITE, 0);
 
+        initButtons(view);
+
         return view;
+    }
+
+    /**
+     * initialization of buttons, setting and handling on click listeners
+     * @param view - parent layout
+     */
+    private void initButtons(View view) {
+        Button btnSaveRecipes, btnRestoreRecipes;
+        btnSaveRecipes = (Button) view.findViewById(R.id.button_export);
+        btnRestoreRecipes = (Button) view.findViewById(R.id.button_import);
+        btnSaveRecipes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // check permissions before call to save dialog
+                checkPermissions(DIALOG_FILE_SAVE);
+            }
+        });
+        btnRestoreRecipes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // check permissions before call to restore dialog
+                checkPermissions(DIALOG_FILE_RESTORE);
+            }
+        });
+    }
+
+    /**
+     * Checks the permissions for android 6
+     * And shows the proper screen if there's no permissions
+     *
+     * @param action - what action will be called after request permissions
+     */
+    public void checkPermissions(int action) {
+        //mAction - save selected type of dialog witch will
+        // be called after permission is granted
+        mAction = action;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                //Asks user to add the permission
+                requestMultiplePermissions();
+            } else {
+                //permissions granted
+                callSaveRestoreDialog(action);
+            }
+        } else {
+            // VERSION < M
+            callSaveRestoreDialog(action);
+        }
+    }
+
+    /**
+     * Calling dialog to save or restore mDatabase of recipes, depends of selected mode
+     *
+     * @param mode - DIALOG_FILE_SAVE / DIALOG_FILE_RESTORE
+     */
+    private void callSaveRestoreDialog(int mode) {
+        switch (mode) {
+            case DIALOG_FILE_SAVE:
+                SaveDatabaseRecipes.dialogSaveDatabase(getActivity());
+                break;
+            case DIALOG_FILE_RESTORE:
+                RestoreDatabaseRecipes.dialogRestoreDatabase(getActivity());
+                break;
+        }
+    }
+
+    /**
+     * Request permissions
+     */
+    private void requestMultiplePermissions() {
+        requestPermissions(
+                new String[]{
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.CAMERA
+                },
+                PERMISSION_REQUEST_CODE);
+    }
+
+    /**
+     * Invokes when user selected the permissions
+     * This is format for use from fragment
+     *
+     * @param requestCode PERMISSION_REQUEST_CODE
+     * @param permissions array of list permissions
+     * @param grantResults grant result
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||
+                    grantResults[1] != PackageManager.PERMISSION_GRANTED ||
+                    grantResults[2] != PackageManager.PERMISSION_GRANTED) {
+                Utilities.showOkDialog(getActivity(),
+                        getResources().getString(R.string.permissions_error),
+                        new Utilities.IYesNoCallback() {
+                            @Override
+                            public void onYes() {
+                            }
+                        });
+            } else {
+                callSaveRestoreDialog(mAction);
+            }
+        }
     }
 
 
@@ -112,10 +237,11 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
 
     /**
      * Application of the chosen theme on the fly
-     * @param parent
-     * @param view
-     * @param position
-     * @param id
+     *
+     * @param parent   parent
+     * @param view     view
+     * @param position position
+     * @param id       id
      */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -261,6 +387,7 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
             } else MainActivity.mFrameLayout.setBackgroundColor(mColorBackground);
     }
 
+
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
@@ -269,8 +396,9 @@ public class FragSettings extends Fragment implements Constants, AdapterView.OnI
     /**
      * Handling checkbox, to control of background color
      * If checked - leave background a white, else apply selected theme
-     * @param buttonView
-     * @param isChecked
+     *
+     * @param buttonView check box
+     * @param isChecked  boolean flag
      */
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

@@ -16,22 +16,16 @@
 
 package ua.com.spacetv.mycookbook;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -59,7 +53,6 @@ import java.util.List;
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSettings;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
-import ua.com.spacetv.mycookbook.fragments.FragTextRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
 import ua.com.spacetv.mycookbook.google_services.Ads;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
@@ -69,9 +62,6 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
 import ua.com.spacetv.mycookbook.interfaces.LicenseKey;
 import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.Preferences;
-import ua.com.spacetv.mycookbook.tools.RestoreDatabaseRecipes;
-import ua.com.spacetv.mycookbook.tools.SaveDatabaseRecipes;
-import ua.com.spacetv.mycookbook.tools.Utilities;
 import ua.com.spacetv.mycookbook.util.IabHelper;
 import ua.com.spacetv.mycookbook.util.IabResult;
 import ua.com.spacetv.mycookbook.util.Inventory;
@@ -86,16 +76,15 @@ public class MainActivity extends AppCompatActivity
     private static FragmentHelper mFragmentHelper;
     public static Context mContext;
     private static FragmentManager mFragmentManager;
-    private static FloatingActionButton fabAddTopCategory;
-    private static FloatingActionButton fabAddRecipeListRecipe;
-    private static FloatingActionMenu fabSubCategory;
+    public static FloatingActionButton fabAddTopCategory;
+    public static FloatingActionButton fabAddRecipeListRecipe;
+    public static FloatingActionMenu fabSubCategory;
     private static android.support.v7.app.ActionBar actionBar;
     public static DbHelper mDbHelper;
     public static SQLiteDatabase mDatabase;
-    private static int mAction;
     //**** Purchase in app
     private static IabHelper mHelper;
-    public static boolean isPurchaseActive = false;//key to purchase
+    public static boolean isPurchaseOwned = false;//key to purchase
     private boolean isRemoveAdsPressed = false;//this key showing is button "Remove ads" is pressed
     boolean isClearPurchase = false; //test, remove it
     public static Toolbar mToolbar;
@@ -139,8 +128,8 @@ public class MainActivity extends AppCompatActivity
 
         //Purchase in app section
         mHelper = new IabHelper(this, LICENSE_KEY);
-        isPurchaseActive = Preferences.getSettingsFromPreferences(mContext, IS_PURCHASE_OWNED, 0);
-        if (!isPurchaseActive) {
+        isPurchaseOwned = Preferences.getSettingsFromPreferences(mContext, IS_PURCHASE_OWNED, 0);
+        if (!isPurchaseOwned) {
             setupBillingInApp();
         } else {
             setupBillingInApp();
@@ -173,14 +162,11 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerOpened(View drawerView) {
-                if (FragTextRecipe.mScheduledTimeTimer != null) {
-                    FragTextRecipe.mScheduledTimeTimer.cancel();
-                }
                 //Header od drawer layout, find him only when it is open!!!
-//                if(mHeaderNavigationDrawerLayout == null) {
-                mHeaderNavigationDrawerLayout =
-                        (LinearLayout) findViewById(R.id.drawer_navigation_header);
-//                }
+                if (mHeaderNavigationDrawerLayout == null) {
+                    mHeaderNavigationDrawerLayout =
+                            (LinearLayout) findViewById(R.id.drawer_navigation_header);
+                }
             }
 
             @Override
@@ -315,13 +301,13 @@ public class MainActivity extends AppCompatActivity
                 if (!isRemoveAdsPressed) {
                     if (inventory.getPurchase(ITEM_SKU) != null) {
                         if (inventory.getPurchase(ITEM_SKU).getSku().equals(ITEM_SKU)) {
-                            isPurchaseActive = true; //purchase is owned
+                            isPurchaseOwned = true; //purchase is owned
                             Log.d("TG", "Purchase already is owned, save state to preference");
                         } else {
                             Log.d("TG", "Purchase still NOT owned, save state to preference");
-                            isPurchaseActive = false; //purchase is not owned
+                            isPurchaseOwned = false; //purchase is not owned
                         }
-                        Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseActive);
+                        Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseOwned);
                     }
                 } else { //'Remove ads' button pressed
 //                    if(!isClearPurchase) {
@@ -352,8 +338,8 @@ public class MainActivity extends AppCompatActivity
             new IabHelper.OnConsumeFinishedListener() {
                 public void onConsumeFinished(Purchase purchase, IabResult result) {
                     if (result.isSuccess()) {
-                        isPurchaseActive = false;
-                        Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseActive);
+                        isPurchaseOwned = false;
+                        Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseOwned);
                         Log.d("TG", "Purchase is canceled! ");
                     } else {
                         Log.d("TG", "Purchase is NOT canceled! handle error ");
@@ -372,8 +358,8 @@ public class MainActivity extends AppCompatActivity
                 // Handle error
                 return;
             } else if (purchase.getSku().equals(ITEM_SKU)) {
-                isPurchaseActive = true;
-                Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseActive);
+                isPurchaseOwned = true;
+                Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseOwned);
                 Log.d("TG", "Purchase is owned! ");
             }
         }
@@ -415,13 +401,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         Log.d("TG", "%%% Main Activity onPause ");
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         Log.d("TG", "%%% Main Activity onResume ");
     }
@@ -557,9 +543,9 @@ public class MainActivity extends AppCompatActivity
             clearBackStackOfFragments();
         } else if (id == R.id.drawer_remove_ads) {//action: 'remove ads'
             isRemoveAdsPressed = true;
-            if (!isPurchaseActive) consumeItem();
+            if (!isPurchaseOwned) consumeItem();
             if (!isDebugModeOn) {//if debug mode off - send analytics
-                String str = "isPurchaseActive = " + isPurchaseActive;
+                String str = "isPurchaseOwned = " + isPurchaseOwned;
                 new Analytics(mContext).sendAnalytics("myCookBook", "Main Activity",
                         "Attempt to buy", str);
             }
@@ -573,17 +559,8 @@ public class MainActivity extends AppCompatActivity
                 FragListRecipe.setParams(0, MODE_FAVORITE_RECIPE, null);
                 new FragListRecipe().showListRecipe();
             }
-
-        } else if (id == R.id.drawer_export_db) {//action: 'save database'
-            // check permissions before call to dialog
-            checkPermissions(DIALOG_FILE_SAVE);
-
-        } else if (id == R.id.drawer_import_db) {//action: 'restore database'
-            // check permissions before call to dialog
-            checkPermissions(DIALOG_FILE_RESTORE);
-
-//        } else if (id == R.id.drawer_send_question) {
-//            sendMailToDevelopers();
+        } else if (id == R.id.drawer_send_question) {
+            sendMailToDevelopers();
         } else if (id == R.id.drawer_settings) {//action: 'settings'
             List<Fragment> fragments = mFragmentManager.getFragments();
             boolean isFragmentFound = false;
@@ -598,67 +575,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    /**
-     * Checks the permissions for android 6
-     * And shows the proper screen if there's no permissions
-     *
-     * @param action - what action will be called after request permissions
-     */
-    private void checkPermissions(int action) {
-        //mAction - save selected type of dialog witch will
-        // be called after permission is granted
-        mAction = action;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
-                //Asks user to add the permission
-                requestMultiplePermissions();
-            } else {
-                //permissions granted
-                callSaveRestoreDialog(action);
-            }
-        } else {
-            // VERSION < M
-            callSaveRestoreDialog(action);
-        }
-    }
-
-    /**
-     * Request permissions
-     */
-    private void requestMultiplePermissions() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.CAMERA
-                },
-                PERMISSION_REQUEST_CODE);
-    }
-
-    /**
-     * Calling dialog to save or restore mDatabase of recipes, depends of selected mode
-     *
-     * @param mode - DIALOG_FILE_SAVE / DIALOG_FILE_RESTORE
-     */
-    private void callSaveRestoreDialog(int mode) {
-        switch (mode) {
-            case DIALOG_FILE_SAVE:
-                SaveDatabaseRecipes.dialogSaveDatabase(this);
-                break;
-            case DIALOG_FILE_RESTORE:
-                RestoreDatabaseRecipes.dialogRestoreDatabase(this);
-                break;
-        }
     }
 
     private void sendMailToDevelopers() {
@@ -763,38 +679,6 @@ public class MainActivity extends AppCompatActivity
     private void makeSnackbar(String text) {
         Snackbar.make(fabSubCategory, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
     }
-
-    /**
-     * Invokes when user selected the permissions
-     * This is format for use from activity
-     * <p/>
-     * mAction - type of mode: save (DIALOG_FILE_SAVE) or
-     * restore (DIALOG_FILE_RESTORE) mDatabase of recipes
-     *
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||
-                    grantResults[1] != PackageManager.PERMISSION_GRANTED ||
-                    grantResults[2] != PackageManager.PERMISSION_GRANTED) {
-                Utilities.showOkDialog(this,
-                        getResources().getString(R.string.permissions_error),
-                        new Utilities.IYesNoCallback() {
-                            @Override
-                            public void onYes() {
-                            }
-                        });
-            } else {
-                callSaveRestoreDialog(mAction);
-            }
-        }
-    }
-
 
     @Override
     public void onIabPurchaseFinished(IabResult result, Purchase info) {

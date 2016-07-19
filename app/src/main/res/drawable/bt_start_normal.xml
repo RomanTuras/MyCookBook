@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle" >
     <corners android:radius="12px" />
-    <solid android:color="@color/colorLightDarkWhite" />
+    <solid android:color="@color/btnSettingsBackground" />
     <stroke
        android:width="3px"
-       android:color="@color/colorDarkGray" />
+       android:color="@color/btnSettingsStroke" />
 </shape>

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">My recipes</string>
 
-    <!-- Navigation Draver -->
+    <!-- Navigation Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -93,8 +93,8 @@
     <string name="drawer_search">Search by content</string>
     <string name="drawer_export_db">Save</string>
     <string name="drawer_import_db">Restore</string>
-    <string name="drawer_backup_group">Backup</string>
-    <string name="drawer_callback">To developers</string>
+    <string name="drawer_backup_group">Backup of recipes into SD card</string>
+    <string name="drawer_feedback">Feedback</string>
     <string name="drawer_send_question">Send question</string>
 
     <string name="email">mailto:trd.developer@gmail.com</string>

@@ -8,6 +8,10 @@
     <color name="colorDarkGray">#656565</color>
     <color name="colorBlack">#000000</color>
 
+    <!--Colors for buttons from settings layout-->
+    <color name="btnSettingsBackground">#d7d7d7</color>
+    <color name="btnSettingsStroke">#656565</color>
+
     <!--Colors for themes-->
     <!--Indigo theme (default) -->
     <color name="colorPrimary">#3F51B5</color>

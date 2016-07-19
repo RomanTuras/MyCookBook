@@ -4,6 +4,6 @@
     <solid android:color="@color/colorDarkWhite" />
     <stroke
        android:width="3px"
-       android:color="@color/colorDarkGray"
+       android:color="@color/btnSettingsStroke"
     />
 </shape>

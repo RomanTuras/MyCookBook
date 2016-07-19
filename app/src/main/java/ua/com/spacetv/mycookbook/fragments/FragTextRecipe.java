@@ -19,14 +19,10 @@ package ua.com.spacetv.mycookbook.fragments;
 import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -39,10 +35,10 @@ import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
@@ -59,17 +55,11 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.google_services.Analytics;
-import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.helpers.ImagePickHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
-import ua.com.spacetv.mycookbook.interfaces.OnFragmentEventsListener;
 import ua.com.spacetv.mycookbook.tools.Utilities;
 
 /**
@@ -81,17 +71,10 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     private static final int PERMISSION_REQUEST_CODE = 2;
     private static Context mContext;
-    private static FragmentManager fragmentManager;
-    private static OnFragmentEventsListener onFragmentEventsListener;
-//    public static DataBaseHelper dataBaseHelper;
-    private static DbHelper mDbHelper;
     public static SQLiteDatabase mDatabase;
     private ContentValues mContentValues;
-//    private static Ads mAds;
     private static View view;
     private EditText mEditTitleRecipe, mEditTextRecipe;
-//    private TextView textTextRecipe;
-    private static Intent mChooseImageIntent;
     private static ImageView imageView;
     private static int idReceivedFolderItem = 0; // id of folder where was or will TEXT of RECIPE
     private static int idRecipe = 0; // id Received (mode REVIEW) or Just Created recipe (mode NEW)
@@ -105,20 +88,13 @@ public class FragTextRecipe extends Fragment implements Constants,
     private String titleRecipeFromDatabase = null;
     private String textRecipeFromDatabase = null;
     private static String databaseImagePath;
-    private static Fragment mFragmentTextRecipe;
-    public static Timer mScheduledTimeTimer;
-    private static Activity mActivity;
-//    private Ads mAds;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         FragTextRecipe.mContext = context;
-//        FragTextRecipe.dataBaseHelper = new DataBaseHelper(context);
-        mDbHelper = MainActivity.mDbHelper;
         mContentValues = new ContentValues();
-        mFragmentTextRecipe = new FragTextRecipe();
-        mActivity = getActivity();
+
         setRetainInstance(true);
 
         Bundle bundle = this.getArguments();
@@ -131,31 +107,17 @@ public class FragTextRecipe extends Fragment implements Constants,
         }
         selectedImagePath = null;
         databaseImagePath = null;
-        onFragmentEventsListener = (OnFragmentEventsListener) getActivity();
         Log.d("TG", "** FragTextRecipe onCreate **");
     }
-
-//    private void loadAds() {
-//        if (mAds.getInterstitialAd() == null) mAds.initAds(); // init and preload Ads
-//    }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle saveInstanceState) {
         view = inflater.inflate(R.layout.frag_text_recipe, null);
         mEditTitleRecipe = (EditText) view.findViewById(R.id.editTitleRecipe);
         mEditTextRecipe = (EditText) view.findViewById(R.id.editTextRecipe);
-//        textTextRecipe = (TextView) view.findViewById(R.id.textTextRecipe);
         imageView = (ImageView) view.findViewById(R.id.imageRecipe);
-
         getDisplayMetrics();
-
-//        mAds = new Ads(mContext);
-
-//        mDatabase = mDbHelper.getWritableDatabase();
         mDatabase = MainActivity.mDatabase;
-
-//        mDatabase = dataBaseHelper.getWritableDatabase();
-        fragmentManager = getFragmentManager();
 
         if (startupMode == MODE_EDIT_RECIPE) modeEdit();
         else if (startupMode == MODE_REVIEW_RECIPE) modeReview();
@@ -179,9 +141,10 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     /**
      * Hiding software keyboard
+     *
      * @param v - View
      */
-    private void hideKeyboard(View v){
+    private void hideKeyboard(View v) {
         InputMethodManager imm = (InputMethodManager) getActivity()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -189,7 +152,6 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     private void modeNewRecipe() {
         Log.d("TG", "modeNewRecipe *** ");
-        if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
         mEditTitleRecipe.setFocusableInTouchMode(true);
         mEditTitleRecipe.setFocusable(true);
         mEditTitleRecipe.requestFocus();
@@ -200,7 +162,6 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     private void modeEdit() {
         Log.d("TG", "modeEdit *** ");
-        if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
         mEditTitleRecipe.setFocusableInTouchMode(true);
         mEditTitleRecipe.setFocusable(true);
         mEditTextRecipe.setFocusableInTouchMode(true);
@@ -213,12 +174,6 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     private void modeReview() {
         new Analytics(mContext).sendAnalytics("myCookBook", "Text Category", "Review recipe", "nop");
-        //If the service is not purchased - show mAds
-//        if (!MainActivity.isPurchaseActive) startScheduledTimeTimer();
-
-//        MainActivity.mAds = new Ads(mContext);
-//        if (MainActivity.mAds.getInterstitialAd() == null) MainActivity.mAds.initAds();
-
         Log.d("TG", "modeReview *** ");
         mEditTitleRecipe.setFocusableInTouchMode(false);
         mEditTitleRecipe.setFocusable(false);
@@ -241,7 +196,7 @@ public class FragTextRecipe extends Fragment implements Constants,
      * Set image into image viev
      * Usage Glide library
      *
-     * @param path
+     * @param path path to image file
      */
     private void setImage(String path) {
         Glide.with(mContext).load(path).asBitmap().fitCenter()
@@ -256,7 +211,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     /**
      * Set bitmap to image view
      *
-     * @param bitmap
+     * @param bitmap image of recipe
      */
     public void setBitmapToImageView(Bitmap bitmap) {
         bitmap = getRoundedCornerBitmap(bitmap, 30);
@@ -275,9 +230,9 @@ public class FragTextRecipe extends Fragment implements Constants,
     /**
      * Rounding corners on bitmap
      *
-     * @param bitmap
+     * @param bitmap image of recipe
      * @param pixels - radius
-     * @return
+     * @return processed bitmap
      */
     public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
@@ -288,12 +243,11 @@ public class FragTextRecipe extends Fragment implements Constants,
         final Paint paint = new Paint();
         final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
         final RectF rectF = new RectF(rect);
-        final float roundPx = pixels;
 
         paint.setAntiAlias(true);
         canvas.drawARGB(0, 0, 0, 0);
         paint.setColor(color);
-        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+        canvas.drawRoundRect(rectF, pixels, pixels, paint);
 
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
@@ -303,20 +257,20 @@ public class FragTextRecipe extends Fragment implements Constants,
 
     /**
      * Getting action from menu
-     *
+     * <p/>
      * action_save - if changes is it, hide keyboard and save recipe
      * action_edit - edit recipe
      * action_share - share current recipe
      * action_photo - pick image from camera or gallery
      *
-     * @param item
-     * @return
+     * @param item menu item
+     * @return boolean
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                if (isChangesFromRecipe()){
+                if (isChangesFromRecipe()) {
                     hideKeyboard(mEditTitleRecipe);
                     saveRecipe();
                 }
@@ -325,7 +279,6 @@ public class FragTextRecipe extends Fragment implements Constants,
                 modeEdit();
                 break;
             case R.id.action_share:
-                if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();// stop ads
                 shareRecipe();
                 break;
             case R.id.action_photo:
@@ -379,8 +332,8 @@ public class FragTextRecipe extends Fragment implements Constants,
     }
 
     public void getPickImageIntent() {
-        mChooseImageIntent = ImagePickHelper.getPickImageIntent(mContext);
-        startActivityForResult(mChooseImageIntent, CHOOSE_IMAGE);
+        Intent intent = ImagePickHelper.getPickImageIntent(mContext);
+        startActivityForResult(intent, CHOOSE_IMAGE);
     }
 
 
@@ -390,7 +343,6 @@ public class FragTextRecipe extends Fragment implements Constants,
         if (resultCode != Activity.RESULT_CANCELED) {
             switch (requestCode) {
                 case CHOOSE_IMAGE:
-                    Bitmap bitmap;
                     if (data != null) { // ** Gallery **
                         selectedImagePath = getDataColumn(data.getData());
                         setImage(selectedImagePath);
@@ -441,78 +393,11 @@ public class FragTextRecipe extends Fragment implements Constants,
             String text = mEditTextRecipe.getText().toString();
             Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
             emailIntent.setType("text/plain");
-//            emailIntent.setType("image/jpeg");
             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
             emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
-//            if (databaseImagePath != null && databaseImagePath != "") {
-//                Uri imageUri = Uri.parse("file://" + databaseImagePath);
-//                emailIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-//            }
             startActivity(Intent.createChooser(emailIntent, mContext
                     .getString(R.string.text_share_recipe)));
         }
-    }
-
-    public void shareRecipe(int j) {
-        Resources resources = getResources();
-        String title = mEditTitleRecipe.getText().toString();
-        String text = mEditTextRecipe.getText().toString();
-//
-        PackageManager pm = getActivity().getPackageManager();
-
-        Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
-//            emailIntent.setType("text/plain");
-        emailIntent.setType("image/jpeg");
-//        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Title1");
-//        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Text of the messages");
-
-        Uri imageUri = null;
-        if (databaseImagePath != null && databaseImagePath != "") {
-            imageUri = Uri.parse("file://" + databaseImagePath);
-        }
-//        emailIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-
-        Intent openInChooser = Intent.createChooser(emailIntent, resources.getString(R.string.text_share_recipe));
-        List<ResolveInfo> resInfo = pm.queryIntentActivities(emailIntent, PackageManager.MATCH_DEFAULT_ONLY);
-        Log.d("TG", "resInfo.size = " + resInfo.size());
-        List<LabeledIntent> intentList = new ArrayList<LabeledIntent>();
-        for (int i = 0; i < resInfo.size(); i++) {
-            // Extract the label, append it, and repackage it in a LabeledIntent
-            ResolveInfo ri = resInfo.get(i);
-
-            String packageName = ri.activityInfo.packageName;
-
-            if (packageName.toLowerCase().contains("com.viber.voip")) {
-                Log.d("TG", "packageName.contains = " + packageName.toString());
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(packageName, ri.activityInfo.name));
-                intent.putExtra(android.content.Intent.EXTRA_TEXT, text);
-                intent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
-                intent.setType("text/plain");
-                intentList.add(new LabeledIntent(intent, packageName, ri.loadLabel(pm), ri.icon));
-            } else if (packageName.toLowerCase().contains("com.whatsapp") ||
-                    packageName.contains("com.twitter.android") ||
-                    packageName.contains("com.facebook.lite") ||
-                    packageName.contains("com.facebook.katana") ||
-                    packageName.contains("com.google.android.apps.plus") ||
-                    packageName.contains("com.google.android.gm")) {
-                Log.d("TG", "packageName.contains others = " + packageName.toString());
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(packageName, ri.activityInfo.name));
-                intent.putExtra(android.content.Intent.EXTRA_TEXT, text);
-                intent.putExtra(android.content.Intent.EXTRA_SUBJECT, title);
-                intent.putExtra(android.content.Intent.EXTRA_STREAM, imageUri);
-                intent.setType("image/jpeg");
-                intentList.add(new LabeledIntent(intent, packageName, ri.loadLabel(pm), ri.icon));
-            }
-        }
-
-// convert intentList to array
-        LabeledIntent[] extraIntents = intentList.toArray(new LabeledIntent[intentList.size()]);
-        Log.d("TG", "intentList.size() = " + intentList.size());
-
-        openInChooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, extraIntents);
-        startActivity(openInChooser);
     }
 
     private void readRecipeFromDatabase() {
@@ -537,7 +422,7 @@ public class FragTextRecipe extends Fragment implements Constants,
                         subFolder_id = cursor.getInt(5);
                         databaseImagePath = cursor.getString(6);
                         Log.d("TG", "databaseImagePath = " + databaseImagePath);
-                        if (databaseImagePath != null && databaseImagePath != "") {
+                        if (databaseImagePath != null && !databaseImagePath.equals("")) {
                             setImage(databaseImagePath);
                         }
                     }
@@ -556,35 +441,33 @@ public class FragTextRecipe extends Fragment implements Constants,
         MainActivity.hideAllFloatButtons();
     }
 
-    @Override
-    public void onPause(){
-        super.onPause();
-        Log.d("TG", "%%% Text onPause ");
-        if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
-    }
-
+    /**
+     * Emergency save changes
+     */
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d("TG", "%%% Text onDetach ");
         if (startupMode == MODE_NEW_RECIPE | startupMode == MODE_EDIT_RECIPE) {
             if (isChangesFromRecipe()) saveRecipe();
         }
-//        mDatabase.close();
-//        dataBaseHelper.close();
-        if (mScheduledTimeTimer != null) mScheduledTimeTimer.cancel();
     }
 
+    /**
+     * Showing ads if Purchase is NOT owned
+     */
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
-        Log.d("TG", "%%% Text onDestroy ");
-        if (MainActivity.mAds.getInterstitialAd() != null) {
-                    MainActivity.mAds.showAd();
-                }
+        if (!MainActivity.isPurchaseOwned) {//if purchase is NOT owned - showing ads
+            if (MainActivity.mAds.getInterstitialAd() != null) {
+                MainActivity.mAds.showAd();
+            }
+        }
     }
 
-    /* If text or image was changed -> save recipe in mDatabase*/
+    /**
+     * Checking, if text or image was changed -> save recipe in mDatabase
+     */
     private boolean isChangesFromRecipe() {
         if (selectedImagePath != null && !selectedImagePath.equals(databaseImagePath)) {
             databaseImagePath = selectedImagePath;
@@ -600,7 +483,6 @@ public class FragTextRecipe extends Fragment implements Constants,
                 return false;
             }
         } else if (mEditTitleRecipe.getText().length() == 0 & mEditTextRecipe.getText().length() == 0) {
-            Log.d("TG", "editText's == 0");
             makeSnackbar(mContext.getString(R.string.nothing_was_entered));
             return false;
         }
@@ -613,7 +495,8 @@ public class FragTextRecipe extends Fragment implements Constants,
         String textRecipe = getString(R.string.text_recipe_no_text);
         if (mEditTitleRecipe.getText().length() > 0)
             titleRecipe = mEditTitleRecipe.getText().toString();
-        if (mEditTextRecipe.getText().length() > 0) textRecipe = mEditTextRecipe.getText().toString();
+        if (mEditTextRecipe.getText().length() > 0)
+            textRecipe = mEditTextRecipe.getText().toString();
 
         mContentValues.put("recipe_title", titleRecipe);
         mContentValues.put("recipe", textRecipe);
@@ -647,7 +530,7 @@ public class FragTextRecipe extends Fragment implements Constants,
     private void makeSnackbar(String text) {
         try {
             Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("Action", null).show();
-        } catch (NullPointerException npe) {
+        } catch (NullPointerException ignored) {
         }
     }
 
@@ -655,13 +538,13 @@ public class FragTextRecipe extends Fragment implements Constants,
      * Invokes when user selected the permissions
      * This is format for use from fragment
      *
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
+     * @param requestCode PERMISSION_REQUEST_CODE
+     * @param permissions array of list permissions
+     * @param grantResults grant result
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
             if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 3) {
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||

@@ -49,9 +49,55 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:layout_marginTop="@dimen/vertic_margin_setup_screen"
                 android:layout_gravity="left"
-                android:clickable="true" />
+                android:clickable="true"
+                android:layout_marginBottom="@dimen/vertic_margin_setup_screen" />
 
             <include layout="@xml/divider_gray" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/drawer_backup_group"
+                android:textColor="@color/colorBlack"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textStyle="bold"
+                android:layout_marginBottom="@dimen/vertic_margin_setup_screen" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="@dimen/vertic_margin_setup_screen" >
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/drawer_export_db"
+                    android:id="@+id/button_export"
+                    android:background="@drawable/bt_start"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="@dimen/vertic_margin_setup_screen"
+                    android:layout_marginLeft="@dimen/horisont_margin_setup_screen"
+                    android:layout_marginRight="@dimen/horisont_margin_setup_screen" />
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bt_start"
+                    android:text="@string/drawer_import_db"
+                    android:id="@+id/button_import"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="@dimen/horisont_margin_setup_screen"
+                    android:layout_marginRight="@dimen/horisont_margin_setup_screen" />
+
+            </LinearLayout>
+
+            <include layout="@xml/divider_gray" />
+
 
         </LinearLayout>
     </ScrollView>

@@ -88,8 +88,8 @@
     <string name="drawer_search">Пошук за складом</string>
     <string name="drawer_export_db">Зберегти</string>
     <string name="drawer_import_db">Завантажити</string>
-    <string name="drawer_backup_group">Резервне копіювання</string>
-    <string name="drawer_callback">Розробникам</string>
+    <string name="drawer_backup_group">Резервне копіювання на SD картку</string>
+    <string name="drawer_feedback">Розробникам</string>
     <string name="drawer_send_question">Відправити питання</string>
 
     <string name="email">mailto:salden.com@gmail.com</string>
