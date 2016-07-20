@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity
         OnFragmentEventsListener, View.OnClickListener, LicenseKey,
         IabHelper.OnIabPurchaseFinishedListener {
 
-    private static final int PERMISSION_REQUEST_CODE = 2;
+    private static final String ITEM_SKU = isDebugModeOn ? ITEM_SKU_DEBUG : ITEM_SKU_PRODUCTION;
     private static FragmentHelper mFragmentHelper;
     public static Context mContext;
     private static FragmentManager mFragmentManager;
@@ -86,7 +86,6 @@ public class MainActivity extends AppCompatActivity
     private static IabHelper mHelper;
     public static boolean isPurchaseOwned = false;//key to purchase
     private boolean isRemoveAdsPressed = false;//this key showing is button "Remove ads" is pressed
-    boolean isClearPurchase = false; //test, remove it
     public static Toolbar mToolbar;
     public static FrameLayout mFrameLayout;
     private boolean mIsBackgroundWhite;
@@ -131,8 +130,6 @@ public class MainActivity extends AppCompatActivity
         isPurchaseOwned = Preferences.getSettingsFromPreferences(mContext, IS_PURCHASE_OWNED, 0);
         if (!isPurchaseOwned) {
             setupBillingInApp();
-        } else {
-            setupBillingInApp();
         }
         Log.d("TG", "%%% Main Activity onCreate ");
     }
@@ -149,7 +146,7 @@ public class MainActivity extends AppCompatActivity
      * Init DrawerLayout and set listener
      * If Drawer is open - check and kill timer (witch showing ads banner)
      *
-     * @param toolbar
+     * @param toolbar - Toolbar
      */
     private void initDrawerLayout(Toolbar toolbar) {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -157,9 +154,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
-        drawer.setDrawerListener(new DrawerLayout.DrawerListener() {
+        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerOpened(View drawerView) {
                 //Header od drawer layout, find him only when it is open!!!
@@ -293,6 +290,7 @@ public class MainActivity extends AppCompatActivity
             = new IabHelper.QueryInventoryFinishedListener() {
         public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
             if (result.isFailure()) {
+                Log.d("TG", "QueryInventoryFinishedListener - result.isFailure");
                 // Handle failure
             } else {
 
@@ -301,7 +299,7 @@ public class MainActivity extends AppCompatActivity
                 if (!isRemoveAdsPressed) {
                     if (inventory.getPurchase(ITEM_SKU) != null) {
                         if (inventory.getPurchase(ITEM_SKU).getSku().equals(ITEM_SKU)) {
-                            isPurchaseOwned = true; //purchase is owned
+                            isPurchaseOwned = true; //purchase is already owned
                             Log.d("TG", "Purchase already is owned, save state to preference");
                         } else {
                             Log.d("TG", "Purchase still NOT owned, save state to preference");
@@ -322,12 +320,14 @@ public class MainActivity extends AppCompatActivity
                     }
 //                    }else {
 //                        isClearPurchase = false;
-                    try {
-                        mHelper.consumeAsync(inventory.getPurchase(ITEM_SKU),//***
-                                mConsumeFinishedListener);//****
-                    } catch (IabHelper.IabAsyncInProgressException e) {
-                        e.printStackTrace();
-                    }
+
+                    //uncomment this try-block for reset purchase
+//                    try {
+//                        mHelper.consumeAsync(inventory.getPurchase(ITEM_SKU),//***
+//                                mConsumeFinishedListener);//****
+//                    } catch (IabHelper.IabAsyncInProgressException e) {
+//                        e.printStackTrace();
+//                    }
 //                    }
                 }
             }
@@ -339,7 +339,7 @@ public class MainActivity extends AppCompatActivity
                 public void onConsumeFinished(Purchase purchase, IabResult result) {
                     if (result.isSuccess()) {
                         isPurchaseOwned = false;
-                        Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseOwned);
+                        Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, false);
                         Log.d("TG", "Purchase is canceled! ");
                     } else {
                         Log.d("TG", "Purchase is NOT canceled! handle error ");
@@ -356,10 +356,13 @@ public class MainActivity extends AppCompatActivity
         public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
             if (result.isFailure()) {
                 // Handle error
-                return;
+                new Analytics(mContext).sendAnalytics("myCookBook", "Main Activity",
+                        "Purchasing error!", null);
             } else if (purchase.getSku().equals(ITEM_SKU)) {
                 isPurchaseOwned = true;
-                Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, isPurchaseOwned);
+                Preferences.setSettingsToPreferences(mContext, IS_PURCHASE_OWNED, true);
+                new Analytics(mContext).sendAnalytics("myCookBook", "Main Activity",
+                        "Purchase is owned!", null);
                 Log.d("TG", "Purchase is owned! ");
             }
         }
@@ -370,9 +373,9 @@ public class MainActivity extends AppCompatActivity
      * Getting result
      * Check (mHelper != null) <-- fixed NullPointer from some device
      *
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     * @param requestCode - requestCode
+     * @param resultCode - resultCode
+     * @param data - data
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -389,9 +392,7 @@ public class MainActivity extends AppCompatActivity
         if (mContext != null && mHelper != null)
             try {
                 mHelper.dispose();
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (IabHelper.IabAsyncInProgressException e) {
+            } catch (IllegalArgumentException | IabHelper.IabAsyncInProgressException e) {
                 e.printStackTrace();
             }
         mHelper = null;
@@ -415,11 +416,10 @@ public class MainActivity extends AppCompatActivity
     /**
      * Returned number of all fragments in the back stack
      *
-     * @return
+     * @return - the number of fragments contained in the back stack
      */
     private int countBackStackFragment() {
-        int i = mFragmentManager.getBackStackEntryCount();
-        return i;
+        return mFragmentManager.getBackStackEntryCount();
     }
 
     /**
@@ -525,13 +525,15 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Processed search item selected
+     * @param item - search item
+     * @return - if "action_search" preset return true, else return super.onOptionsItemSelected
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_search) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_search || super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -544,11 +546,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.drawer_remove_ads) {//action: 'remove ads'
             isRemoveAdsPressed = true;
             if (!isPurchaseOwned) consumeItem();
-            if (!isDebugModeOn) {//if debug mode off - send analytics
-                String str = "isPurchaseOwned = " + isPurchaseOwned;
-                new Analytics(mContext).sendAnalytics("myCookBook", "Main Activity",
-                        "Attempt to buy", str);
-            }
+
         } else if (id == R.id.drawer_favorite) {//action: 'favourite'
             String tag = FragListRecipe.class.getSimpleName();
             tag += "Favorite";
@@ -612,8 +610,7 @@ public class MainActivity extends AppCompatActivity
         boolean success;
         File workDatabase = mContext.getDatabasePath(FILENAME_WORKING_DB);
         File newFolder = new File(pathFolder);
-        if (!newFolder.exists()) success = newFolder.mkdirs();
-        else success = true;
+        success = newFolder.exists() || newFolder.mkdirs();
         if (success) {
             File backupDatabase = new File(pathFolder, BACKUP_FILENAME);
             if (!backupDatabase.exists()) {

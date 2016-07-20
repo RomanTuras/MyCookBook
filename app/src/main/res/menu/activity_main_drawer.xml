@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <group android:checkableBehavior="single">
+    <group android:checkableBehavior="single"
+        android:id="@+id/group_settings" >
         <item
             android:id="@+id/drawer_home"
             android:icon="@drawable/ic_home_black_24dp"
@@ -12,28 +12,22 @@
             android:icon="@drawable/ic_favorite_black_24dp"
             android:title="@string/drawer_favorite" />
     </group>
-
-    <item android:title="@string/drawer_additionally">
-        <menu>
-            <item
-                android:id="@+id/drawer_remove_ads"
-                android:icon="@drawable/ic_not_interested_black_24dp"
-                android:title="@string/drawer_remove_ads" />
-            <item
-                android:id="@+id/drawer_settings"
-                android:icon="@drawable/ic_settings_black_24dp"
-                android:title="@string/action_settings" />
-        </menu>
-    </item>
-
-    <item android:title="@string/drawer_feedback">
-        <menu>
-            <item
-                android:id="@+id/drawer_send_question"
-                android:icon="@drawable/ic_menu_send"
-                android:title="@string/drawer_send_question" />
-        </menu>
-    </item>
-
-
+    <group android:checkableBehavior="single"
+        android:id="@+id/group_settings1">
+        <item
+            android:id="@+id/drawer_remove_ads"
+            android:icon="@drawable/ic_not_interested_black_24dp"
+            android:title="@string/drawer_remove_ads" />
+        <item
+            android:id="@+id/drawer_settings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/action_settings" />
+    </group>
+    <group android:checkableBehavior="single"
+        android:id="@+id/group_settings3">
+        <item
+            android:id="@+id/drawer_send_question"
+            android:icon="@drawable/ic_menu_send"
+            android:title="@string/drawer_feedback" />
+    </group>
 </menu>
