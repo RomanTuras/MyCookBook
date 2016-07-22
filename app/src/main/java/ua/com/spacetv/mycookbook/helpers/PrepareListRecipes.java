@@ -36,7 +36,6 @@ import ua.com.spacetv.mycookbook.interfaces.Constants;
 public class PrepareListRecipes implements Constants {
     private static ArrayList<ListData> adapter;
     private SQLiteDatabase mDatabase;
-//    private DataBaseHelper dataBaseHelper;
     private DbHelper mDbHelper;
     private final static int KEY_FAVORITE = 1;
     private final static byte UPPER = 1;
@@ -48,7 +47,6 @@ public class PrepareListRecipes implements Constants {
      * To prepare a list of recipes that are in 'idParentFolder'
      */
     public PrepareListRecipes(Context context, int idParentFolder) {
-//        dataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
         mDatabase = mDbHelper.getWritableDatabase();
         adapter = new ArrayList<>();
@@ -59,9 +57,7 @@ public class PrepareListRecipes implements Constants {
      * To prepare a list of favorite recipes
      */
     public PrepareListRecipes(Context context) {
-//        dataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
-//        mDatabase = mDbHelper.getWritableDatabase();
         mDatabase = MainActivity.mDatabase;
 
         adapter = new ArrayList<>();
@@ -70,7 +66,6 @@ public class PrepareListRecipes implements Constants {
 
     /** To prepare a list of recipes depend of search request */
     public PrepareListRecipes(Context context, String searchRequest) {
-//        dataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
         mDatabase = mDbHelper.getWritableDatabase();
         adapter = new ArrayList<>();

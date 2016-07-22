@@ -4,11 +4,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import ua.com.spacetv.mycookbook.MainActivity;
 import ua.com.spacetv.mycookbook.R;
@@ -28,7 +31,7 @@ public class RestoreDatabaseRecipes implements Constants {
      * Checking if SD card is available - showing save dialog
      * Else - showing error dialog with one "cancel" button
      *
-     * @param context
+     * @param context - Context
      */
     public static void dialogRestoreDatabase(Context context) {
         isOkButtonShow = true;
@@ -36,9 +39,10 @@ public class RestoreDatabaseRecipes implements Constants {
         String title = context.getResources().getString(R.string.dlg_restore_file);
         String message;
         if (pathFolder != null) {//SD card mounted, folder found
-            if (checkFile() != null) {//file founded - restore available
+            String filename = checkFile();
+            if (filename != null) {//file founded - restore available
                 message = context.getResources().getString(R.string.dlg_file_found);
-                message += '\n' + checkFile();
+                message += '\n' + filename + '\n';
                 message += '\n' + context.getResources().getString(R.string.dlg_warning);
             } else {//file not found
                 isOkButtonShow = false;
@@ -59,12 +63,19 @@ public class RestoreDatabaseRecipes implements Constants {
      * @return date of last modified file if it exist, else return null
      */
     public static String checkFile() {
+        Locale locale = Locale.getDefault();
+        Log.d("TG", "Locale = " + locale.toString());
+
         String dateLastModeFile = null;
         File backupDatabase = new File(getPath(), BACKUP_FILENAME);
         if (backupDatabase.exists()) {
             Date lastModDate = new Date(backupDatabase.lastModified());
-            SimpleDateFormat sdf = new SimpleDateFormat("d.MM.yyyy hh:mm:ss");
+            DateFormat sdf = new SimpleDateFormat("d.MM.yyyy kk:mm:ss", locale);
             dateLastModeFile = sdf.format(lastModDate);
+
+            Log.d("TG","date - "+
+                    android.text.format.DateFormat.format("yyyy-MM-dd kk:mm:ss", lastModDate));
+
         }
         return dateLastModeFile;
     }
@@ -88,8 +99,8 @@ public class RestoreDatabaseRecipes implements Constants {
     /**
      * Showing Alert dialog
      *
-     * @param title
-     * @param message
+     * @param title - caption of dialog
+     * @param message - text of dialog
      * @param pathFolder - path to folder in to SD card
      */
     private static void showDialog(Context context, String title,

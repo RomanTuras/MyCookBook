@@ -95,6 +95,7 @@ public interface Constants {
     String FILENAME_WORKING_DB = "db_cook.db";
     String BACKUP_FILENAME = "cook.db";
     String FOLDER_NAME = "myCookBook";
+    String IMAGE_FOLDER_NAME = "myCookBook/Cook Images";
 
     /* Names of a Tables*/
     String TABLE_TOP_CATEGORY = "tableMain";

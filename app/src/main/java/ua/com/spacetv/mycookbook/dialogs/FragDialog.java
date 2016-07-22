@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
@@ -46,7 +47,6 @@ import ua.com.spacetv.mycookbook.R;
 import ua.com.spacetv.mycookbook.fragments.FragListRecipe;
 import ua.com.spacetv.mycookbook.fragments.FragSubCategory;
 import ua.com.spacetv.mycookbook.fragments.FragTopCategory;
-import ua.com.spacetv.mycookbook.helpers.DbHelper;
 import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
@@ -64,8 +64,6 @@ public class FragDialog extends DialogFragment implements Constants,
     private Map<String, Object> map;
     private Context mContext;
     private SQLiteDatabase mDatabase;
-    //    private DataBaseHelper dataBaseHelper;
-    private DbHelper mDbHelper;
     private AlertDialog.Builder adb;
     private TextView textView;
 
@@ -86,9 +84,6 @@ public class FragDialog extends DialogFragment implements Constants,
         this.idDialog = getArguments().getInt(ID_DIALOG);
         this.nameForAction = getArguments().getString(NAME_FOR_ACTION);
         this.mContext = getContext();
-//        dataBaseHelper = new DataBaseHelper(mContext);
-        mDbHelper = MainActivity.mDbHelper;
-//        mDatabase = mDbHelper.getWritableDatabase();
         mDatabase = MainActivity.mDatabase;
 
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Holo_Light_Dialog);
@@ -99,6 +94,7 @@ public class FragDialog extends DialogFragment implements Constants,
         super.onResume();
     }
 
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         initAllViewsInDialog();
         dialogForCategory();
@@ -119,7 +115,7 @@ public class FragDialog extends DialogFragment implements Constants,
                 input.setText(nameForAction);
                 adb.setView(input);
                 input.requestFocus();
-                showKeyboard(input);
+                showKeyboard();
                 break;
             case DIALOG_DEL_RECIPE_LISTRECIPE:
                 title = getResources().getString(R.string.dlg_confirm_del_recipe);
@@ -141,14 +137,14 @@ public class FragDialog extends DialogFragment implements Constants,
                 input.setHint(R.string.dlg_hint);
                 adb.setView(input);
                 input.requestFocus();
-                showKeyboard(input);
+                showKeyboard();
                 break;
             case DIALOG_REN_SUBCATEGORY:
                 title = getResources().getString(R.string.dlg_rename_category);
                 input.setText(nameForAction);
                 adb.setView(input);
                 input.requestFocus();
-                showKeyboard(input);
+                showKeyboard();
                 break;
             case DIALOG_DEL_SUBCATEGORY:
                 title = getResources().getString(R.string.dlg_confirm_delete);
@@ -161,7 +157,7 @@ public class FragDialog extends DialogFragment implements Constants,
                 input.setText(nameForAction);
                 adb.setView(input);
                 input.requestFocus();
-                showKeyboard(input);
+                showKeyboard();
                 break;
             case DIALOG_DEL_RECIPE_SUBCATEGORY:
                 title = getResources().getString(R.string.dlg_confirm_del_recipe);
@@ -182,14 +178,14 @@ public class FragDialog extends DialogFragment implements Constants,
                 input.setHint(R.string.dlg_hint);
                 adb.setView(input);
                 input.requestFocus();
-                showKeyboard(input);
+                showKeyboard();
                 break;
             case DIALOG_REN_CATEGORY:
                 title = getResources().getString(R.string.dlg_rename_category);
                 input.setText(nameForAction);
                 adb.setView(input);
                 input.requestFocus();
-                showKeyboard(input);
+                showKeyboard();
                 break;
             case DIALOG_DEL_CATEGORY:
                 title = getResources().getString(R.string.dlg_confirm_delete);
@@ -200,10 +196,8 @@ public class FragDialog extends DialogFragment implements Constants,
 
     /**
      * Showing software keyboard
-     *
-     * @param v - View
      */
-    private void showKeyboard(View v) {
+    private void showKeyboard() {
         InputMethodManager imm = (InputMethodManager) getActivity()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
@@ -318,6 +312,7 @@ public class FragDialog extends DialogFragment implements Constants,
                     data.add(map);
                 } while (cursor.moveToNext());
             }
+            cursor.close();
         }
     }
 

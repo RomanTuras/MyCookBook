@@ -30,30 +30,35 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import ua.com.spacetv.mycookbook.R;
+import ua.com.spacetv.mycookbook.interfaces.Constants;
 
 /**
  * Created by Roman Turas on 07/02/2016
  * It's creates options to pick images from different sources, like camera, gallery, photos e.t.c.
  */
 
-public class ImagePickHelper {
+public class ImagePickHelper implements Constants{
     private static final String TAG = "TG";
     private static final String JPEG_FILE_PREFIX = "cook";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
     private static String imagePath = null;
     private static File tempFile = null;
-    private static Context context;
+    private static Context mContext;
 
     public static Intent getPickImageIntent(Context context) {
         Intent chooserIntent = null;
-        ImagePickHelper.context = context;
+        ImagePickHelper.mContext = context;
 
         List<Intent> intentList = new ArrayList<>();
 
@@ -99,8 +104,9 @@ public class ImagePickHelper {
                     imageReturnedIntent.getData() == null ||
                     imageReturnedIntent.getData().equals(Uri.fromFile(tempFile)));
             if (isCamera) {     /** CAMERA **/
-                imagePath = tempFile.getPath();
+                imagePath = getNewPathToImage(tempFile.getPath(), tempFile.getName());
                 Log.d(TAG, "** CAMERA **, imagePath: " + imagePath);
+                Log.d(TAG, "** CAMERA **, tempFile: " + tempFile.getName());
                 return imagePath;
             } else {            /** ALBUM **/
                 imagePath = imageReturnedIntent.getData().getPath();
@@ -111,6 +117,68 @@ public class ImagePickHelper {
     }
 
     /**
+     * Moved file from default DCIM folder into myCookBook/images folder
+     * @param path - full path to image
+     * @param filename - image filename
+     * @return new path + filename
+     */
+    private static String getNewPathToImage(String path, String filename) {
+        boolean isFileCopied = false;
+        try {
+            isFileCopied = copyFileToImageFolder(path, filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if(isFileCopied){
+            deleteFile(path);
+            return getCookBookPath() + filename;
+        }else return null;
+    }
+
+    /**
+     * Copied file from default DCIM camera folder into myCookBook/images folder
+     *
+     * @param sourcePath - full path to source file
+     * @param filename - destination Filename
+     * @throws IOException
+     */
+    public static boolean copyFileToImageFolder(String sourcePath, String filename) throws IOException {
+        File src = new File(sourcePath);
+        if (!src.exists()) return false; //source file not found
+
+        File imageFolder = new File(getCookBookPath());
+        if(!imageFolder.exists()) imageFolder.mkdir();
+        File dst = new File(getCookBookPath() + filename);
+
+        Log.d("TG", "dst file is - " + dst.toString());
+
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
+        return dst.exists();
+    }
+
+    /**
+     * Deleting file from default DCIM folder
+     *
+     * @param filename - filename
+     */
+    private static void deleteFile(String filename) {
+        File file = new File(filename);
+        if (file.exists()) file.delete();
+    }
+
+
+    /**
      * Registered image in to gallery
      */
     public static void addImageToGallery(String filePath) {
@@ -118,7 +186,7 @@ public class ImagePickHelper {
         values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
         values.put(MediaStore.MediaColumns.DATA, filePath);
-        context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        mContext.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 
     /** Get the temporary file to obtain possible to save picture from camera
@@ -145,12 +213,28 @@ public class ImagePickHelper {
     private static File getPath() {
         String pathDcim = android.os.Environment.DIRECTORY_DCIM;
         String sdState = Environment.getExternalStorageState();
-        String path = null;
+        String path;
         if (sdState.equals(Environment.MEDIA_MOUNTED)) {
             path = Environment.getExternalStorageDirectory().getAbsolutePath();
             path += "/" + pathDcim + "/";
+            return new File(path);
         }
-        return new File(path);
+        return null;
+    }
+
+    /**
+     * Getting path to myCookBook storage directory
+     *
+     * @return path, if SD card available, else - null
+     */
+    public static String getCookBookPath() {
+        String sdState = Environment.getExternalStorageState();
+        String path = null;
+        if (sdState.equals(Environment.MEDIA_MOUNTED)) {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+            path += "/" + IMAGE_FOLDER_NAME + "/";
+        }
+        return path;
     }
 
     /** Created a File with unique filename

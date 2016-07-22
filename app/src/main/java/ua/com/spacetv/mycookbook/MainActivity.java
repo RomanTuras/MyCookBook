@@ -586,6 +586,11 @@ public class MainActivity extends AppCompatActivity
         startActivity(emailIntent);
     }
 
+    /**
+     * Restoring previously saved SQLite-file
+     * @param pathFolder - path to folder with database file
+     * @throws IOException
+     */
     public void restoreDatabase(String pathFolder) throws IOException {
         File workDatabase = mContext.getDatabasePath(FILENAME_WORKING_DB);
         File backupOfDatabase = new File(pathFolder, BACKUP_FILENAME);

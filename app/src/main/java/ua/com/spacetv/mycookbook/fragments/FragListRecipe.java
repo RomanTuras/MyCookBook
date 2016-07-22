@@ -62,7 +62,6 @@ public class FragListRecipe extends Fragment implements Constants,
     private static Context mContext;
     private static FragmentManager mFrManager;
     private static OnFragmentEventsListener onFragmentEventsListener;
-//    public static DataBaseHelper mDataBaseHelper;
     public static DbHelper mDbHelper;
     public static SQLiteDatabase mDatabase;
     private static ListView mListView;
@@ -82,7 +81,6 @@ public class FragListRecipe extends Fragment implements Constants,
     public void onAttach(Context context) {
         super.onAttach(context);
         FragListRecipe.mContext = context;
-//        mDataBaseHelper = new DataBaseHelper(context);
         mDbHelper = MainActivity.mDbHelper;
         mContentValues = new ContentValues();
         setRetainInstance(true);

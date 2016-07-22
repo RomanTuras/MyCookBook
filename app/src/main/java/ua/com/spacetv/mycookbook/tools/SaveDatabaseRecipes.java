@@ -26,7 +26,7 @@ public class SaveDatabaseRecipes implements Constants {
      * Checking if SD card is available - showing save dialog
      * Else - showing error dialog with one "cancel" button
      *
-     * @param context
+     * @param context - Context
      */
     public static void dialogSaveDatabase(Context context) {
         isOkButtonShow = true;
@@ -35,7 +35,7 @@ public class SaveDatabaseRecipes implements Constants {
         String message;
         if (pathFolder != null) {
             message = context.getResources().getString(R.string.dlg_path_to_file);
-            message += " " + pathFolder;
+            message += " " + pathFolder + '\n';
             message += '\n' + context.getResources().getString(R.string.dlg_name_of_file);
         } else {
             isOkButtonShow = false;//hide OK button
@@ -63,8 +63,8 @@ public class SaveDatabaseRecipes implements Constants {
     /**
      * Showing Alert dialog
      *
-     * @param title
-     * @param message
+     * @param title - caption of dialog
+     * @param message - text of dialog
      * @param pathFolder - path to folder in to SD card
      */
     private static void showDialog(Context context, String title,
